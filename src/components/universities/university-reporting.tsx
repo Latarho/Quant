@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCooperationLineBadgeColor } from "@/lib/badge-colors";
+import { getCooperationLineLabel } from "@/lib/universities/constants";
 import { cn } from "@/lib/utils";
 import { EVENT_TYPE_OPTIONS, EVENT_TYPE_LABELS } from "@/lib/event-types";
 import { formatDateOrDefault } from "@/lib/date-utils";
@@ -35,142 +36,19 @@ import {
   ChevronsRight,
   ChevronRight
 } from "lucide-react";
-
-// Типы
-interface Contract {
-  id: string;
-  type: "cooperation" | "scholarship" | "internship" | "bankDepartment";
-  hasContract: boolean;
-  number?: string;
-  date?: string;
-  period?: { start: string; end: string };
-  contractBranch?: string;
-  asddLink?: string;
-}
-
-interface Event {
-  id: string;
-  type: "businessGame" | "caseChampionship" | "diplomaDefense" | "webinar" | "lecture" | "conference" | "masterClass" | "contact";
-  date: string;
-  endDate: string;
-  status: "planned" | "in_progress" | "completed" | "cancelled";
-  responsiblePerson: string[];
-  comments?: string;
-}
-
-interface Intern {
-  id: string;
-  employeeName: string;
-  age: number;
-  position: string;
-  department: string;
-  hireDate: string;
-  status: "active" | "dismissed";
-  dismissalDate?: string;
-}
-
-interface Practitioner {
-  id: string;
-  employeeName: string;
-  age: number;
-  position: string;
-  department: string;
-  practiceStartDate: string;
-  practiceEndDate: string;
-  practiceSupervisor?: string;
-  practiceStatus?: "not_meets" | "meets" | "exceeds";
-}
-
-interface CaseChampionshipParticipant {
-  id: string;
-  employeeName: string;
-  eventId: string;
-  status: "registered" | "participated" | "winner" | "prize_winner";
-}
-
-interface CooperationLineRecord {
-  id: string;
-  line: "drp" | "bko" | "cntr";
-  year: number;
-  responsible: string[];
-}
-
-interface BankDepartment {
-  id: string;
-  name: string;
-}
-
-interface CNTRProjectItem {
-  id: string;
-  projectName: string;
-  date: string;
-  branch?: string;
-  fundingAmount?: number;
-  supportFormat?: "grant-cofinancing" | "ordered-rd-center-lift" | "targeted-charity";
-}
-
-interface CNTRInfrastructureItem {
-  id: string;
-  developmentType: "financing" | "endowment" | "endowment-fund";
-  date: string;
-  branch?: string;
-  description?: string;
-}
-
-interface CNTRAgreementItem {
-  id: string;
-  date: string;
-  branch?: string;
-  status?: "in-progress" | "signed";
-}
-
-interface BKOData {
-  salaryProject?: {
-    students?: boolean;
-    employees?: boolean;
-  };
-  transactionalProducts?: {
-    ie?: boolean;
-    te?: boolean;
-    sbp?: boolean;
-    adm?: boolean;
-  };
-  limit?: boolean;
-  ukGpbFundsCk?: boolean;
-  comment?: string;
-}
-
-interface BranchCurator {
-  id: string;
-  city: string;
-  branch: string;
-  cooperationLines?: CooperationLineRecord[];
-}
-
-interface University {
-  id: string;
-  name: string;
-  shortName?: string;
-  inn?: string;
-  city: string;
-  branch?: string[];
-  cooperationStartYear?: number;
-  cooperationLines?: CooperationLineRecord[];
-  initiatorBlock?: string;
-  initiatorName?: string;
-  branchCurators?: BranchCurator[];
-  contracts?: Contract[];
-  bankDepartments?: BankDepartment[];
-  events?: Event[];
-  allEmployees?: number;
-  internList?: Intern[];
-  practitionerList?: Practitioner[];
-  caseChampionshipParticipants?: CaseChampionshipParticipant[];
-  cntrProjects?: CNTRProjectItem[];
-  cntrInfrastructure?: CNTRInfrastructureItem[];
-  cntrAgreementItems?: CNTRAgreementItem[];
-  bkoData?: BKOData;
-}
+import type {
+  University,
+  Contract,
+  Event,
+  Intern,
+  Practitioner,
+  CaseChampionshipParticipant,
+  BankDepartment,
+  CNTRProjectItem,
+  CNTRInfrastructureItem,
+  CNTRAgreementItem,
+  BranchCurator,
+} from "@/types/universities";
 
 interface UniversityReportingProps {
   universities: University[];
@@ -392,13 +270,6 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
       cancelled: "Отменено",
     };
     return statuses[status] || status;
-  };
-
-  const getCooperationLineLabel = (line: "drp" | "bko" | "cntr"): string => {
-    if (line === "drp") return "ДРП";
-    if (line === "bko") return "БКО";
-    if (line === "cntr") return "ЦНТР";
-    return "";
   };
 
   const getPracticeStatusName = (status?: string) => {
