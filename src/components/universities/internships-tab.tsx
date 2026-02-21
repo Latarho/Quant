@@ -1,294 +1,253 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { GraduationCap, Plus, Search, X, Filter, Clock, Users, Calendar, CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, Calendar, ArrowRight, Filter, BarChart3 } from "lucide-react";
+import { useInternships } from "@/contexts/internships-context";
+import type { InternshipStatus } from "@/types/internships";
+import { getStatusBadgeColor } from "@/lib/badge-colors";
 import { cn } from "@/lib/utils";
-import { getInternshipStatusText, getInternshipStatusColor } from "@/lib/internships/display-utils";
-import type { Internship, InternshipStatus } from "@/types/internships";
 
-export interface InternshipsTabProps {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  filters: {
-    statuses: InternshipStatus[];
-    universities: string[];
-  };
-  onFiltersChange: (filters: { statuses: InternshipStatus[]; universities: string[] }) => void;
-  isFiltersDialogOpen: boolean;
-  onFiltersDialogChange: (open: boolean) => void;
-  filteredInternships: Internship[];
-  uniqueUniversities: Array<{ id: string; name: string }>;
-  selectedInternshipId: string | null;
-  onCreateClick: () => void;
-}
+const INTERNSHIP_TABS = [
+  { value: "level-up", label: "GPB.Level Up" },
+  { value: "experience", label: "GPB.Experience" },
+  { value: "it-factory", label: "GPB.IT Factory" },
+  { value: "spot-hiring", label: "Точечный найм" },
+] as const;
 
-export function InternshipsTab({
-  searchQuery,
-  onSearchChange,
-  filters,
-  onFiltersChange,
-  isFiltersDialogOpen,
-  onFiltersDialogChange,
-  filteredInternships,
-  uniqueUniversities,
-  selectedInternshipId,
-  onCreateClick,
-}: InternshipsTabProps) {
+const STATUS_OPTIONS: { value: InternshipStatus; label: string }[] = [
+  { value: "planned", label: "Запланирована" },
+  { value: "in_progress", label: "В процессе" },
+  { value: "completed", label: "Завершена" },
+];
+
+const getStatusText = (status: InternshipStatus) =>
+  STATUS_OPTIONS.find((o) => o.value === status)?.label ?? status;
+
+export function InternshipsTab() {
   const router = useRouter();
-  const hasActiveFilters = filters.statuses.length > 0 || filters.universities.length > 0;
+  const { internships, addInternship } = useInternships();
+  const [activeTab, setActiveTab] = useState<(typeof INTERNSHIP_TABS)[number]["value"]>("level-up");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    type: "GPB.Level Up",
+    startDate: "",
+    endDate: "",
+    status: "planned" as InternshipStatus,
+  });
+
+  const currentTabLabel = INTERNSHIP_TABS.find((t) => t.value === activeTab)?.label ?? "";
+
+  const handleOpenModal = () => {
+    setFormData({
+      type: currentTabLabel,
+      startDate: "",
+      endDate: "",
+      status: "planned",
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    if (!formData.startDate || !formData.endDate) return;
+    addInternship({
+      type: formData.type,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      status: formData.status,
+    });
+    setIsModalOpen(false);
+  };
 
   return (
     <>
-      {/* Поиск и фильтры */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Поиск по названию стажировки или вузу..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
-              onClick={() => onSearchChange("")}
-            >
-              <X className="h-4 w-4" />
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
+        <div className="space-y-4 mb-4">
+          <TabsList variant="grid4" className="min-w-[min(100%,48rem)] w-full">
+            {INTERNSHIP_TABS.map(({ value, label }) => (
+              <TabsTrigger key={value} value={value}>
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="flex justify-end">
+            <Button onClick={handleOpenModal} size="lg">
+              <Plus className="mr-2 h-4 w-4" />
+              Добавить стажировку
             </Button>
-          )}
+          </div>
         </div>
-        <Dialog open={isFiltersDialogOpen} onOpenChange={onFiltersDialogChange}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Фильтры
-              {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
-                  {filters.statuses.length + filters.universities.length}
-                </Badge>
-              )}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-            <DialogHeader className="pb-3">
-              <DialogTitle className="text-lg">Фильтры</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Статус</Label>
-                <div className="space-y-1.5">
-                  {(["planned", "recruiting", "active", "completed"] as InternshipStatus[]).map((status) => (
-                    <div key={status} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`filter-status-${status}`}
-                        checked={filters.statuses.includes(status)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            onFiltersChange({
-                              ...filters,
-                              statuses: [...filters.statuses, status],
-                            });
-                          } else {
-                            onFiltersChange({
-                              ...filters,
-                              statuses: filters.statuses.filter((s) => s !== status),
-                            });
-                          }
-                        }}
-                      />
-                      <Label htmlFor={`filter-status-${status}`} className="text-sm font-normal cursor-pointer">
-                        {getInternshipStatusText(status)}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">ВУЗ</Label>
-                <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
-                  {uniqueUniversities.map((university) => (
-                    <div key={university.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`filter-university-${university.id}`}
-                        checked={filters.universities.includes(university.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            onFiltersChange({
-                              ...filters,
-                              universities: [...filters.universities, university.id],
-                            });
-                          } else {
-                            onFiltersChange({
-                              ...filters,
-                              universities: filters.universities.filter((id) => id !== university.id),
-                            });
-                          }
-                        }}
-                      />
-                      <Label htmlFor={`filter-university-${university.id}`} className="text-sm font-normal cursor-pointer">
-                        {university.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <DialogFooter className="pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onFiltersChange({ statuses: [], universities: [] })}
-              >
-                Сбросить
-              </Button>
-              <Button size="sm" onClick={() => onFiltersDialogChange(false)}>
-                Применить
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        <Button onClick={onCreateClick} size="lg">
-          <Plus className="mr-2 h-4 w-4" />
-          Добавить стажировку
-        </Button>
-      </div>
-
-      {/* Канбан доска стажировок */}
-      {filteredInternships.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-lg font-medium mb-2">Стажировки не найдены</p>
-              <p className="text-muted-foreground mb-4">
-                {searchQuery || hasActiveFilters
-                  ? "Попробуйте изменить фильтры"
-                  : "Создайте первую стажировку, чтобы начать работу"}
-              </p>
-              {!searchQuery && !hasActiveFilters && (
-                <Button onClick={onCreateClick} size="lg">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Добавить стажировку
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-4 gap-[18px] w-full">
-          {[
-            { status: "planned" as InternshipStatus, label: "Запланированные", icon: Clock },
-            { status: "recruiting" as InternshipStatus, label: "Набор участников", icon: Users },
-            { status: "active" as InternshipStatus, label: "Активные стажировки", icon: Calendar },
-            { status: "completed" as InternshipStatus, label: "Завершенные", icon: CheckCircle2 },
-          ].map(({ status, label, icon: Icon }) => {
-            const columnInternships = filteredInternships
-              .filter((i) => i.status === status)
-              .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-
-            let headerBgColor = "bg-blue-100 dark:bg-blue-900";
-            let headerBorderColor = "border-blue-300 dark:border-blue-700";
-            let headerIconColor = "text-blue-700 dark:text-blue-200";
-
-            if (status === "planned") {
-              headerBgColor = "bg-blue-100 dark:bg-blue-900";
-              headerBorderColor = "border-blue-300 dark:border-blue-700";
-              headerIconColor = "text-blue-700 dark:text-blue-200";
-            } else if (status === "recruiting") {
-              headerBgColor = "bg-green-100 dark:bg-green-900";
-              headerBorderColor = "border-green-300 dark:border-green-700";
-              headerIconColor = "text-green-700 dark:text-green-200";
-            } else if (status === "active") {
-              headerBgColor = "bg-purple-100 dark:bg-purple-900";
-              headerBorderColor = "border-purple-300 dark:border-purple-700";
-              headerIconColor = "text-purple-700 dark:text-purple-200";
-            } else if (status === "completed") {
-              headerBgColor = "bg-gray-100 dark:bg-gray-800";
-              headerBorderColor = "border-gray-300 dark:border-gray-700";
-              headerIconColor = "text-gray-700 dark:text-gray-200";
-            }
-
-            return (
-              <div key={status} className="flex flex-col">
-                <div
-                  className={cn(headerBgColor, "border-2", headerBorderColor, "rounded-lg p-4 mb-3 shadow-sm")}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon className={cn("h-5 w-5", headerIconColor)} />
-                    <h3 className={cn("font-bold text-base", headerIconColor)}>{label}</h3>
-                    <Badge variant="secondary" className="ml-auto text-xs font-semibold px-2.5 py-0.5">
-                      {columnInternships.length}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="space-y-[18px] min-h-[400px]">
-                  {columnInternships.map((internship) => (
-                    <Card
-                      key={internship.id}
-                      className={cn(
-                        "transition-all hover:shadow-md h-[224px] flex flex-col overflow-hidden",
-                        selectedInternshipId === internship.id && "ring-2 ring-primary"
-                      )}
-                    >
-                      <CardHeader className="pb-2 flex-shrink-0 overflow-hidden">
-                        <div className="flex items-start justify-between gap-2 min-w-0">
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <CardTitle className="text-base mb-1 line-clamp-2 leading-tight break-words">
-                              {internship.title}
-                            </CardTitle>
-                            <CardDescription className="text-xs mt-1 min-w-0">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <Calendar className="h-4 w-4 flex-shrink-0" />
-                                <span className="truncate">
-                                  {internship.startDate.toLocaleDateString("ru-RU", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                  }).replace(/\//g, ".")}{" "}
-                                  -{" "}
-                                  {internship.endDate.toLocaleDateString("ru-RU", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                  }).replace(/\//g, ".")}
-                                </span>
-                              </div>
-                            </CardDescription>
+        {INTERNSHIP_TABS.map(({ value }) => (
+          <TabsContent key={value} value={value} className="mt-4">
+            {(() => {
+              const list = internships.filter(
+                (i) => i.title === INTERNSHIP_TABS.find((t) => t.value === value)?.label
+              );
+              const useScroll = list.length >= 5;
+              const slots: (typeof list[0] | null)[] = useScroll
+                ? [...list]
+                : (() => {
+                    const s: (typeof list[0] | null)[] = [...list.slice(0, 4)];
+                    while (s.length < 4) s.push(null);
+                    return s;
+                  })();
+              const gridContent = (
+                  <>
+                  {slots.map((internship, index) =>
+                    internship ? (
+                      <Card
+                        key={internship.id}
+                        className="p-3 h-full min-h-0 flex flex-col relative"
+                      >
+                        <Badge
+                          variant="outline"
+                          className={cn("absolute top-3 right-3 text-xs shrink-0", getStatusBadgeColor(internship.status))}
+                        >
+                          {getStatusText(internship.status)}
+                        </Badge>
+                        <div className="flex-1 min-w-0 flex flex-col">
+                          <div className="pr-20">
+                            <div className="flex items-center gap-2 flex-wrap mb-2">
+                              <Badge variant="outline" className="text-xs font-semibold">
+                                {internship.title}
+                              </Badge>
+                              <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <span className="text-sm font-semibold">
+                                {internship.startDate.toLocaleDateString("ru-RU", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                }).replace(/\//g, ".")}{" "}
+                                —{" "}
+                                {internship.endDate.toLocaleDateString("ru-RU", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                }).replace(/\//g, ".")}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                getInternshipStatusColor(internship.status),
-                                "text-xs px-2 py-0.5 whitespace-nowrap"
-                              )}
-                            >
-                              {getInternshipStatusText(internship.status)}
-                            </Badge>
+                          <div className="border-t my-2 w-full" />
+                          <div className="w-full">
+                          <div className="w-full flex-shrink-0 rounded-lg min-w-0">
+                            <div className="w-full box-border">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <Filter className="h-4 w-4 text-primary" />
+                                <span className="text-base font-semibold text-foreground">Воронка</span>
+                              </div>
+                              <div className="flex gap-1.5">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1">
+                                    <div className="text-sm font-bold text-foreground leading-tight">0</div>
+                                    <div className="text-xs text-muted-foreground uppercase">Заявки</div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Количество заявок</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1">
+                                    <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{internship.maxParticipants ?? 0}</div>
+                                    <div className="text-xs text-muted-foreground uppercase">Целевые заявки</div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Целевые заявки</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1">
+                                    <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{internship.currentParticipants ?? 0}</div>
+                                    <div className="text-xs text-muted-foreground uppercase">Прошли</div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Прошли отборочные этапы</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="w-full flex-shrink-0 rounded-lg min-w-0 mt-2">
+                            <div className="w-full box-border">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <BarChart3 className="h-4 w-4 text-primary" />
+                                <span className="text-base font-semibold text-foreground">Результаты</span>
+                              </div>
+                              <div className="flex gap-1.5">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1">
+                                    <div className="text-sm font-bold text-foreground leading-tight">20</div>
+                                    <div className="text-xs text-muted-foreground uppercase">Стажеры</div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Стажеры</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1">
+                                    <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">17</div>
+                                    <div className="text-xs text-muted-foreground uppercase">Сотрудники</div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Сотрудники, работающие в банке на текущий момент</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1">
+                                    <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">85%</div>
+                                    <div className="text-xs text-muted-foreground uppercase">Конверсия</div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Конверсия</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="border-t my-2 w-full" />
+                          <p className="text-sm text-muted-foreground">
+                            Нанимающих подразделений: <span className="font-medium text-foreground">{internship.hiringDepartmentsCount ?? 0}</span>
+                          </p>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent className="pt-[2px] pb-2 px-6 flex-1 flex flex-col min-h-0">
-                        {internship.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed break-words mb-3 flex-shrink-0">
-                            {internship.description}
-                          </p>
-                        )}
-                        <div className="mt-auto flex-shrink-0">
+                        <div className="border-t pt-3 mt-auto shrink-0">
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="w-full mt-2"
+                            className="w-full justify-center text-primary"
                             onClick={(e) => {
                               e.stopPropagation();
                               router.push(`/universities/internship/${internship.id}`);
@@ -298,15 +257,109 @@ export function InternshipsTab({
                             <ArrowRight className="h-3.5 w-3.5 ml-2" />
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                      </Card>
+                    ) : (
+                      <div
+                        key={`empty-${value}-${index}`}
+                        className="h-full min-h-0 rounded-lg bg-muted/30 !shadow-none border-0"
+                      />
+                    )
+                  )}
+                  </>
+              );
+              return useScroll ? (
+                <div className="w-full h-[calc(100vh-14rem)] overflow-y-auto">
+                  <div className="w-full grid grid-cols-2 gap-4 pb-4">
+                    {gridContent}
+                  </div>
                 </div>
+              ) : (
+                <div className="w-full h-[calc(100vh-14rem)] grid grid-cols-2 grid-rows-2 gap-4">
+                  {gridContent}
+                </div>
+              );
+            })()}
+          </TabsContent>
+        ))}
+      </Tabs>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Добавить стажировку</DialogTitle>
+            <DialogDescription>Заполните информацию о стажировке</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-end gap-2">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="internship-type">Тип стажировки</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(v) => setFormData({ ...formData, type: v })}
+                >
+                  <SelectTrigger id="internship-type">
+                    <SelectValue placeholder="Выберите тип" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INTERNSHIP_TABS.map(({ value, label }) => (
+                      <SelectItem key={value} value={label}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="internship-start">Дата начала</Label>
+                <Input
+                  id="internship-start"
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="internship-end">Дата окончания</Label>
+                <Input
+                  id="internship-end"
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="internship-status">Статус</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(v) => setFormData({ ...formData, status: v as InternshipStatus })}
+                >
+                  <SelectTrigger id="internship-status">
+                    <SelectValue placeholder="Выберите статус" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Отмена
+            </Button>
+            <Button
+              onClick={handleCreate}
+              disabled={!formData.startDate || !formData.endDate}
+            >
+              Добавить стажировку
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -4,9 +4,9 @@
   "private": true,
   "description": "Платформа по работе с ВУЗами — отдельное приложение",
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start -p 3001",
+    "start": "next start -p 3000",
     "lint": "eslint ."
   },
   "dependencies": {

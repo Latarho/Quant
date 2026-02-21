@@ -4,15 +4,15 @@ import type { InternshipStatus, ApplicationStatus } from "@/types/internships";
 import { getStatusBadgeColor } from "@/lib/badge-colors";
 
 const STATUS_LABELS: Record<string, string> = {
-  planned: "План",
-  recruiting: "Набор",
-  active: "Активна",
+  planned: "Запланирована",
+  in_progress: "В процессе",
   completed: "Завершена",
   pending: "На рассмотрении",
   approved: "Одобрено",
   rejected: "Отклонено",
   withdrawn: "Отозвано",
   confirmed: "Подтверждено",
+  active: "Активно",
 };
 
 export function getInternshipStatusText(status: InternshipStatus | ApplicationStatus): string {

@@ -1,6 +1,6 @@
 // Типы для системы стажировок
 
-export type InternshipStatus = 'planned' | 'recruiting' | 'active' | 'completed';
+export type InternshipStatus = 'planned' | 'in_progress' | 'completed';
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected' | 'withdrawn' | 'confirmed' | 'active' | 'completed';
 export type InternshipLocation = 'remote' | 'office' | 'hybrid';
 export type ApprovalWorkflow = 'single' | 'two-level' | 'multi-level';
@@ -29,6 +29,7 @@ export interface Internship {
   city?: string;
   address?: string;
   salary?: number;
+  hiringDepartmentsCount?: number; // Количество нанимающих подразделений
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;

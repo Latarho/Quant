@@ -244,7 +244,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-07-01'),
     endDate: new Date('2024-08-31'),
     applicationDeadline: new Date('2024-06-15'),
-    status: 'recruiting',
+    status: 'in_progress',
     maxParticipants: 10,
     currentParticipants: 0,
     requirements: [
@@ -276,7 +276,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-07-01'),
     endDate: new Date('2024-08-31'),
     applicationDeadline: new Date('2024-06-15'),
-    status: 'recruiting',
+    status: 'in_progress',
     maxParticipants: 8,
     currentParticipants: 0,
     requirements: [
@@ -334,7 +334,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-03-01'),
     endDate: new Date('2024-05-31'),
     applicationDeadline: new Date('2024-02-15'),
-    status: 'active',
+    status: 'in_progress',
     maxParticipants: 15,
     currentParticipants: 12,
     requirements: [
@@ -366,7 +366,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-06-15'),
     endDate: new Date('2024-08-15'),
     applicationDeadline: new Date('2024-05-30'),
-    status: 'recruiting',
+    status: 'in_progress',
     maxParticipants: 8,
     currentParticipants: 3,
     requirements: [
@@ -425,7 +425,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-07-10'),
     endDate: new Date('2024-09-10'),
     applicationDeadline: new Date('2024-06-25'),
-    status: 'active',
+    status: 'in_progress',
     maxParticipants: 12,
     currentParticipants: 8,
     requirements: [
@@ -485,7 +485,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-06-01'),
     endDate: new Date('2024-07-31'),
     applicationDeadline: new Date('2024-05-15'),
-    status: 'recruiting',
+    status: 'in_progress',
     maxParticipants: 10,
     currentParticipants: 5,
     requirements: [
@@ -542,7 +542,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-07-05'),
     endDate: new Date('2024-08-30'),
     applicationDeadline: new Date('2024-06-20'),
-    status: 'active',
+    status: 'in_progress',
     maxParticipants: 10,
     currentParticipants: 9,
     requirements: [
@@ -603,7 +603,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-08-01'),
     endDate: new Date('2024-09-30'),
     applicationDeadline: new Date('2024-07-15'),
-    status: 'recruiting',
+    status: 'in_progress',
     maxParticipants: 6,
     currentParticipants: 2,
     requirements: [
@@ -662,7 +662,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-07-15'),
     endDate: new Date('2024-09-15'),
     applicationDeadline: new Date('2024-06-30'),
-    status: 'active',
+    status: 'in_progress',
     maxParticipants: 12,
     currentParticipants: 10,
     requirements: [
@@ -723,7 +723,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-08-10'),
     endDate: new Date('2024-10-10'),
     applicationDeadline: new Date('2024-07-25'),
-    status: 'recruiting',
+    status: 'in_progress',
     maxParticipants: 5,
     currentParticipants: 1,
     requirements: [
@@ -844,7 +844,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-07-01'),
     endDate: new Date('2024-08-31'),
     applicationDeadline: new Date('2024-06-20'),
-    status: 'active',
+    status: 'in_progress',
     maxParticipants: 8,
     currentParticipants: 6,
     requirements: [
@@ -975,7 +975,7 @@ export const mockApplications: InternshipApplication[] = [
     universityName: 'Московский государственный университет',
     course: 4,
     gpa: 4.9,
-    status: 'active',
+    status: 'in_progress',
     appliedAt: new Date('2024-06-05'),
     reviewedAt: new Date('2024-06-08'),
     reviewerId: 'user-1',
@@ -1001,7 +1001,7 @@ export const mockApplications: InternshipApplication[] = [
     universityName: 'Санкт-Петербургский государственный университет',
     course: 3,
     gpa: 4.6,
-    status: 'active',
+    status: 'in_progress',
     appliedAt: new Date('2024-06-07'),
     reviewedAt: new Date('2024-06-10'),
     reviewerId: 'user-1',

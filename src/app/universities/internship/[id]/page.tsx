@@ -39,6 +39,7 @@ import {
   mockApplications, 
   mockStudents,
 } from "@/lib/internships/mock-data";
+import { useInternships } from "@/contexts/internships-context";
 import {
   canChangeApplicationStatus,
   calculateConversionRate,
@@ -49,9 +50,10 @@ export default function InternshipDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { setCustomLabel } = useBreadcrumb();
+  const { internships: contextInternships } = useInternships();
   const internshipId = params.id as string;
 
-  const [internships] = useState<Internship[]>(mockInternships);
+  const internships = [...contextInternships, ...mockInternships];
   const [internshipApplications, setInternshipApplications] = useState<InternshipApplication[]>(mockApplications);
   const [internshipStudents] = useState<InternshipStudent[]>(mockStudents);
   
@@ -183,15 +185,15 @@ export default function InternshipDetailsPage() {
 
   const getInternshipStatusText = (status: InternshipStatus | ApplicationStatus) => {
     const statusMap: Record<string, string> = {
-      planned: "План",
-      recruiting: "Набор",
-      active: "Активна",
+      planned: "Запланирована",
+      in_progress: "В процессе",
       completed: "Завершена",
       pending: "На рассмотрении",
       approved: "Одобрено",
       rejected: "Отклонено",
       withdrawn: "Отозвано",
       confirmed: "Подтверждено",
+      active: "Активно",
     };
     return statusMap[status] || status;
   };
@@ -529,7 +531,7 @@ export default function InternshipDetailsPage() {
                                 <UserCheck className="h-4 w-4" />
                               </Button>
                             )}
-                            {(application.status === 'active' || application.status === 'confirmed') && selectedInternship?.status === 'active' && (
+                            {(application.status === 'active' || application.status === 'confirmed') && selectedInternship?.status === 'in_progress' && (
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -657,7 +659,7 @@ export default function InternshipDetailsPage() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {(application.status === 'active' || application.status === 'confirmed') && selectedInternship?.status === 'active' && (
+                            {(application.status === 'active' || application.status === 'confirmed') && selectedInternship?.status === 'in_progress' && (
                               <Button
                                 variant="ghost"
                                 size="sm"

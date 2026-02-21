@@ -2928,9 +2928,8 @@ export default function UniversitiesPage() {
   // Группировка стажировок по статусам с сортировкой
   const groupedInternships = useMemo(() => {
     const groups: Record<string, typeof filteredInternshipsForTab> = {
-      active: [],
-      recruiting: [],
       planned: [],
+      in_progress: [],
       completed: [],
     };
 
@@ -2950,10 +2949,9 @@ export default function UniversitiesPage() {
 
     // Порядок отображения групп
     const order: Array<{ status: InternshipStatus; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-      { status: 'active', label: 'Активные стажировки', icon: Calendar },
-      { status: 'recruiting', label: 'Набор участников', icon: Users },
       { status: 'planned', label: 'Запланированные', icon: Clock },
-      { status: 'completed', label: 'Завершенные', icon: CheckCircle2 },
+      { status: 'in_progress', label: 'В процессе', icon: Calendar },
+      { status: 'completed', label: 'Завершённые', icon: CheckCircle2 },
     ];
 
     return order.map(({ status, label, icon }) => ({
@@ -16846,18 +16844,7 @@ export default function UniversitiesPage() {
           </TabsContent>
 
           <TabsContent value="internships" className="mt-1 space-y-4 w-full">
-            <InternshipsTab
-              searchQuery={internshipSearchQuery}
-              onSearchChange={setInternshipSearchQuery}
-              filters={internshipFilters}
-              onFiltersChange={setInternshipFilters}
-              isFiltersDialogOpen={isInternshipFiltersDialogOpen}
-              onFiltersDialogChange={setIsInternshipFiltersDialogOpen}
-              filteredInternships={filteredInternshipsForTab}
-              uniqueUniversities={uniqueInternshipUniversities}
-              selectedInternshipId={selectedInternship?.id ?? null}
-              onCreateClick={handleCreateInternship}
-            />
+            <InternshipsTab />
           </TabsContent>
 
           <TabsContent value="reporting" className="mt-1 space-y-4">
@@ -18511,9 +18498,8 @@ export default function UniversitiesPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="planned">План</SelectItem>
-                    <SelectItem value="recruiting">Набор</SelectItem>
-                    <SelectItem value="active">Активна</SelectItem>
+                    <SelectItem value="planned">Запланирована</SelectItem>
+                    <SelectItem value="in_progress">В процессе</SelectItem>
                     <SelectItem value="completed">Завершена</SelectItem>
                   </SelectContent>
                 </Select>
@@ -18731,7 +18717,7 @@ export default function UniversitiesPage() {
                                       <UserCheck className="h-4 w-4" />
                                     </Button>
                                   )}
-                                  {(application.status === 'active' || application.status === 'confirmed') && selectedInternship?.status === 'active' && (
+                                  {(application.status === 'active' || application.status === 'confirmed') && selectedInternship?.status === 'in_progress' && (
                                     <Button
                                       variant="ghost"
                                       size="sm"
@@ -18844,7 +18830,7 @@ export default function UniversitiesPage() {
                                   >
                                     <Eye className="h-4 w-4" />
                                   </Button>
-                                  {(application.status === 'active' || application.status === 'confirmed') && selectedInternship?.status === 'active' && (
+                                  {(application.status === 'active' || application.status === 'confirmed') && selectedInternship?.status === 'in_progress' && (
                                     <Button
                                       variant="ghost"
                                       size="sm"

@@ -17,9 +17,8 @@ export function canChangeInternshipStatus(
   internship: Internship
 ): { allowed: boolean; reason?: string } {
   const transitions: Record<InternshipStatus, InternshipStatus[]> = {
-    planned: ['recruiting'],
-    recruiting: ['active'],
-    active: ['completed'],
+    planned: ['in_progress'],
+    in_progress: ['completed'],
     completed: [], // Финальный статус
   };
 
@@ -31,14 +30,14 @@ export function canChangeInternshipStatus(
   }
 
   // Дополнительные проверки
-  if (newStatus === 'active' && internship.currentParticipants < 1) {
+  if (newStatus === 'in_progress' && internship.currentParticipants < 1) {
     return {
       allowed: false,
       reason: 'Нельзя начать стажировку без одобренных участников',
     };
   }
 
-  if (newStatus === 'active' && new Date() < internship.startDate) {
+  if (newStatus === 'in_progress' && new Date() < internship.startDate) {
     return {
       allowed: false,
       reason: 'Нельзя начать стажировку до даты начала',
@@ -172,8 +171,8 @@ export function canSubmitApplication(
     };
   }
 
-  // Проверка 2: Статус стажировки
-  if (internship.status !== 'recruiting') {
+  // Проверка 2: Статус стажировки (заявки принимаются в статусе «Запланирована»)
+  if (internship.status !== 'planned') {
     return {
       allowed: false,
       reason: 'Стажировка не принимает заявки',
@@ -322,15 +321,15 @@ export function calculateConversionRate(
   };
 }
 
-// Проверка возможности перехода стажировки в статус "active"
+// Проверка возможности перехода стажировки в статус «В процессе»
 export function canStartInternship(
   internship: Internship,
   applications: InternshipApplication[]
 ): { allowed: boolean; reason?: string } {
-  if (internship.status !== 'recruiting') {
+  if (internship.status !== 'planned') {
     return {
       allowed: false,
-      reason: 'Стажировка должна быть в статусе "Набор"',
+      reason: 'Стажировка должна быть в статусе «Запланирована»',
     };
   }
 
