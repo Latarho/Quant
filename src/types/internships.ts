@@ -13,6 +13,7 @@ export interface Internship {
   universityId: string;
   universityName: string;
   title: string;
+  name?: string; // Название стажировки (отображается в карточке под тегом типа)
   description: string;
   startDate: Date;
   endDate: Date;
@@ -30,6 +31,10 @@ export interface Internship {
   address?: string;
   salary?: number;
   hiringDepartmentsCount?: number; // Количество нанимающих подразделений
+  totalApplications?: number; // Всего заявок (для воронки)
+  completedTraineesCount?: number; // Стажеры (результат)
+  hiredEmployeesCount?: number; // Сотрудники в банке (результат)
+  conversionRatePercent?: number; // Конверсия %
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;

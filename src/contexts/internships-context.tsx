@@ -5,6 +5,7 @@ import type { Internship, InternshipStatus } from "@/types/internships";
 
 export interface NewInternshipData {
   type: string;
+  name?: string;
   startDate: string;
   endDate: string;
   status: InternshipStatus;
@@ -28,6 +29,7 @@ function createInternshipFromData(data: NewInternshipData, id: string): Internsh
     universityId: "",
     universityName: "",
     title: data.type,
+    name: data.name,
     description: "",
     startDate,
     endDate,
@@ -47,10 +49,12 @@ function createInternshipFromData(data: NewInternshipData, id: string): Internsh
 
 const STATUSES: InternshipStatus[] = ["planned", "in_progress", "completed"];
 
+const MONTH_NAMES: string[] = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
 function getInitialInternships(): Internship[] {
   const list: Internship[] = [];
   const types = ["GPB.Level Up", "GPB.Experience", "GPB.IT Factory"];
-  const counts = [10, 6, 4]; // Level Up 10, Experience 6, IT Factory 4
+  const counts = [10, 6, 5]; // Level Up 10, Experience 6, IT Factory 5
   types.forEach((title, typeIndex) => {
     const n = counts[typeIndex];
     for (let i = 0; i < n; i++) {
@@ -60,17 +64,18 @@ function getInitialInternships(): Internship[] {
       const startDate = new Date(year, startMonth - 1, 15);
       const endDate = new Date(year, endMonth - 1, 20);
       const status = STATUSES[i % STATUSES.length];
-      list.push(
-        createInternshipFromData(
-          {
-            type: title,
-            startDate: startDate.toISOString().split("T")[0],
-            endDate: endDate.toISOString().split("T")[0],
-            status,
-          },
-          `seed-${title.replace(/\s/g, "-").toLowerCase()}-${i + 1}`
-        )
+      const name = title === "GPB.Level Up" && i === 0 ? "Data Science" : `${MONTH_NAMES[startMonth - 1]} — ${MONTH_NAMES[endMonth - 1]} ${year}`;
+      const internship = createInternshipFromData(
+        {
+          type: title,
+          name,
+          startDate: startDate.toISOString().split("T")[0],
+          endDate: endDate.toISOString().split("T")[0],
+          status,
+        },
+        `seed-${title.replace(/\s/g, "-").toLowerCase()}-${i + 1}`
       );
+      list.push(internship);
     }
   });
   return list;

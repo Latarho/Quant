@@ -128,6 +128,14 @@ export const BADGE_COLORS = {
   
   /** ДКМ - оранжевый */
   dkm: "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700",
+
+  // ========== Типы стажировок ==========
+  /** GPB.Level Up - основная программа, синий */
+  internshipLevelUp: "bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700",
+  /** GPB.Experience - опыт, фиолетовый */
+  internshipExperience: "bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700",
+  /** GPB.IT Factory - технологическая линия, циан */
+  internshipItFactory: "bg-cyan-100 text-cyan-700 border-cyan-300 dark:bg-cyan-900 dark:text-cyan-200 dark:border-cyan-700",
 } as const;
 
 /**
@@ -233,6 +241,16 @@ export function getAgreementBadgeColor(status: string): string {
  */
 export function getCooperationLineBadgeColor(line: "drp" | "bko" | "cntr" | "ecosystem" | "dkm"): string {
   return BADGE_COLORS[line];
+}
+
+/**
+ * Цвет тега для типа стажировки (Level Up, Experience, IT Factory)
+ */
+export function getInternshipTypeBadgeColor(title: string): string {
+  if (title === "GPB.Level Up") return BADGE_COLORS.internshipLevelUp;
+  if (title === "GPB.Experience") return BADGE_COLORS.internshipExperience;
+  if (title === "GPB.IT Factory") return BADGE_COLORS.internshipItFactory;
+  return "bg-muted text-muted-foreground border-border";
 }
 
 /**
