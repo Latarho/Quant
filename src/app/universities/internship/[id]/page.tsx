@@ -262,12 +262,67 @@ export default function InternshipDetailsPage() {
     router.push("/universities?tab=internships");
   };
 
-  const staffIndicators = useMemo((): StaffIndicatorRow[] => {
+  const baseStaffIndicators = useMemo((): StaffIndicatorRow[] => {
     return MOCK_STAFF_INDICATORS_BASE.map((row, index) => ({
       ...row,
       university: MOCK_UNIVERSITIES_FOR_STAFF[index % MOCK_UNIVERSITIES_FOR_STAFF.length],
     }));
   }, []);
+
+  const [additionalStaff, setAdditionalStaff] = useState<StaffIndicatorRow[]>([]);
+  const staffIndicators = useMemo(
+    () => [...baseStaffIndicators, ...additionalStaff],
+    [baseStaffIndicators, additionalStaff]
+  );
+
+  const [addStaffDialogOpen, setAddStaffDialogOpen] = useState(false);
+  const [newStaffForm, setNewStaffForm] = useState({
+    fullName: "",
+    university: MOCK_UNIVERSITIES_FOR_STAFF[0],
+    position: "",
+    ssp: "",
+    vsp: "",
+    internshipStartDate: "",
+    internshipEndDate: "",
+    internshipResult: "Переведен" as "Переведен" | "Уволен",
+    departmentHireDate: "",
+    status: "active" as "active" | "dismissed",
+  });
+
+  const handleAddStaffSubmit = () => {
+    if (!newStaffForm.fullName.trim() || !newStaffForm.internshipStartDate || !newStaffForm.internshipEndDate) return;
+    const positionDepartment = newStaffForm.position && (newStaffForm.ssp || newStaffForm.vsp)
+      ? `${newStaffForm.position} / ${newStaffForm.vsp || newStaffForm.ssp}`
+      : newStaffForm.position || "";
+    const row: StaffIndicatorRow = {
+      id: `staff-${Date.now()}`,
+      fullName: newStaffForm.fullName.trim(),
+      university: newStaffForm.university,
+      positionDepartment,
+      ssp: newStaffForm.ssp || "—",
+      vsp: newStaffForm.vsp || "—",
+      internshipStartDate: newStaffForm.internshipStartDate,
+      internshipEndDate: newStaffForm.internshipEndDate,
+      internshipResult: newStaffForm.internshipResult,
+      departmentHireDate: newStaffForm.departmentHireDate || null,
+      dismissalDate: null,
+      status: newStaffForm.status,
+    };
+    setAdditionalStaff((prev) => [...prev, row]);
+    setNewStaffForm({
+      fullName: "",
+      university: MOCK_UNIVERSITIES_FOR_STAFF[0],
+      position: "",
+      ssp: "",
+      vsp: "",
+      internshipStartDate: "",
+      internshipEndDate: "",
+      internshipResult: "Переведен",
+      departmentHireDate: "",
+      status: "active",
+    });
+    setAddStaffDialogOpen(false);
+  };
 
   const [staffCurrentPage, setStaffCurrentPage] = useState(1);
   const [staffItemsPerPage, setStaffItemsPerPage] = useState(10);
@@ -488,7 +543,7 @@ export default function InternshipDetailsPage() {
                       <Filter className="mr-2 h-4 w-4" />
                       Фильтры
                     </Button>
-                    <Button size="sm">
+                    <Button size="sm" onClick={() => setAddStaffDialogOpen(true)}>
                       <UserPlus className="mr-2 h-4 w-4" />
                       Добавить стажера
                     </Button>
@@ -576,7 +631,7 @@ export default function InternshipDetailsPage() {
                                       Уволен
                                     </Badge>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="max-w-xs p-3 text-sm space-y-1.5">
+                                  <TooltipContent side="top" className="max-w-xs p-3 space-y-1.5">
                                     <p><span className="font-medium">Дата увольнения:</span> {row.dismissalDate ? formatDateRu(row.dismissalDate) : "—"}</p>
                                     <p><span className="font-medium">Этап увольнения:</span> {getDismissalStage(row.dismissalDate, row.internshipEndDate)}</p>
                                     <p><span className="font-medium">Трудовой стаж в банке:</span> {getTenureInBank(row.departmentHireDate, row.dismissalDate)}</p>
@@ -585,7 +640,7 @@ export default function InternshipDetailsPage() {
                               ) : (
                                 <Badge
                                   variant="outline"
-                                  className="text-xs px-2 py-0.5 bg-green-100 text-green-700 border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700"
+                                  className={cn("text-xs px-2 py-0.5", getStatusBadgeColor("active"))}
                                 >
                                   Работает
                                 </Badge>
@@ -719,6 +774,144 @@ export default function InternshipDetailsPage() {
             </Button>
             <Button onClick={handleSaveStaffComment}>
               Сохранить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Модальное окно: Добавить стажера */}
+      <Dialog open={addStaffDialogOpen} onOpenChange={setAddStaffDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Добавить стажера</DialogTitle>
+            <DialogDescription>Заполните данные по полям таблицы кадровых показателей</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-staff-fullName">ФИО *</Label>
+              <Input
+                id="new-staff-fullName"
+                value={newStaffForm.fullName}
+                onChange={(e) => setNewStaffForm((p) => ({ ...p, fullName: e.target.value }))}
+                placeholder="Фамилия Имя Отчество"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-staff-university">ВУЗ *</Label>
+              <Select
+                value={newStaffForm.university}
+                onValueChange={(v) => setNewStaffForm((p) => ({ ...p, university: v }))}
+              >
+                <SelectTrigger id="new-staff-university">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MOCK_UNIVERSITIES_FOR_STAFF.map((u) => (
+                    <SelectItem key={u} value={u}>{u}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-staff-position">Должность</Label>
+              <Input
+                id="new-staff-position"
+                value={newStaffForm.position}
+                onChange={(e) => setNewStaffForm((p) => ({ ...p, position: e.target.value }))}
+                placeholder="Например: Аналитик-исследователь"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-staff-ssp">ССП</Label>
+                <Input
+                  id="new-staff-ssp"
+                  value={newStaffForm.ssp}
+                  onChange={(e) => setNewStaffForm((p) => ({ ...p, ssp: e.target.value }))}
+                  placeholder="Департамент"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-staff-vsp">ВСП</Label>
+                <Input
+                  id="new-staff-vsp"
+                  value={newStaffForm.vsp}
+                  onChange={(e) => setNewStaffForm((p) => ({ ...p, vsp: e.target.value }))}
+                  placeholder="Управление / отдел"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-staff-start">Дата приема на стажировку *</Label>
+                <Input
+                  id="new-staff-start"
+                  type="date"
+                  value={newStaffForm.internshipStartDate}
+                  onChange={(e) => setNewStaffForm((p) => ({ ...p, internshipStartDate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-staff-end">Дата окончания стажировки *</Label>
+                <Input
+                  id="new-staff-end"
+                  type="date"
+                  value={newStaffForm.internshipEndDate}
+                  onChange={(e) => setNewStaffForm((p) => ({ ...p, internshipEndDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-staff-result">Результат стажировки</Label>
+                <Select
+                  value={newStaffForm.internshipResult}
+                  onValueChange={(v: "Переведен" | "Уволен") => setNewStaffForm((p) => ({ ...p, internshipResult: v }))}
+                >
+                  <SelectTrigger id="new-staff-result">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Переведен">Переведен</SelectItem>
+                    <SelectItem value="Уволен">Уволен</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-staff-departmentHire">Дата приема в ССП/ВСП</Label>
+                <Input
+                  id="new-staff-departmentHire"
+                  type="date"
+                  value={newStaffForm.departmentHireDate}
+                  onChange={(e) => setNewStaffForm((p) => ({ ...p, departmentHireDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-staff-status">Статус</Label>
+              <Select
+                value={newStaffForm.status}
+                onValueChange={(v: "active" | "dismissed") => setNewStaffForm((p) => ({ ...p, status: v }))}
+              >
+                <SelectTrigger id="new-staff-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Работает</SelectItem>
+                  <SelectItem value="dismissed">Уволен</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddStaffDialogOpen(false)}>
+              Отмена
+            </Button>
+            <Button
+              onClick={handleAddStaffSubmit}
+              disabled={!newStaffForm.fullName.trim() || !newStaffForm.internshipStartDate || !newStaffForm.internshipEndDate}
+            >
+              Добавить
             </Button>
           </DialogFooter>
         </DialogContent>
