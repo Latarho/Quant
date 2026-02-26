@@ -17,7 +17,6 @@ export function canChangeInternshipStatus(
   internship: Internship
 ): { allowed: boolean; reason?: string } {
   const transitions: Record<InternshipStatus, InternshipStatus[]> = {
-    planned: ['in_progress'],
     in_progress: ['completed'],
     completed: [], // Финальный статус
   };
@@ -171,8 +170,8 @@ export function canSubmitApplication(
     };
   }
 
-  // Проверка 2: Статус стажировки (заявки принимаются в статусе «Запланирована»)
-  if (internship.status !== 'planned') {
+  // Проверка 2: Статус стажировки (заявки принимаются в статусе «В процессе»)
+  if (internship.status !== 'in_progress') {
     return {
       allowed: false,
       reason: 'Стажировка не принимает заявки',
@@ -321,15 +320,15 @@ export function calculateConversionRate(
   };
 }
 
-// Проверка возможности перехода стажировки в статус «В процессе»
+// Проверка возможности перехода стажировки в статус «В процессе» (для двухстатусной модели не используется)
 export function canStartInternship(
   internship: Internship,
   applications: InternshipApplication[]
 ): { allowed: boolean; reason?: string } {
-  if (internship.status !== 'planned') {
+  if (internship.status !== 'in_progress') {
     return {
       allowed: false,
-      reason: 'Стажировка должна быть в статусе «Запланирована»',
+      reason: 'Стажировка уже начата или завершена',
     };
   }
 

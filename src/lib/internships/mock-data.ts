@@ -305,7 +305,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-09-01'),
     endDate: new Date('2024-11-30'),
     applicationDeadline: new Date('2024-08-15'),
-    status: 'planned',
+    status: 'in_progress',
     maxParticipants: 12,
     currentParticipants: 0,
     requirements: [
@@ -393,7 +393,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-09-15'),
     endDate: new Date('2024-12-15'),
     applicationDeadline: new Date('2024-08-30'),
-    status: 'planned',
+    status: 'in_progress',
     maxParticipants: 10,
     currentParticipants: 0,
     requirements: [
@@ -513,7 +513,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-10-01'),
     endDate: new Date('2024-12-31'),
     applicationDeadline: new Date('2024-09-15'),
-    status: 'planned',
+    status: 'in_progress',
     maxParticipants: 8,
     currentParticipants: 0,
     requirements: [
@@ -632,7 +632,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-09-20'),
     endDate: new Date('2024-11-20'),
     applicationDeadline: new Date('2024-09-05'),
-    status: 'planned',
+    status: 'in_progress',
     maxParticipants: 10,
     currentParticipants: 0,
     requirements: [
@@ -753,7 +753,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-10-15'),
     endDate: new Date('2024-12-15'),
     applicationDeadline: new Date('2024-09-30'),
-    status: 'planned',
+    status: 'in_progress',
     maxParticipants: 10,
     currentParticipants: 0,
     requirements: [
@@ -812,7 +812,7 @@ export const mockInternships: Internship[] = [
     startDate: new Date('2024-11-01'),
     endDate: new Date('2025-01-31'),
     applicationDeadline: new Date('2024-10-15'),
-    status: 'planned',
+    status: 'in_progress',
     maxParticipants: 10,
     currentParticipants: 0,
     requirements: [

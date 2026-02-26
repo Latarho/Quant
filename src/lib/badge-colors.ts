@@ -136,6 +136,7 @@ export const BADGE_COLORS = {
   internshipExperience: "bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700",
   /** GPB.IT Factory - технологическая линия, циан */
   internshipItFactory: "bg-cyan-100 text-cyan-700 border-cyan-300 dark:bg-cyan-900 dark:text-cyan-200 dark:border-cyan-700",
+  internshipMgimo: "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700",
 } as const;
 
 /**
@@ -250,6 +251,7 @@ export function getInternshipTypeBadgeColor(title: string): string {
   if (title === "GPB.Level Up") return BADGE_COLORS.internshipLevelUp;
   if (title === "GPB.Experience") return BADGE_COLORS.internshipExperience;
   if (title === "GPB.IT Factory") return BADGE_COLORS.internshipItFactory;
+  if (title === "Стажировка МГИМО") return BADGE_COLORS.internshipMgimo;
   return "bg-muted text-muted-foreground border-border";
 }
 

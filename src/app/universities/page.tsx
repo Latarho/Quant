@@ -916,7 +916,7 @@ export default function UniversitiesPage() {
     endDate: "",
     applicationDeadline: "",
     maxParticipants: 10,
-    status: "planned" as InternshipStatus,
+    status: "in_progress" as InternshipStatus,
     location: "hybrid" as "remote" | "office" | "hybrid",
     city: "",
     address: "",
@@ -2949,7 +2949,6 @@ export default function UniversitiesPage() {
 
     // Порядок отображения групп
     const order: Array<{ status: InternshipStatus; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-      { status: 'planned', label: 'Запланированные', icon: Clock },
       { status: 'in_progress', label: 'В процессе', icon: Calendar },
       { status: 'completed', label: 'Завершённые', icon: CheckCircle2 },
     ];
@@ -3037,7 +3036,7 @@ export default function UniversitiesPage() {
       endDate: "",
       applicationDeadline: "",
       maxParticipants: 10,
-      status: "planned",
+      status: "in_progress",
       location: "hybrid",
       city: "",
       address: "",

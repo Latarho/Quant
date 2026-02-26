@@ -47,7 +47,7 @@ function createInternshipFromData(data: NewInternshipData, id: string): Internsh
   };
 }
 
-const STATUSES: InternshipStatus[] = ["planned", "in_progress", "completed"];
+const STATUSES: InternshipStatus[] = ["in_progress", "completed"];
 
 const MONTH_NAMES: string[] = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
 
@@ -78,6 +78,26 @@ function getInitialInternships(): Internship[] {
       list.push(internship);
     }
   });
+  // 3 стажировки с типом «Стажировка МГИМО»
+  const mgimoTitle = "Стажировка МГИМО";
+  for (let i = 0; i < 3; i++) {
+    const year = 2025;
+    const startMonth = 3 + i;
+    const endMonth = startMonth + 2;
+    const startDate = new Date(year, startMonth - 1, 1);
+    const endDate = new Date(year, endMonth - 1, 28);
+    const internship = createInternshipFromData(
+      {
+        type: mgimoTitle,
+        name: `${MONTH_NAMES[startMonth - 1]} — ${MONTH_NAMES[endMonth - 1]} ${year}`,
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.toISOString().split("T")[0],
+        status: STATUSES[i % STATUSES.length],
+      },
+      `seed-mgimo-${i + 1}`
+    );
+    list.push(internship);
+  }
   return list;
 }
 

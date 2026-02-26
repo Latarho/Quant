@@ -110,7 +110,7 @@ function getInternshipChangeHistory(internshipId: string): InternshipChangeHisto
 function formatHistoryValueForDisplay(value: string | undefined, field?: string): string {
   if (value === undefined || value === "") return "(пусто)";
   if (field === "status" || !field) {
-    const statusRu: Record<string, string> = { planned: "Запланирована", in_progress: "В процессе", completed: "Завершена" };
+    const statusRu: Record<string, string> = { in_progress: "В процессе", completed: "Завершена" };
     if (statusRu[value]) return statusRu[value];
   }
   if (field === "location") {
@@ -197,7 +197,7 @@ export default function InternshipDetailsPage() {
     endDate: "",
     applicationDeadline: "",
     maxParticipants: 10,
-    status: "planned" as InternshipStatus,
+    status: "in_progress" as InternshipStatus,
     location: "hybrid" as InternshipLocation,
     city: "",
     salary: "",
@@ -361,7 +361,6 @@ export default function InternshipDetailsPage() {
 
   const getInternshipStatusText = (status: InternshipStatus | ApplicationStatus) => {
     const statusMap: Record<string, string> = {
-      planned: "Запланирована",
       in_progress: "В процессе",
       completed: "Завершена",
       pending: "На рассмотрении",
@@ -435,7 +434,7 @@ export default function InternshipDetailsPage() {
           <Badge variant="outline" className={cn(getInternshipStatusColor(displayInternship.status))}>
             {getInternshipStatusText(displayInternship.status)}
           </Badge>
-          {displayInternship.status === "planned" && (
+          {(displayInternship.status === "in_progress" || displayInternship.status === "completed") && (
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Редактировать" onClick={openEditDialog}>
                 <Pencil className="h-4 w-4" />
@@ -1123,7 +1122,6 @@ export default function InternshipDetailsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="planned">Запланирована</SelectItem>
                     <SelectItem value="in_progress">В процессе</SelectItem>
                     <SelectItem value="completed">Завершена</SelectItem>
                   </SelectContent>

@@ -24,21 +24,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Plus, Calendar, ArrowRight, Filter, BarChart3, ChevronRight, HelpCircle } from "lucide-react";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Plus, Calendar, ArrowRight, BarChart3, HelpCircle, X, Search } from "lucide-react";
 import { useInternships } from "@/contexts/internships-context";
 import type { InternshipStatus } from "@/types/internships";
 import { getStatusBadgeColor, getInternshipTypeBadgeColor } from "@/lib/badge-colors";
 import { cn } from "@/lib/utils";
 
 const INTERNSHIP_TABS = [
-  { value: "level-up", label: "GPB.Level Up" },
-  { value: "experience", label: "GPB.Experience" },
-  { value: "it-factory", label: "GPB.IT Factory" },
+  { value: "internships", label: "Стажировки" },
   { value: "spot-hiring", label: "Точечный найм" },
 ] as const;
 
+const PROGRAM_TYPES = ["GPB.Level Up", "GPB.Experience", "GPB.IT Factory", "Стажировка МГИМО"] as const;
+const SPOT_HIRING_LABEL = "Точечный найм";
+
+const INTERNSHIP_TYPE_OPTIONS = [...PROGRAM_TYPES, SPOT_HIRING_LABEL] as const;
+const MODAL_INTERNSHIP_TYPE_OPTIONS = [...PROGRAM_TYPES, "Стажировка МГИМО"] as const;
+
 const STATUS_OPTIONS: { value: InternshipStatus; label: string }[] = [
-  { value: "planned", label: "Запланирована" },
   { value: "in_progress", label: "В процессе" },
   { value: "completed", label: "Завершена" },
 ];
@@ -49,27 +53,30 @@ const getStatusText = (status: InternshipStatus) =>
 export function InternshipsTab() {
   const router = useRouter();
   const { internships, addInternship } = useInternships();
-  const [activeTab, setActiveTab] = useState<(typeof INTERNSHIP_TABS)[number]["value"]>("level-up");
+  const [activeTab, setActiveTab] = useState<(typeof INTERNSHIP_TABS)[number]["value"]>("internships");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isFiltersDialogOpen, setIsFiltersDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<"startDate_asc" | "startDate_desc" | "status_asc" | "status_desc">("startDate_asc");
+  const [internshipFeedFilters, setInternshipFeedFilters] = useState<{
+    type: string[];
+    year: number[];
+    status: InternshipStatus[];
+  }>({ type: [], year: [], status: [] });
+  const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
-    type: "GPB.Level Up",
+    type: "GPB.Level Up" as string,
     name: "",
     startDate: "",
     endDate: "",
-    status: "planned" as InternshipStatus,
+    status: "in_progress" as InternshipStatus,
   });
-
-  const currentTabLabel = INTERNSHIP_TABS.find((t) => t.value === activeTab)?.label ?? "";
 
   const handleOpenModal = () => {
     setFormData({
-      type: currentTabLabel,
+      type: activeTab === "spot-hiring" ? "Стажировка МГИМО" : "GPB.Level Up",
       name: "",
       startDate: "",
       endDate: "",
-      status: "planned",
+      status: "in_progress",
     });
     setIsModalOpen(true);
   };
@@ -90,9 +97,11 @@ export function InternshipsTab() {
     <>
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
         <div className="space-y-4 mb-4">
-          <TabsList variant="grid4" className="min-w-[min(100%,48rem)] w-full">
+          <TabsList variant="grid2" className="min-w-[min(100%,24rem)] w-full">
             {INTERNSHIP_TABS.map(({ value, label }) => {
-              const count = internships.filter((i) => i.title === label).length;
+              const count = value === "internships"
+                ? internships.filter((i) => PROGRAM_TYPES.includes(i.title as (typeof PROGRAM_TYPES)[number])).length
+                : internships.filter((i) => i.title === SPOT_HIRING_LABEL).length;
               return (
                 <TabsTrigger key={value} value={value} className="flex items-center gap-2">
                   {label}
@@ -103,11 +112,17 @@ export function InternshipsTab() {
               );
             })}
           </TabsList>
-          <div className="flex justify-end items-center gap-4">
-            <Button variant="outline" size="sm" onClick={() => setIsFiltersDialogOpen(true)}>
-              <Filter className="mr-2 h-4 w-4" />
-              Фильтры
-            </Button>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative flex-1 min-w-0 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Input
+                type="search"
+                placeholder="Поиск по названию стажировки"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-full"
+              />
+            </div>
             <Button onClick={handleOpenModal} size="lg">
               <Plus className="mr-2 h-4 w-4" />
               Добавить стажировку
@@ -115,12 +130,53 @@ export function InternshipsTab() {
           </div>
         </div>
         {INTERNSHIP_TABS.map(({ value }) => (
-          <TabsContent key={value} value={value} className="mt-4">
+          <TabsContent key={value} value={value} className="mt-4 space-y-4">
             {(() => {
-              let list = internships.filter(
-                (i) => i.title === INTERNSHIP_TABS.find((t) => t.value === value)?.label
-              );
-              const statusOrder: Record<InternshipStatus, number> = { planned: 0, in_progress: 1, completed: 2 };
+              const baseList = value === "internships"
+                ? internships.filter((i) => PROGRAM_TYPES.includes(i.title as (typeof PROGRAM_TYPES)[number]))
+                : internships.filter((i) => i.title === SPOT_HIRING_LABEL);
+              const listForType = baseList.filter((i) => {
+                if (internshipFeedFilters.year.length > 0 && !internshipFeedFilters.year.includes(i.startDate.getFullYear())) return false;
+                if (internshipFeedFilters.status.length > 0 && !internshipFeedFilters.status.includes(i.status)) return false;
+                return true;
+              });
+              const listForYear = baseList.filter((i) => {
+                if (internshipFeedFilters.type.length > 0 && !internshipFeedFilters.type.includes(i.title)) return false;
+                if (internshipFeedFilters.status.length > 0 && !internshipFeedFilters.status.includes(i.status)) return false;
+                return true;
+              });
+              const listForStatus = baseList.filter((i) => {
+                if (internshipFeedFilters.type.length > 0 && !internshipFeedFilters.type.includes(i.title)) return false;
+                if (internshipFeedFilters.year.length > 0 && !internshipFeedFilters.year.includes(i.startDate.getFullYear())) return false;
+                return true;
+              });
+              const byType = listForType.reduce<Record<string, number>>((acc, i) => {
+                acc[i.title] = (acc[i.title] ?? 0) + 1;
+                return acc;
+              }, {});
+              const yearsMap = listForYear.reduce<Record<number, number>>((acc, i) => {
+                const y = i.startDate.getFullYear();
+                acc[y] = (acc[y] ?? 0) + 1;
+                return acc;
+              }, {});
+              const yearsSorted = Object.keys(yearsMap).map(Number).sort((a, b) => a - b);
+              const byStatus = {
+                in_progress: listForStatus.filter((i) => i.status === "in_progress").length,
+                completed: listForStatus.filter((i) => i.status === "completed").length,
+              };
+              const typeOptionsForTab = value === "internships" ? [...PROGRAM_TYPES] : [SPOT_HIRING_LABEL];
+              let list = baseList.filter((i) => {
+                if (internshipFeedFilters.type.length > 0 && !internshipFeedFilters.type.includes(i.title)) return false;
+                if (internshipFeedFilters.year.length > 0 && !internshipFeedFilters.year.includes(i.startDate.getFullYear())) return false;
+                if (internshipFeedFilters.status.length > 0 && !internshipFeedFilters.status.includes(i.status)) return false;
+                if (searchQuery.trim()) {
+                  const q = searchQuery.trim().toLowerCase();
+                  const name = (i.name || "").toLowerCase();
+                  if (!name.includes(q)) return false;
+                }
+                return true;
+              });
+              const statusOrder: Record<InternshipStatus, number> = { in_progress: 0, completed: 1 };
               list = [...list].sort((a, b) => {
                 if (sortBy === "startDate_asc") return a.startDate.getTime() - b.startDate.getTime();
                 if (sortBy === "startDate_desc") return b.startDate.getTime() - a.startDate.getTime();
@@ -131,252 +187,306 @@ export function InternshipsTab() {
               const slots: (typeof list[0] | null)[] = useScroll
                 ? [...list]
                 : (() => {
-                    const s: (typeof list[0] | null)[] = [...list.slice(0, 4)];
-                    while (s.length < 4) s.push(null);
+                    const s: (typeof list[0] | null)[] = [...list.slice(0, 8)];
+                    while (s.length < 8) s.push(null);
                     return s;
                   })();
-              const gridContent = (
-                  <>
-                  {slots.map((internship, index) =>
-                    internship ? (
-                      <Card
-                        key={internship.id}
-                        className="p-3 h-full min-h-0 flex flex-col relative"
-                      >
-                        <Badge
-                          variant="outline"
-                          className={cn("absolute top-3 right-3 text-xs shrink-0", getStatusBadgeColor(internship.status))}
-                        >
-                          {getStatusText(internship.status)}
-                        </Badge>
-                        <div className="flex-1 min-w-0 flex flex-col">
-                          <div className="pr-20">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <Badge variant="outline" className={cn("text-xs font-medium shrink-0 w-fit", getInternshipTypeBadgeColor(internship.title))}>
-                                {internship.title}
-                              </Badge>
-                              <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                                {internship.startDate.toLocaleDateString("ru-RU", {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                }).replace(/\//g, ".")}{" "}
-                                —{" "}
-                                {internship.endDate.toLocaleDateString("ru-RU", {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                }).replace(/\//g, ".")}
-                              </span>
-                            </div>
-                            {internship.name && (
-                              <p className="text-base text-muted-foreground mt-1.5">{internship.name}</p>
-                            )}
-                          </div>
-                          <div className="border-t my-2 w-full" />
-                          <div className="w-full">
-                          <div className="w-full flex-shrink-0 rounded-lg min-w-0 bg-muted/30 p-2">
-                            <div className="w-full box-border">
-                              <div className="flex items-center gap-1.5 mb-1">
-                                <Filter className="h-4 w-4 text-primary" />
-                                <span className="text-base font-semibold text-foreground">Воронка</span>
-                              </div>
-                              <div className="flex items-center gap-0.5">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                    <div className="text-sm font-bold text-foreground leading-tight">{internship.totalApplications ?? "—"}</div>
-                                    <div className="text-xs text-muted-foreground">Заявки</div>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Количество заявок</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 flex-shrink-0 stroke-[2.5]" aria-hidden />
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                    <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{internship.maxParticipants ?? 0}</div>
-                                    <div className="text-xs text-muted-foreground">Целевые заявки</div>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Целевые заявки</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 flex-shrink-0 stroke-[2.5]" aria-hidden />
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                    <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{internship.currentParticipants ?? 0}</div>
-                                    <div className="text-xs text-muted-foreground">Прошли</div>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Прошли отборочные этапы</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="w-full flex-shrink-0 rounded-lg min-w-0 mt-3 p-2">
-                            <div className="w-full box-border">
-                              <div className="flex items-center gap-1.5 mb-1">
-                                <BarChart3 className="h-4 w-4 text-primary" />
-                                <span className="text-base font-semibold text-foreground">Результаты</span>
-                              </div>
-                              <div className="flex items-center gap-0.5">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                    <div className="text-sm font-bold text-foreground leading-tight">{internship.completedTraineesCount ?? "—"}</div>
-                                    <div className="text-xs text-muted-foreground">Стажеры</div>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Стажеры</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <span className="w-5 shrink-0 flex-shrink-0" aria-hidden />
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                    <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{internship.hiredEmployeesCount ?? "—"}</div>
-                                    <div className="text-xs text-muted-foreground">Сотрудники</div>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Сотрудники, работающие в банке на текущий момент</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <span className="w-5 shrink-0 flex-shrink-0" aria-hidden />
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                    <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{internship.conversionRatePercent != null ? `${internship.conversionRatePercent}%` : "—"}</div>
-                                    <div className="text-xs text-muted-foreground">Конверсия</div>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Конверсия</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              </div>
-                            </div>
-                          </div>
-                          </div>
-                        </div>
-                        <div className="border-t pt-3 mt-auto shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                          <p className="text-sm text-muted-foreground order-2 sm:order-1">
-                            Подразделений: <span className="font-medium text-foreground">{internship.hiringDepartmentsCount ?? 0}</span>
-                          </p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full sm:w-auto justify-center text-primary order-1 sm:order-2 shrink-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/universities/internship/${internship.id}`);
-                            }}
-                          >
-                            Подробнее
-                            <ArrowRight className="h-3.5 w-3.5 ml-2" />
-                          </Button>
-                        </div>
-                      </Card>
-                    ) : (
-                      <div
-                        key={`empty-${value}-${index}`}
-                        className="h-full min-h-0 rounded-lg bg-muted/30 !shadow-none border-0"
+              return (
+                <>
+                  <div className="flex flex-wrap items-center gap-4 mb-4">
+                    <div className="flex-1 min-w-[180px] space-y-2">
+                      <Label className="text-base font-semibold">Тип стажировки</Label>
+                      <MultiSelect
+                        options={typeOptionsForTab
+                          .filter((t) => (byType[t] ?? 0) > 0 || internshipFeedFilters.type.includes(t))
+                          .map((t) => ({ value: t, label: `${t} (${byType[t] ?? 0})` }))}
+                        selected={internshipFeedFilters.type}
+                        onChange={(selected) => setInternshipFeedFilters((p) => ({ ...p, type: selected }))}
+                        placeholder="Выберите типы"
                       />
-                    )
-                  )}
-                  </>
-              );
-              return useScroll ? (
-                <div className="w-full h-[calc(100vh-14rem)] overflow-y-auto">
-                  <div className="w-full grid grid-cols-2 gap-4 pb-4">
-                    {gridContent}
+                      {typeOptionsForTab.every((t) => (byType[t] ?? 0) === 0) && (
+                        <span className="text-sm text-muted-foreground">Нет данных</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-[180px] space-y-2">
+                      <Label className="text-base font-semibold">Период</Label>
+                      <MultiSelect
+                        options={yearsSorted.map((y) => ({
+                          value: String(y),
+                          label: `${y} (${yearsMap[y] ?? 0})`,
+                        }))}
+                        selected={internshipFeedFilters.year.map(String)}
+                        onChange={(selected) =>
+                          setInternshipFeedFilters((p) => ({ ...p, year: selected.map(Number) }))
+                        }
+                        placeholder="Выберите годы"
+                      />
+                      {yearsSorted.length === 0 && (
+                        <span className="text-sm text-muted-foreground">Нет данных</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-[180px] space-y-2">
+                      <Label className="text-base font-semibold">Статус</Label>
+                      <MultiSelect
+                        options={([
+{ value: "in_progress", label: "В процессе", count: byStatus.in_progress },
+                                          { value: "completed", label: "Завершена", count: byStatus.completed },
+                        ] as const)
+                          .filter(
+                            (item) =>
+                              item.count > 0 || internshipFeedFilters.status.includes(item.value as InternshipStatus)
+                          )
+                          .map(({ value, label, count }) => ({ value, label: `${label} (${count})` }))}
+                        selected={internshipFeedFilters.status}
+                        onChange={(selected) =>
+                          setInternshipFeedFilters((p) => ({ ...p, status: selected as InternshipStatus[] }))
+                        }
+                        placeholder="Выберите статусы"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-[180px] space-y-2">
+                      <Label className="text-base font-semibold">Сортировка</Label>
+                      <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+                        <SelectTrigger className="w-full bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50">
+                          <SelectValue placeholder="Сортировка" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="startDate_asc">По дате начала (сначала ранние)</SelectItem>
+                          <SelectItem value="startDate_desc">По дате начала (сначала поздние)</SelectItem>
+                          <SelectItem value="status_asc">По статусу (В процессе → Завершена)</SelectItem>
+                          <SelectItem value="status_desc">По статусу (Завершена → В процессе)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="w-full h-[calc(100vh-14rem)] grid grid-cols-2 grid-rows-2 gap-4">
-                  {gridContent}
-                </div>
+                  <div className="mb-2">
+                    <div className="text-sm text-muted-foreground">
+                      Найдено: <span className="font-semibold text-foreground">{list.length}</span>{" "}
+                      {list.length === 1 ? "стажировка" : list.length > 1 && list.length < 5 ? "стажировки" : "стажировок"}
+                      {list.length !== baseList.length && (
+                        <span className="ml-1">из {baseList.length}</span>
+                      )}
+                    </div>
+                  </div>
+                  {(() => {
+                    const activeFilters: Array<{ label: string; onRemove: () => void }> = [];
+                    if (internshipFeedFilters.type.length > 0) {
+                      activeFilters.push({
+                        label: `Тип: ${internshipFeedFilters.type.join(", ")}`,
+                        onRemove: () => setInternshipFeedFilters((p) => ({ ...p, type: [] })),
+                      });
+                    }
+                    if (internshipFeedFilters.year.length > 0) {
+                      activeFilters.push({
+                        label: `Период: ${internshipFeedFilters.year.join(", ")}`,
+                        onRemove: () => setInternshipFeedFilters((p) => ({ ...p, year: [] })),
+                      });
+                    }
+                    if (internshipFeedFilters.status.length > 0) {
+                      activeFilters.push({
+                        label: `Статус: ${internshipFeedFilters.status.map((s) => getStatusText(s)).join(", ")}`,
+                        onRemove: () => setInternshipFeedFilters((p) => ({ ...p, status: [] })),
+                      });
+                    }
+                    if (activeFilters.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        {activeFilters.map((filter, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="flex items-center gap-1 px-2 py-1"
+                          >
+                            <span className="text-sm">{filter.label}</span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                filter.onRemove();
+                              }}
+                              className="ml-1 rounded-full hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                              aria-label="Удалить фильтр"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  {list.length === 0 ? (
+                    <div className="text-sm text-muted-foreground py-8 text-center">
+                      Нет стажировок по выбранным фильтрам
+                    </div>
+                  ) : useScroll ? (
+                    <div className="w-full h-[calc(100vh-14rem)] overflow-y-auto">
+                      <div className="w-full grid grid-cols-4 gap-4 pb-4 items-start">
+                        {slots.map((internship, index) =>
+                          internship ? (
+                            <Card key={internship.id} className="p-3 min-h-0 flex flex-col relative">
+                              <Badge variant="outline" className={cn("absolute top-3 right-3 text-xs shrink-0", getStatusBadgeColor(internship.status))}>
+                                {getStatusText(internship.status)}
+                              </Badge>
+                              <div className="flex-1 min-w-0 flex flex-col">
+                                <div className="pr-20">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="outline" className={cn("text-xs font-medium shrink-0 w-fit", getInternshipTypeBadgeColor(internship.title))}>
+                                      {internship.title}
+                                    </Badge>
+                                    <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                                      <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                                      {internship.startDate.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, ".")}{" "}
+                                      —{" "}
+                                      {internship.endDate.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, ".")}
+                                    </span>
+                                  </div>
+                                  {internship.name && <p className="text-base text-muted-foreground mt-1.5">{internship.name}</p>}
+                                </div>
+                                <div className="border-t my-2 w-full" />
+                                <div className="w-full">
+                                  <div className="w-full flex-shrink-0 rounded-lg min-w-0 p-2">
+                                    <div className="w-full box-border">
+                                      <div className="flex items-center gap-1.5 mb-1">
+                                        <BarChart3 className="h-4 w-4 text-primary" />
+                                        <span className="text-base font-semibold text-foreground">Результаты</span>
+                                      </div>
+                                      <div className="flex items-center gap-0.5">
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
+                                              <div className="text-sm font-bold text-foreground leading-tight">{internship.completedTraineesCount ?? "—"}</div>
+                                              <div className="text-xs text-muted-foreground">Стажеры</div>
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent><p>Стажеры</p></TooltipContent>
+                                        </Tooltip>
+                                        <span className="w-5 shrink-0 flex-shrink-0" aria-hidden />
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
+                                              <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{internship.hiredEmployeesCount ?? "—"}</div>
+                                              <div className="text-xs text-muted-foreground">Сотрудники</div>
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent><p>Сотрудники, работающие в банке на текущий момент</p></TooltipContent>
+                                        </Tooltip>
+                                        <span className="w-5 shrink-0 flex-shrink-0" aria-hidden />
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
+                                              <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{internship.conversionRatePercent != null ? `${internship.conversionRatePercent}%` : "—"}</div>
+                                              <div className="text-xs text-muted-foreground">Конверсия</div>
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent><p>Конверсия</p></TooltipContent>
+                                        </Tooltip>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="border-t pt-3 mt-auto shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <p className="text-sm text-muted-foreground order-2 sm:order-1">
+                                  Подразделений: <span className="font-medium text-foreground">{internship.hiringDepartmentsCount ?? 0}</span>
+                                </p>
+                                <Button variant="ghost" size="sm" className="w-full sm:w-auto justify-center text-primary order-1 sm:order-2 shrink-0" onClick={(e) => { e.stopPropagation(); router.push(`/universities/internship/${internship.id}`); }}>
+                                  Подробнее <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                                </Button>
+                              </div>
+                            </Card>
+                          ) : (
+                            <div key={`empty-${value}-${index}`} className="h-full min-h-0 rounded-lg bg-muted/30 !shadow-none border-0" />
+                          )
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-[calc(100vh-14rem)] grid grid-cols-4 grid-rows-2 gap-4 items-start">
+                      {slots.map((internship, index) =>
+                        internship ? (
+                          <Card key={internship.id} className="p-3 min-h-0 flex flex-col relative">
+                            <Badge variant="outline" className={cn("absolute top-3 right-3 text-xs shrink-0", getStatusBadgeColor(internship.status))}>
+                              {getStatusText(internship.status)}
+                            </Badge>
+                            <div className="flex-1 min-w-0 flex flex-col">
+                              <div className="pr-20">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Badge variant="outline" className={cn("text-xs font-medium shrink-0 w-fit", getInternshipTypeBadgeColor(internship.title))}>
+                                    {internship.title}
+                                  </Badge>
+                                  <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                                    <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                                    {internship.startDate.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, ".")}{" "}
+                                    —{" "}
+                                    {internship.endDate.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, ".")}
+                                  </span>
+                                </div>
+                                {internship.name && <p className="text-base text-muted-foreground mt-1.5">{internship.name}</p>}
+                              </div>
+                              <div className="border-t my-2 w-full" />
+                              <div className="w-full">
+                                <div className="w-full flex-shrink-0 rounded-lg min-w-0 p-2">
+                                  <div className="w-full box-border">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                      <BarChart3 className="h-4 w-4 text-primary" />
+                                      <span className="text-base font-semibold text-foreground">Результаты</span>
+                                    </div>
+                                    <div className="flex items-center gap-0.5">
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
+                                            <div className="text-sm font-bold text-foreground leading-tight">{internship.completedTraineesCount ?? "—"}</div>
+                                            <div className="text-xs text-muted-foreground">Стажеры</div>
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Стажеры</p></TooltipContent>
+                                      </Tooltip>
+                                      <span className="w-5 shrink-0 flex-shrink-0" aria-hidden />
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
+                                            <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{internship.hiredEmployeesCount ?? "—"}</div>
+                                            <div className="text-xs text-muted-foreground">Сотрудники</div>
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Сотрудники, работающие в банке на текущий момент</p></TooltipContent>
+                                      </Tooltip>
+                                      <span className="w-5 shrink-0 flex-shrink-0" aria-hidden />
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
+                                            <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{internship.conversionRatePercent != null ? `${internship.conversionRatePercent}%` : "—"}</div>
+                                            <div className="text-xs text-muted-foreground">Конверсия</div>
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Конверсия</p></TooltipContent>
+                                      </Tooltip>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="border-t pt-3 mt-auto shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <p className="text-sm text-muted-foreground order-2 sm:order-1">
+                                Подразделений: <span className="font-medium text-foreground">{internship.hiringDepartmentsCount ?? 0}</span>
+                              </p>
+                              <Button variant="ghost" size="sm" className="w-full sm:w-auto justify-center text-primary order-1 sm:order-2 shrink-0" onClick={(e) => { e.stopPropagation(); router.push(`/universities/internship/${internship.id}`); }}>
+                                Подробнее <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                              </Button>
+                            </div>
+                          </Card>
+                        ) : (
+                          <div key={`empty-${value}-${index}`} className="h-full min-h-0 rounded-lg bg-muted/30 !shadow-none border-0" />
+                        )
+                      )}
+                    </div>
+                  )}
+                </>
               );
             })()}
           </TabsContent>
         ))}
       </Tabs>
-
-      <Dialog open={isFiltersDialogOpen} onOpenChange={setIsFiltersDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Фильтры</DialogTitle>
-            <DialogDescription>
-              Настройте фильтры для списка стажировок
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <Label>Сортировка</Label>
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите сортировку" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="startDate_asc">По дате начала (сначала ранние)</SelectItem>
-                  <SelectItem value="startDate_desc">По дате начала (сначала поздние)</SelectItem>
-                  <SelectItem value="status_asc">По статусу (Запланирована → Завершена)</SelectItem>
-                  <SelectItem value="status_desc">По статусу (Завершена → Запланирована)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Программа</Label>
-              <Select defaultValue="all">
-                <SelectTrigger>
-                  <SelectValue placeholder="Все программы" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все программы</SelectItem>
-                  {INTERNSHIP_TABS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Статус стажировки</Label>
-              <Select defaultValue="all">
-                <SelectTrigger>
-                  <SelectValue placeholder="Все статусы" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все статусы</SelectItem>
-                  {STATUS_OPTIONS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setSortBy("startDate_asc"); setIsFiltersDialogOpen(false); }}>
-              Сбросить фильтры
-            </Button>
-            <Button onClick={() => setIsFiltersDialogOpen(false)}>
-              Применить
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -396,7 +506,7 @@ export function InternshipsTab() {
                       <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Выберите программу: GPB.Level Up, GPB.Experience или GPB.IT Factory</p>
+                      <p>Выберите тип: Level Up, Experience, IT Factory или Стажировка МГИМО</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -408,8 +518,8 @@ export function InternshipsTab() {
                     <SelectValue placeholder="Выберите тип" />
                   </SelectTrigger>
                   <SelectContent>
-                    {INTERNSHIP_TABS.map(({ value, label }) => (
-                      <SelectItem key={value} value={label}>
+                    {MODAL_INTERNSHIP_TYPE_OPTIONS.map((label) => (
+                      <SelectItem key={label} value={label}>
                         {label}
                       </SelectItem>
                     ))}
