@@ -10985,12 +10985,12 @@ export default function UniversitiesPage() {
                                 </Card>
                               );
                             }
-                            const drpCooperationLinesFromArray = (university.cooperationLines || []).filter((r) => r.line === "drp");
                             const hasLegacyDrp = Array.isArray(university.cooperationLine)
                               ? university.cooperationLine.includes("drp")
                               : university.cooperationLine === "drp";
-                            const drpCooperationLines = drpCooperationLinesFromArray.length > 0
-                              ? drpCooperationLinesFromArray
+                            // В личном кабинете ДРП показываем все линии (ДРП, БКО, ЦНТР и т.д.), чтобы ДРП видел добавленные линии любого типа
+                            const allMainCooperationLines = (university.cooperationLines && university.cooperationLines.length > 0)
+                              ? university.cooperationLines
                               : hasLegacyDrp
                                 ? [{ id: "legacy-drp", line: "drp" as const, year: university.cooperationLineYear ?? new Date().getFullYear(), responsible: [] }]
                                 : [];
@@ -11043,9 +11043,9 @@ export default function UniversitiesPage() {
                                             Добавить линию сотрудничества
                                           </Button>
                                         </div>
-                                        {drpCooperationLines.length > 0 ? (
+                                        {allMainCooperationLines.length > 0 ? (
                                           <div className="space-y-3">
-                                            {drpCooperationLines.map((record, index) => (
+                                            {allMainCooperationLines.map((record, index) => (
                                               <Card key={record.id || index} className="p-3">
                                                 <div className="flex items-start justify-between gap-3">
                                                   <div className="flex-1 space-y-1.5">
@@ -11255,12 +11255,12 @@ export default function UniversitiesPage() {
                                           </div>
                                         ) : (
                                           <Card className="p-3">
-                                            <p className="text-sm text-muted-foreground text-center">Линии сотрудничества ДРП не добавлены</p>
+                                            <p className="text-sm text-muted-foreground text-center">Линии сотрудничества не добавлены</p>
                                           </Card>
                                         )}
                                       </TabsContent>
 
-                                      {/* Филиалы ВУза — только линии ДРП по филиалам с контактами */}
+                                      {/* Филиалы ВУза — линии сотрудничества по филиалам (в ЛК ДРП показываем все линии) */}
                                       <TabsContent value="branches" className="space-y-4 mt-4">
                                         <div className="flex items-center justify-end w-full">
                                           <Button
@@ -11276,7 +11276,7 @@ export default function UniversitiesPage() {
                                           {university.branchCurators && university.branchCurators.length > 0 ? (
                                             <>
                                               {university.branchCurators.map((curator) => {
-                                                const drpLinesInBranch = (curator.cooperationLines || []).filter((r) => r.line === "drp");
+                                                const allLinesInBranch = curator.cooperationLines || [];
                                                 return (
                                                   <Card key={curator.id} className="p-3">
                                                     {editingCuratorId === curator.id ? (
@@ -11306,8 +11306,8 @@ export default function UniversitiesPage() {
                                                         <div className="space-y-2">
                                                           <Label className="text-xs text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
                                                           <div className="space-y-3">
-                                                            {editingCurator.cooperationLines.filter((r) => r.line === "drp").map((record, index) => {
-                                                              const origIndex = editingCurator.cooperationLines.findIndex((r) => r === record);
+                                                            {editingCurator.cooperationLines.map((record, index) => {
+                                                              const origIndex = index;
                                                               return (
                                                                 <div key={record.id} className="p-3 border rounded-lg space-y-2">
                                                                   <div className="flex items-center gap-2">
@@ -11315,7 +11315,7 @@ export default function UniversitiesPage() {
                                                                       value={record.line}
                                                                       onValueChange={(value) => {
                                                                         const updated = editingCurator.cooperationLines.map((r, i) =>
-                                                                          i === origIndex ? { ...r, line: value as "drp" | "bko" | "cntr" } : r
+                                                                          i === origIndex ? { ...r, line: value as CooperationLine } : r
                                                                         );
                                                                         setEditingCurator({ ...editingCurator, cooperationLines: updated });
                                                                       }}
@@ -11324,7 +11324,7 @@ export default function UniversitiesPage() {
                                                                         <SelectValue />
                                                                       </SelectTrigger>
                                                                       <SelectContent>
-                                                                        {cooperationLines.filter((line) => line.value === "drp").map((line) => (
+                                                                        {cooperationLines.map((line) => (
                                                                           <SelectItem key={line.value} value={line.value}>
                                                                             {line.label}
                                                                           </SelectItem>
@@ -11377,7 +11377,7 @@ export default function UniversitiesPage() {
                                                                 </div>
                                                               );
                                                             })}
-                                                            {editingCurator.cooperationLines.filter((r) => r.line === "drp").length < 3 && (
+                                                            {editingCurator.cooperationLines.length < 3 && (
                                                               <Button
                                                                 type="button"
                                                                 variant="outline"
@@ -11444,11 +11444,11 @@ export default function UniversitiesPage() {
                                                                 <span className="text-sm text-muted-foreground font-normal">Город:</span>
                                                                 <span className="text-base font-bold">{curator.city}</span>
                                                               </Badge>
-                                                              {drpLinesInBranch.length > 0 && (
+                                                              {allLinesInBranch.length > 0 && (
                                                                 <>
                                                                   <Separator orientation="vertical" className="h-6" />
                                                                   <div className="flex items-center gap-2 flex-wrap">
-                                                                    {drpLinesInBranch.map((record, idx) => (
+                                                                    {allLinesInBranch.map((record, idx) => (
                                                                       <Badge key={record.id || idx} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
                                                                         {getCooperationLineLabel(record.line)}
                                                                       </Badge>
@@ -11459,7 +11459,7 @@ export default function UniversitiesPage() {
                                                             </div>
                                                           </div>
                                                           <div className="flex gap-1 shrink-0">
-                                                            {drpLinesInBranch.length < 3 && (
+                                                            {allLinesInBranch.length < 3 && (
                                                               <Button
                                                                 variant="ghost"
                                                                 size="sm"
@@ -11490,8 +11490,8 @@ export default function UniversitiesPage() {
                                                         </div>
                                                         {!collapsedBranches.has(curator.id) && (
                                                           <div className="space-y-3 mt-3 pt-3 border-t">
-                                                            {drpLinesInBranch.length > 0 ? (
-                                                              drpLinesInBranch.map((record) => (
+                                                            {allLinesInBranch.length > 0 ? (
+                                                              allLinesInBranch.map((record) => (
                                                                 <Card key={record.id} className="p-3">
                                                                   <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex-1 space-y-1.5">
@@ -11664,7 +11664,7 @@ export default function UniversitiesPage() {
                                                                 </Card>
                                                               ))
                                                             ) : (
-                                                              <p className="text-sm text-muted-foreground">Линии сотрудничества ДРП по филиалу не добавлены</p>
+                                                              <p className="text-sm text-muted-foreground">Линии сотрудничества по филиалу не добавлены</p>
                                                             )}
                                                           </div>
                                                         )}
@@ -17925,7 +17925,7 @@ export default function UniversitiesPage() {
                   {editingCooperationLine ? "Редактировать линию сотрудничества" : "Добавить линию сотрудничества"}
                 </DialogTitle>
                 <DialogDescription>
-                  {editingCooperationLine ? "Внесите изменения в линию сотрудничества для филиала" : "Заполните информацию о линии сотрудничества для филиала"}
+                  {editingCooperationLine ? "Внесите изменения в линию сотрудничества" : "Заполните информацию о линии сотрудничества"}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -17939,7 +17939,7 @@ export default function UniversitiesPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(isDrpCabinetBranchLineDialog ? cooperationLines.filter((l) => l.value === "drp") : isBkoCabinetBranchLineDialog ? cooperationLines.filter((l) => l.value === "bko") : isCntrCabinetBranchLineDialog ? cooperationLines.filter((l) => l.value === "cntr") : isEcosystemCabinetBranchLineDialog ? cooperationLines.filter((l) => l.value === "ecosystem") : cooperationLines).map((line) => (
+                      {(isDrpCabinetBranchLineDialog ? cooperationLines : isBkoCabinetBranchLineDialog ? cooperationLines.filter((l) => l.value === "bko") : isCntrCabinetBranchLineDialog ? cooperationLines.filter((l) => l.value === "cntr") : isEcosystemCabinetBranchLineDialog ? cooperationLines.filter((l) => l.value === "ecosystem") : cooperationLines).map((line) => (
                         <SelectItem key={line.value} value={line.value}>
                           {line.label}
                         </SelectItem>
@@ -18029,11 +18029,12 @@ export default function UniversitiesPage() {
                   {editingMainCooperationLine ? "Редактировать линию сотрудничества" : "Добавить линию сотрудничества"}
                 </DialogTitle>
                 <DialogDescription>
-                  {isDrpCabinetCooperationLineDialog ? "Заполните информацию о линии сотрудничества ДРП" : isBkoCabinetCooperationLineDialog ? "Заполните информацию о линии сотрудничества БКО" : isCntrCabinetCooperationLineDialog ? "Заполните информацию о линии сотрудничества ЦНТР" : isEcosystemCabinetCooperationLineDialog ? "Заполните информацию о линии сотрудничества Экосистема" : editingMainCooperationLine ? "Внесите изменения в линию сотрудничества для головного ВУЗа" : "Заполните информацию о линии сотрудничества для головного ВУЗа"}
+                  {editingMainCooperationLine ? "Внесите изменения в линию сотрудничества" : "Заполните информацию о линии сотрудничества"}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                {!isDrpCabinetCooperationLineDialog && !isBkoCabinetCooperationLineDialog && !isCntrCabinetCooperationLineDialog && !isEcosystemCabinetCooperationLineDialog && (
+                {/* Выпадающий список линии сотрудничества: только в личном кабинете ДРП (ДРП может добавлять любую линию) или на общей вкладке */}
+                {(isDrpCabinetCooperationLineDialog || (!isBkoCabinetCooperationLineDialog && !isCntrCabinetCooperationLineDialog && !isEcosystemCabinetCooperationLineDialog)) && (
                 <div className="space-y-2">
                   <Label>Линия сотрудничества</Label>
                   <Select
