@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useBreadcrumb } from "@/contexts/breadcrumb-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,14 +30,34 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, Calendar, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, FileDown, FileUp, FileText, Filter, History, MessageSquare, Pencil, Trash2, User, UserPlus, X } from "lucide-react";
+import { ArrowLeft, BarChart3, Building2, Calendar, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, FileDown, FileSpreadsheet, FileUp, FileText, Filter, HelpCircle, History, MessageSquare, Pencil, Plus, Trash2, User, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/format-utils";
 import { formatDateObject } from "@/lib/date-utils";
-import { getStatusBadgeColor } from "@/lib/badge-colors";
+import { getStatusBadgeColor, getInternshipTypeBadgeColor } from "@/lib/badge-colors";
 import type { Internship, InternshipStatus, InternshipLocation, ApplicationStatus } from "@/types/internships";
 import { mockInternships, mockMentors } from "@/lib/internships/mock-data";
 import { useInternships } from "@/contexts/internships-context";
+
+const INTERNSHIP_TYPE_OPTIONS = ["GPB.Level Up", "GPB.Experience", "GPB.IT Factory", "Стажировка МГИМО"] as const;
+
+/** Данные блока «Информация»: воронка, прикреплённый файл, подразделения */
+interface InfoBlockData {
+  funnel: { applications: number; targetApplications: number; interviews: number };
+  attachedFileName: string;
+  departments: string[];
+}
+
+function getDefaultInfoBlockData(internship: Internship | null): InfoBlockData {
+  const isDataScience = internship?.name?.trim() === "Data Science";
+  return {
+    funnel: { applications: 0, targetApplications: 0, interviews: 0 },
+    attachedFileName: "",
+    departments: isDataScience
+      ? ["Департамент анализа данных", "Департамент искусственного интеллекта", "Департамент машинного обучения"]
+      : [],
+  };
+}
 
 /** Запись кадровых показателей стажировки (формат как в ДРП — сотрудники) */
 interface StaffIndicatorRow {
@@ -190,68 +210,89 @@ export default function InternshipDetailsPage() {
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
-    title: "",
-    description: "",
-    universityId: "",
+    type: "",
+    name: "",
     startDate: "",
     endDate: "",
-    applicationDeadline: "",
-    maxParticipants: 10,
     status: "in_progress" as InternshipStatus,
-    location: "hybrid" as InternshipLocation,
-    city: "",
-    salary: "",
-    mentorId: "",
   });
 
-  const uniqueInternshipUniversities = useMemo(() => {
-    const seen = new Set<string>();
-    return internships.filter((i) => {
-      if (!i.universityId || seen.has(i.universityId)) return false;
-      seen.add(i.universityId);
-      return true;
-    }).map((i) => ({ id: i.universityId, name: i.universityName }));
-  }, [internships]);
+  /** Данные блока «Информация» по id стажировки (воронка, файл, подразделения) */
+  const [infoBlockDataByInternship, setInfoBlockDataByInternship] = useState<Record<string, InfoBlockData>>({});
+  const [infoBlockEditOpen, setInfoBlockEditOpen] = useState(false);
+  const [infoBlockForm, setInfoBlockForm] = useState<InfoBlockData>(getDefaultInfoBlockData(null));
+  const [newDepartmentName, setNewDepartmentName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const currentInfoBlockData = useMemo((): InfoBlockData => {
+    if (!displayInternship) return getDefaultInfoBlockData(null);
+    return infoBlockDataByInternship[displayInternship.id] ?? getDefaultInfoBlockData(displayInternship);
+  }, [displayInternship, infoBlockDataByInternship]);
+
+  const openInfoBlockEdit = () => {
+    if (!displayInternship) return;
+    const data = infoBlockDataByInternship[displayInternship.id] ?? getDefaultInfoBlockData(displayInternship);
+    setInfoBlockForm(JSON.parse(JSON.stringify(data)));
+    setNewDepartmentName("");
+    setInfoBlockEditOpen(true);
+  };
+
+  const saveInfoBlockEdit = () => {
+    if (!displayInternship) return;
+    setInfoBlockDataByInternship((prev) => ({
+      ...prev,
+      [displayInternship.id]: infoBlockForm,
+    }));
+    setInfoBlockEditOpen(false);
+  };
+
+  const addDepartment = () => {
+    const name = newDepartmentName.trim();
+    if (!name) return;
+    setInfoBlockForm((prev) => ({
+      ...prev,
+      departments: [...prev.departments, name],
+    }));
+    setNewDepartmentName("");
+  };
+
+  const removeDepartment = (index: number) => {
+    setInfoBlockForm((prev) => ({
+      ...prev,
+      departments: prev.departments.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleInfoBlockFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file?.name.endsWith(".xlsx")) {
+      setInfoBlockForm((prev) => ({ ...prev, attachedFileName: file.name }));
+    }
+    e.target.value = "";
+  };
 
   const openEditDialog = () => {
     if (!displayInternship) return;
     setEditFormData({
-      title: displayInternship.title,
-      description: displayInternship.description,
-      universityId: displayInternship.universityId || "",
+      type: displayInternship.title,
+      name: displayInternship.name ?? "",
       startDate: displayInternship.startDate instanceof Date ? displayInternship.startDate.toISOString().split("T")[0] : "",
       endDate: displayInternship.endDate instanceof Date ? displayInternship.endDate.toISOString().split("T")[0] : "",
-      applicationDeadline: displayInternship.applicationDeadline instanceof Date ? displayInternship.applicationDeadline.toISOString().split("T")[0] : "",
-      maxParticipants: displayInternship.maxParticipants,
       status: displayInternship.status,
-      location: displayInternship.location,
-      city: displayInternship.city || "",
-      salary: displayInternship.salary?.toString() || "",
-      mentorId: displayInternship.mentorId || "",
     });
     setEditDialogOpen(true);
   };
 
   const handleSaveEdit = () => {
     if (!selectedInternship) return;
-    const universityName = uniqueInternshipUniversities.find((u) => u.id === editFormData.universityId)?.name ?? selectedInternship.universityName;
-    const mentorName = mockMentors.find((m) => m.id === editFormData.mentorId)?.fullName;
     setLocalInternship({
       ...selectedInternship,
-      title: editFormData.title,
-      description: editFormData.description,
-      universityId: editFormData.universityId || selectedInternship.universityId,
-      universityName,
+      title: editFormData.type,
+      name: editFormData.name.trim() || undefined,
       startDate: new Date(editFormData.startDate),
       endDate: new Date(editFormData.endDate),
-      applicationDeadline: new Date(editFormData.applicationDeadline),
-      maxParticipants: editFormData.maxParticipants,
+      applicationDeadline: new Date(editFormData.endDate),
       status: editFormData.status,
-      location: editFormData.location,
-      city: editFormData.city || undefined,
-      salary: editFormData.salary ? parseFloat(editFormData.salary) : undefined,
-      mentorId: editFormData.mentorId || undefined,
-      mentorName,
       updatedAt: new Date(),
     });
     setEditDialogOpen(false);
@@ -348,10 +389,11 @@ export default function InternshipDetailsPage() {
 
   const filteredStaffIndicators = staffIndicators;
 
-  // Устанавливаем название стажировки в breadcrumbs
+  // Устанавливаем в breadcrumbs: название стажировки (если есть) или тип
   useEffect(() => {
     if (displayInternship) {
-      setCustomLabel(displayInternship.title);
+      const label = displayInternship.name?.trim() || displayInternship.title;
+      setCustomLabel(label);
     }
     // Очищаем при размонтировании
     return () => {
@@ -403,16 +445,12 @@ export default function InternshipDetailsPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Назад
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">{displayInternship.title}</h1>
-            <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-              {displayInternship.name && (
-                <>
-                  <span>{displayInternship.name}</span>
-                  <span aria-hidden>•</span>
-                </>
-              )}
-              <span className="inline-flex items-center gap-1.5">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <Badge variant="outline" className={cn("text-xs font-medium", getInternshipTypeBadgeColor(displayInternship.title))}>
+                {displayInternship.title}
+              </Badge>
+              <span className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                 {displayInternship.startDate.toLocaleDateString("ru-RU", {
                   day: "2-digit",
@@ -426,14 +464,19 @@ export default function InternshipDetailsPage() {
                   year: "numeric",
                 }).replace(/\//g, ".")}
               </span>
-              <span>{displayInternship.universityName}</span>
+              <Badge variant="outline" className={cn("text-xs font-medium", getInternshipStatusColor(displayInternship.status))}>
+                {getInternshipStatusText(displayInternship.status)}
+              </Badge>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {displayInternship.name?.trim() || displayInternship.title}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {displayInternship.universityName}
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <Badge variant="outline" className={cn(getInternshipStatusColor(displayInternship.status))}>
-            {getInternshipStatusText(displayInternship.status)}
-          </Badge>
+        <div className="flex flex-col items-end justify-center shrink-0">
           {(displayInternship.status === "in_progress" || displayInternship.status === "completed") && (
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Редактировать" onClick={openEditDialog}>
@@ -454,42 +497,126 @@ export default function InternshipDetailsPage() {
           {/* Информация о стажировке — коллапсируемый блок */}
           <div className="w-full grid grid-cols-1 gap-4 mb-6">
             <Card className="min-w-0 w-full">
-              <CardHeader
-                className="cursor-pointer hover:bg-muted/50 transition-colors rounded-t-xl"
-                onClick={() => setInfoBlockOpen((v) => !v)}
-              >
-                <div className="flex items-center gap-2">
-                  <ChevronDown
-                    className={cn("h-5 w-5 shrink-0 transition-transform", !infoBlockOpen && "-rotate-90")}
-                  />
-                  <CardTitle className="text-lg">Информация</CardTitle>
+              <CardHeader className="rounded-t-xl">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 shrink-0"
+                      aria-label={infoBlockOpen ? "Свернуть" : "Развернуть"}
+                      onClick={() => setInfoBlockOpen((v) => !v)}
+                    >
+                      <ChevronDown
+                        className={cn("h-5 w-5 transition-transform", !infoBlockOpen && "-rotate-90")}
+                      />
+                    </Button>
+                    <CardTitle className="text-lg">Информация</CardTitle>
+                  </div>
+                  {(displayInternship.status === "in_progress" || displayInternship.status === "completed") && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      aria-label="Редактировать блок информации"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openInfoBlockEdit();
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               {infoBlockOpen && (
-              <CardContent className="space-y-2">
-                <div>
-<Label className="text-xs text-muted-foreground">Описание</Label>
-                <p className="text-sm">{displayInternship.description}</p>
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Формат</Label>
-                  <p className="text-sm">
-                    {displayInternship.location === 'remote' ? 'Удаленно' : 
-                     displayInternship.location === 'office' ? 'Офис' : 'Гибридно'}
-                  </p>
-                </div>
-                {displayInternship.city && (
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Город</Label>
-                    <p className="text-sm">{displayInternship.city}</p>
+              <CardContent className="space-y-6 pt-1">
+                {/* Воронка */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <BarChart3 className="h-4 w-4 shrink-0" />
+                    Воронка
                   </div>
-                )}
-                {displayInternship.salary && (
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Зарплата</Label>
-                    <p className="text-sm">{displayInternship.salary.toLocaleString('ru-RU')} ₽</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
+                      <div className="text-2xl font-semibold tabular-nums text-foreground">
+                        {currentInfoBlockData.funnel.applications}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Заявки</div>
+                    </div>
+                    <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
+                      <div className="text-2xl font-semibold tabular-nums text-foreground">
+                        {currentInfoBlockData.funnel.targetApplications}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Целевые заявки</div>
+                    </div>
+                    <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
+                      <div className="text-2xl font-semibold tabular-nums text-foreground">
+                        {currentInfoBlockData.funnel.interviews}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Собеседования</div>
+                    </div>
                   </div>
-                )}
+                </div>
+
+                {/* Документ */}
+                {currentInfoBlockData.attachedFileName ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <FileSpreadsheet className="h-4 w-4 shrink-0" />
+                      Документ
+                    </div>
+                    <div className="rounded-lg border bg-muted/20 dark:bg-muted/10 px-4 py-3 flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                        <FileSpreadsheet className="h-5 w-5 text-primary" />
+                      </div>
+                      <span className="text-sm font-medium truncate">{currentInfoBlockData.attachedFileName}</span>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Подразделения */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Building2 className="h-4 w-4 shrink-0" />
+                    Подразделения
+                  </div>
+                  {currentInfoBlockData.departments.length > 0 ? (
+                    <div className="rounded-lg border divide-y dark:divide-border">
+                      {currentInfoBlockData.departments.map((d, i) => (
+                        <div key={i} className="px-4 py-2.5 text-sm flex items-center gap-2">
+                          <span className="size-1.5 rounded-full bg-primary/60 shrink-0" />
+                          {d}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+                      Нет подразделений
+                    </div>
+                  )}
+                </div>
+
+                {/* Дополнительно: город и зарплата */}
+                {(displayInternship.city || displayInternship.salary) ? (
+                  <div className="pt-2 border-t space-y-2">
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Дополнительно</div>
+                    <div className="flex flex-wrap gap-6">
+                      {displayInternship.city && (
+                        <div>
+                          <span className="text-xs text-muted-foreground">Город</span>
+                          <p className="text-sm font-medium">{displayInternship.city}</p>
+                        </div>
+                      )}
+                      {displayInternship.salary && (
+                        <div>
+                          <span className="text-xs text-muted-foreground">Зарплата</span>
+                          <p className="text-sm font-medium">{displayInternship.salary.toLocaleString("ru-RU")} ₽</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
               </CardContent>
               )}
             </Card>
@@ -498,14 +625,19 @@ export default function InternshipDetailsPage() {
           {/* Кадровые показатели — коллапсируемый блок */}
           <div className="w-full grid grid-cols-1 gap-4 mb-6">
             <Card className="min-w-0 w-full">
-              <CardHeader
-                className="cursor-pointer hover:bg-muted/50 transition-colors rounded-t-xl"
-                onClick={() => setStaffBlockOpen((v) => !v)}
-              >
+              <CardHeader className="rounded-t-xl">
                 <div className="flex items-center gap-2">
-                  <ChevronDown
-                    className={cn("h-5 w-5 shrink-0 transition-transform", !staffBlockOpen && "-rotate-90")}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0"
+                    aria-label={staffBlockOpen ? "Свернуть" : "Развернуть"}
+                    onClick={() => setStaffBlockOpen((v) => !v)}
+                  >
+                    <ChevronDown
+                      className={cn("h-5 w-5 transition-transform", !staffBlockOpen && "-rotate-90")}
+                    />
+                  </Button>
                   <CardTitle className="text-lg">Кадровые показатели</CardTitle>
                 </div>
               </CardHeader>
@@ -940,7 +1072,7 @@ export default function InternshipDetailsPage() {
           <DialogHeader>
             <DialogTitle>История изменений</DialogTitle>
             <DialogDescription>
-              Подробная история изменений для «{displayInternship?.title || "стажировки"}»
+              Подробная история изменений для «{displayInternship?.name?.trim() || displayInternship?.title || "стажировки"}»
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -1025,101 +1157,103 @@ export default function InternshipDetailsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Редактирование стажировки — поля как при создании */}
+      {/* Редактирование стажировки — только основные поля, раскладка как в «Добавить стажировку» */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Редактировать стажировку</DialogTitle>
             <DialogDescription>
-              Заполните информацию о стажировке
+              Измените тип, название, даты или статус стажировки
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-title">Название стажировки *</Label>
-                <Input
-                  id="edit-internship-title"
-                  value={editFormData.title}
-                  onChange={(e) => setEditFormData((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="Например: Фронтенд-разработка на React"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-university">ВУЗ *</Label>
+          <div className="space-y-4 py-4">
+            <div className="flex items-end gap-2">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="edit-internship-type">Тип стажировки <span className="text-destructive">*</span></Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="z-[100]">
+                      <p>Выберите программу: GPB.Level Up, GPB.Experience, GPB.IT Factory или Стажировка МГИМО</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <Select
-                  value={editFormData.universityId}
-                  onValueChange={(v) => setEditFormData((prev) => ({ ...prev, universityId: v }))}
+                  value={editFormData.type}
+                  onValueChange={(v) => setEditFormData((prev) => ({ ...prev, type: v }))}
                 >
-                  <SelectTrigger id="edit-internship-university">
-                    <SelectValue placeholder="Выберите ВУЗ" />
+                  <SelectTrigger id="edit-internship-type" className="w-full">
+                    <SelectValue placeholder="Выберите тип" />
                   </SelectTrigger>
                   <SelectContent>
-                    {uniqueInternshipUniversities.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                    {INTERNSHIP_TYPE_OPTIONS.map((label) => (
+                      <SelectItem key={label} value={label}>
+                        {label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-internship-description">Описание *</Label>
-              <Textarea
-                id="edit-internship-description"
-                value={editFormData.description}
-                onChange={(e) => setEditFormData((prev) => ({ ...prev, description: e.target.value }))}
-                placeholder="Подробное описание стажировки..."
-                rows={4}
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-startDate">Дата начала *</Label>
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="edit-internship-startDate">Дата начала <span className="text-destructive">*</span></Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="z-[100]">
+                      <p>Укажите дату начала стажировки</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <Input
                   id="edit-internship-startDate"
                   type="date"
                   value={editFormData.startDate}
                   onChange={(e) => setEditFormData((prev) => ({ ...prev, startDate: e.target.value }))}
+                  className="w-full"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-endDate">Дата окончания *</Label>
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="edit-internship-endDate">Дата окончания <span className="text-destructive">*</span></Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="z-[100]">
+                      <p>Укажите дату окончания стажировки</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <Input
                   id="edit-internship-endDate"
                   type="date"
                   value={editFormData.endDate}
                   onChange={(e) => setEditFormData((prev) => ({ ...prev, endDate: e.target.value }))}
+                  className="w-full"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-deadline">Дедлайн заявок *</Label>
-                <Input
-                  id="edit-internship-deadline"
-                  type="date"
-                  value={editFormData.applicationDeadline}
-                  onChange={(e) => setEditFormData((prev) => ({ ...prev, applicationDeadline: e.target.value }))}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-maxParticipants">Максимум участников *</Label>
-                <Input
-                  id="edit-internship-maxParticipants"
-                  type="number"
-                  min={1}
-                  value={editFormData.maxParticipants}
-                  onChange={(e) => setEditFormData((prev) => ({ ...prev, maxParticipants: parseInt(e.target.value, 10) || 1 }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-status">Статус</Label>
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="edit-internship-status">Статус <span className="text-destructive">*</span></Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="z-[100]">
+                      <p>Выберите статус: в процессе или завершена</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <Select
                   value={editFormData.status}
                   onValueChange={(v) => setEditFormData((prev) => ({ ...prev, status: v as InternshipStatus }))}
                 >
-                  <SelectTrigger id="edit-internship-status">
-                    <SelectValue />
+                  <SelectTrigger id="edit-internship-status" className="w-full">
+                    <SelectValue placeholder="Выберите статус" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="in_progress">В процессе</SelectItem>
@@ -1127,67 +1261,162 @@ export default function InternshipDetailsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-location">Формат</Label>
-                <Select
-                  value={editFormData.location}
-                  onValueChange={(v) => setEditFormData((prev) => ({ ...prev, location: v as InternshipLocation }))}
-                >
-                  <SelectTrigger id="edit-internship-location">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="remote">Удаленно</SelectItem>
-                    <SelectItem value="office">Офис</SelectItem>
-                    <SelectItem value="hybrid">Гибридно</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-city">Город</Label>
-                <Input
-                  id="edit-internship-city"
-                  value={editFormData.city}
-                  onChange={(e) => setEditFormData((prev) => ({ ...prev, city: e.target.value }))}
-                  placeholder="Москва"
-                />
+            <div className="space-y-2 w-full">
+              <div className="flex items-center gap-1">
+                <Label htmlFor="edit-internship-name">Название стажировки <span className="text-muted-foreground font-normal">(необязательно)</span></Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="z-[100]">
+                    <p>Можно указать название стажировки (например, период или тема набора) или оставить пустым</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-internship-salary">Зарплата (₽)</Label>
-                <Input
-                  id="edit-internship-salary"
-                  type="number"
-                  value={editFormData.salary}
-                  onChange={(e) => setEditFormData((prev) => ({ ...prev, salary: e.target.value }))}
-                  placeholder="30000"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-internship-mentor">Наставник</Label>
-              <Select
-                value={editFormData.mentorId}
-                onValueChange={(v) => setEditFormData((prev) => ({ ...prev, mentorId: v }))}
-              >
-                <SelectTrigger id="edit-internship-mentor">
-                  <SelectValue placeholder="Выберите наставника" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockMentors.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>{m.fullName} - {m.position}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="edit-internship-name"
+                value={editFormData.name}
+                onChange={(e) => setEditFormData((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="Название стажировки"
+                className="w-full"
+              />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
               Отмена
             </Button>
-            <Button onClick={handleSaveEdit}>
+            <Button
+              onClick={handleSaveEdit}
+              disabled={!editFormData.type || !editFormData.startDate || !editFormData.endDate}
+            >
               Сохранить изменения
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Редактирование блока «Информация»: воронка, документ xlsx, подразделения */}
+      <Dialog open={infoBlockEditOpen} onOpenChange={setInfoBlockEditOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Редактировать блок информации</DialogTitle>
+            <DialogDescription>
+              Воронка, прикреплённый документ и подразделения
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label className="text-sm font-medium">Воронка (количество)</Label>
+              <div className="grid grid-cols-3 gap-3 mt-2">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Заявки</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={infoBlockForm.funnel.applications}
+                    onChange={(e) =>
+                      setInfoBlockForm((prev) => ({
+                        ...prev,
+                        funnel: { ...prev.funnel, applications: parseInt(e.target.value, 10) || 0 },
+                      }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Целевые заявки</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={infoBlockForm.funnel.targetApplications}
+                    onChange={(e) =>
+                      setInfoBlockForm((prev) => ({
+                        ...prev,
+                        funnel: { ...prev.funnel, targetApplications: parseInt(e.target.value, 10) || 0 },
+                      }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Собеседования</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={infoBlockForm.funnel.interviews}
+                    onChange={(e) =>
+                      setInfoBlockForm((prev) => ({
+                        ...prev,
+                        funnel: { ...prev.funnel, interviews: parseInt(e.target.value, 10) || 0 },
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Документ (xlsx)</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx"
+                className="hidden"
+                onChange={handleInfoBlockFileChange}
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Приложить xlsx
+                </Button>
+                {infoBlockForm.attachedFileName && (
+                  <span className="text-sm text-muted-foreground truncate">{infoBlockForm.attachedFileName}</span>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Подразделения</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Название подразделения"
+                  value={newDepartmentName}
+                  onChange={(e) => setNewDepartmentName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addDepartment())}
+                />
+                <Button type="button" variant="outline" size="sm" onClick={addDepartment}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Добавить
+                </Button>
+              </div>
+              <ul className="space-y-1.5 mt-2">
+                {infoBlockForm.departments.map((name, index) => (
+                  <li key={index} className="flex items-center justify-between gap-2 text-sm py-1.5 px-2 rounded bg-muted/50">
+                    <span>{name}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeDepartment(index)}
+                      aria-label="Удалить"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInfoBlockEditOpen(false)}>
+              Отмена
+            </Button>
+            <Button onClick={saveInfoBlockEdit}>
+              Сохранить
             </Button>
           </DialogFooter>
         </DialogContent>

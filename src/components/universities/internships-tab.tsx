@@ -40,7 +40,7 @@ const PROGRAM_TYPES = ["GPB.Level Up", "GPB.Experience", "GPB.IT Factory", "Ст
 const SPOT_HIRING_LABEL = "Точечный найм";
 
 const INTERNSHIP_TYPE_OPTIONS = [...PROGRAM_TYPES, SPOT_HIRING_LABEL] as const;
-const MODAL_INTERNSHIP_TYPE_OPTIONS = [...PROGRAM_TYPES, "Стажировка МГИМО"] as const;
+const MODAL_INTERNSHIP_TYPE_OPTIONS = [...PROGRAM_TYPES] as const;
 
 const STATUS_OPTIONS: { value: InternshipStatus; label: string }[] = [
   { value: "in_progress", label: "В процессе" },
@@ -500,13 +500,13 @@ export function InternshipsTab() {
             <div className="flex items-end gap-2">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label htmlFor="internship-type">Тип стажировки</Label>
+                  <Label htmlFor="internship-type">Тип стажировки <span className="text-destructive">*</span></Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Выберите тип: Level Up, Experience, IT Factory или Стажировка МГИМО</p>
+                    <TooltipContent side="top" className="z-[100]">
+                      <p>Выберите программу: GPB.Level Up, GPB.Experience, GPB.IT Factory или Стажировка МГИМО</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -528,12 +528,12 @@ export function InternshipsTab() {
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label htmlFor="internship-start">Дата начала</Label>
+                  <Label htmlFor="internship-start">Дата начала <span className="text-destructive">*</span></Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent side="top" className="z-[100]">
                       <p>Укажите дату начала стажировки</p>
                     </TooltipContent>
                   </Tooltip>
@@ -548,12 +548,12 @@ export function InternshipsTab() {
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label htmlFor="internship-end">Дата окончания</Label>
+                  <Label htmlFor="internship-end">Дата окончания <span className="text-destructive">*</span></Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent side="top" className="z-[100]">
                       <p>Укажите дату окончания стажировки</p>
                     </TooltipContent>
                   </Tooltip>
@@ -568,13 +568,13 @@ export function InternshipsTab() {
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label htmlFor="internship-status">Статус</Label>
+                  <Label htmlFor="internship-status">Статус <span className="text-destructive">*</span></Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Выберите статус: запланирована, в процессе или завершена</p>
+                    <TooltipContent side="top" className="z-[100]">
+                      <p>Выберите статус: в процессе или завершена</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -597,13 +597,13 @@ export function InternshipsTab() {
             </div>
             <div className="space-y-2 w-full">
               <div className="flex items-center gap-1">
-                <Label htmlFor="internship-name">Название стажировки</Label>
+                <Label htmlFor="internship-name">Название стажировки <span className="text-muted-foreground font-normal">(необязательно)</span></Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Укажите название стажировки (например, период или тема набора)</p>
+                  <TooltipContent side="top" className="z-[100]">
+                    <p>Можно указать название стажировки (например, период или тема набора) или оставить пустым</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
