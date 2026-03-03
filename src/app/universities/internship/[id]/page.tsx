@@ -30,7 +30,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, BarChart3, Building2, Calendar, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, FileDown, FileSpreadsheet, FileUp, FileText, Filter, HelpCircle, History, MessageSquare, Pencil, Plus, Trash2, User, UserPlus, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, BarChart3, Briefcase, Building2, Calendar, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, FileDown, FileSpreadsheet, FileUp, FileText, Filter, HelpCircle, History, MessageSquare, Pencil, Plus, Trash2, User, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/format-utils";
 import { formatDateObject } from "@/lib/date-utils";
@@ -39,6 +40,7 @@ import type { Internship, InternshipStatus, InternshipLocation, ApplicationStatu
 import { mockInternships, mockMentors } from "@/lib/internships/mock-data";
 import type { StaffIndicatorRow } from "@/lib/internships/staff-table-data";
 import { MOCK_UNIVERSITIES_FOR_STAFF, MOCK_STAFF_INDICATORS_BASE } from "@/lib/internships/staff-table-data";
+import { useInternshipExtra } from "@/contexts/internship-extra-context";
 import { useInternships } from "@/contexts/internships-context";
 
 const INTERNSHIP_TYPE_OPTIONS = ["GPB.Level Up", "GPB.Experience", "GPB.IT Factory", "Стажировка МГИМО"] as const;
@@ -72,7 +74,7 @@ function getDismissalStage(dismissalDate: string | null, internshipEndDate: stri
   return dismissalDate <= internshipEndDate ? "до окончания стажировки" : "после окончания стажировки";
 }
 
-/** Трудовой стаж в банке (между датой приёма в подразделение и датой увольнения) */
+/** Трудовой стаж в банке (между датой приёма в подразделение и датой увольнения). Формат: "1 г 8 мес" */
 function getTenureInBank(departmentHireDate: string | null, dismissalDate: string | null): string {
   if (!departmentHireDate || !dismissalDate) return "—";
   const [y1, m1, d1] = departmentHireDate.split("-").map(Number);
@@ -83,8 +85,8 @@ function getTenureInBank(departmentHireDate: string | null, dismissalDate: strin
   const years = Math.floor(months / 12);
   const monthsRest = months % 12;
   const parts: string[] = [];
-  if (years > 0) parts.push(`${years} ${years === 1 ? "год" : years < 5 ? "года" : "лет"}`);
-  if (monthsRest > 0) parts.push(`${monthsRest} ${monthsRest === 1 ? "месяц" : monthsRest < 5 ? "месяца" : "месяцев"}`);
+  if (years > 0) parts.push(`${years} г`);
+  if (monthsRest > 0) parts.push(`${monthsRest} мес`);
   return parts.length ? parts.join(" ") : "—";
 }
 
@@ -141,6 +143,7 @@ export default function InternshipDetailsPage() {
   const router = useRouter();
   const { setCustomLabel } = useBreadcrumb();
   const { internships: contextInternships } = useInternships();
+  const { departmentsByInternship, setDepartmentsForInternship } = useInternshipExtra();
   const internshipId = params.id as string;
 
   const internships = [...contextInternships, ...mockInternships];
@@ -172,8 +175,13 @@ export default function InternshipDetailsPage() {
 
   const currentInfoBlockData = useMemo((): InfoBlockData => {
     if (!displayInternship) return getDefaultInfoBlockData(null);
-    return infoBlockDataByInternship[displayInternship.id] ?? getDefaultInfoBlockData(displayInternship);
-  }, [displayInternship, infoBlockDataByInternship]);
+    const base = infoBlockDataByInternship[displayInternship.id] ?? getDefaultInfoBlockData(displayInternship);
+    const externalDepartments = departmentsByInternship[displayInternship.id];
+    return {
+      ...base,
+      departments: externalDepartments ?? base.departments,
+    };
+  }, [displayInternship, infoBlockDataByInternship, departmentsByInternship]);
 
   const openInfoBlockEdit = () => {
     if (!displayInternship) return;
@@ -189,6 +197,7 @@ export default function InternshipDetailsPage() {
       ...prev,
       [displayInternship.id]: infoBlockForm,
     }));
+    setDepartmentsForInternship(displayInternship.id, infoBlockForm.departments);
     setInfoBlockEditOpen(false);
   };
 
@@ -313,13 +322,22 @@ export default function InternshipDetailsPage() {
 
   const [staffCurrentPage, setStaffCurrentPage] = useState(1);
   const [staffItemsPerPage, setStaffItemsPerPage] = useState(10);
+  const [staffFullView, setStaffFullView] = useState(false);
   const [infoBlockOpen, setInfoBlockOpen] = useState(true);
   const [staffBlockOpen, setStaffBlockOpen] = useState(true);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [commentDialogStaff, setCommentDialogStaff] = useState<{ staffId: string; fullName: string; comment: string } | null>(null);
   const [staffComments, setStaffComments] = useState<Record<string, string>>({});
+  const [careerModalStaff, setCareerModalStaff] = useState<StaffIndicatorRow | null>(null);
 
   const getStaffComment = (row: StaffIndicatorRow) => staffComments[row.id] ?? row.comment ?? "";
+
+  /** Текущий стаж в банке: от даты приёма в подразделение до даты увольнения или до текущей даты */
+  const getCurrentTenure = (row: StaffIndicatorRow): string => {
+    if (!row.departmentHireDate) return "—";
+    const endDate = row.dismissalDate ?? new Date().toISOString().split("T")[0];
+    return getTenureInBank(row.departmentHireDate, endDate);
+  };
 
   const handleOpenCommentDialog = (row: StaffIndicatorRow) => {
     setCommentDialogStaff({ staffId: row.id, fullName: row.fullName, comment: getStaffComment(row) });
@@ -650,41 +668,68 @@ export default function InternshipDetailsPage() {
                       {filteredStaffIndicators.length === 1 ? "стажер" : filteredStaffIndicators.length > 1 && filteredStaffIndicators.length < 5 ? "стажера" : "стажеров"}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <FileText className="mr-2 h-4 w-4" />
-                          Импорт/Экспорт Excel
-                          <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem>
-                          <FileDown className="mr-2 h-4 w-4" />
-                          Импорт из Excel
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <FileUp className="mr-2 h-4 w-4" />
-                          Экспорт в Excel
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <Button variant="outline" size="sm">
-                      <Filter className="mr-2 h-4 w-4" />
-                      Фильтры
-                    </Button>
-                    <Button size="sm" onClick={() => setAddStaffDialogOpen(true)}>
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Добавить стажера
-                    </Button>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="staff-full-view"
+                        checked={staffFullView}
+                        onCheckedChange={(value) => {
+                          const checked = Boolean(value);
+                          setStaffFullView(checked);
+                          if (checked) {
+                            setStaffCurrentPage(1);
+                          }
+                        }}
+                      />
+                      <Label
+                        htmlFor="staff-full-view"
+                        className="text-sm font-normal text-muted-foreground cursor-pointer whitespace-nowrap"
+                      >
+                        Показать полный вид
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <FileText className="mr-2 h-4 w-4" />
+                            Импорт/Экспорт Excel
+                            <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuItem>
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Импорт из Excel
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <FileUp className="mr-2 h-4 w-4" />
+                            Экспорт в Excel краткий вид
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <FileUp className="mr-2 h-4 w-4" />
+                            Экспорт в Excel полный вид
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <Button variant="outline" size="sm">
+                        <Filter className="mr-2 h-4 w-4" />
+                        Фильтры
+                      </Button>
+                      <Button size="sm" onClick={() => setAddStaffDialogOpen(true)}>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Добавить стажера
+                      </Button>
+                    </div>
                   </div>
                 </div>
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
+                <div className="border rounded-lg overflow-x-auto overflow-y-hidden">
+                  <Table className={staffFullView ? "min-w-[1200px]" : "min-w-full"}>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        <TableHead className="text-sm font-medium">ФИО</TableHead>
+                        <TableHead className="text-sm font-medium sticky left-0 z-10 bg-background">
+                          ФИО
+                        </TableHead>
                         <TableHead className="text-sm font-medium">ВУЗ</TableHead>
                         <TableHead className="text-sm font-medium">Должность</TableHead>
                         <TableHead className="text-sm font-medium">ССП</TableHead>
@@ -702,6 +747,16 @@ export default function InternshipDetailsPage() {
                           <span className="block">Дата приема в</span>
                           <span className="block">ССП/ВСП</span>
                         </TableHead>
+                        {staffFullView && (
+                          <>
+                            <TableHead className="text-sm font-medium max-w-[8.5rem]">
+                              <span className="block">Дата увольнения</span>
+                            </TableHead>
+                            <TableHead className="text-sm font-medium">Этап увольнения</TableHead>
+                            <TableHead className="text-sm font-medium">Трудовой стаж в банке</TableHead>
+                            <TableHead className="text-sm font-medium">Комментарий</TableHead>
+                          </>
+                        )}
                         <TableHead className="text-sm font-medium text-center">Статус</TableHead>
                         <TableHead className="text-sm font-medium text-center">Действия</TableHead>
                       </TableRow>
@@ -713,8 +768,12 @@ export default function InternshipDetailsPage() {
                         const endIndex = startIndex + staffItemsPerPage;
                         const paginatedStaff = filteredStaffIndicators.slice(startIndex, endIndex);
                         return paginatedStaff.map((row) => (
-                        <TableRow key={row.id}>
-                          <TableCell className="px-4 whitespace-normal">
+                        <TableRow
+                          key={row.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => setCareerModalStaff(row)}
+                        >
+                          <TableCell className="px-4 whitespace-normal sticky left-0 z-10 bg-background">
                             <div className="flex items-center gap-3">
                               <Avatar className="h-10 w-10 shrink-0">
                                 <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
@@ -750,7 +809,23 @@ export default function InternshipDetailsPage() {
                           <TableCell className="px-4 whitespace-normal">
                             {row.departmentHireDate ? formatDateRu(row.departmentHireDate) : "—"}
                           </TableCell>
-                          <TableCell>
+                          {staffFullView && (
+                            <>
+                              <TableCell className="px-4 whitespace-normal max-w-[8.5rem]">
+                                {row.dismissalDate ? formatDateRu(row.dismissalDate) : "—"}
+                              </TableCell>
+                              <TableCell className="px-4 whitespace-normal">
+                                {getDismissalStage(row.dismissalDate, row.internshipEndDate)}
+                              </TableCell>
+                              <TableCell className="px-4 whitespace-normal">
+                                {getTenureInBank(row.departmentHireDate, row.dismissalDate)}
+                              </TableCell>
+                              <TableCell className="px-4 whitespace-normal">
+                                {getStaffComment(row) || "—"}
+                              </TableCell>
+                            </>
+                          )}
+                          <TableCell onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-center gap-2">
                               {row.status === "dismissed" ? (
                                 <Tooltip>
@@ -790,7 +865,7 @@ export default function InternshipDetailsPage() {
                               </Button>
                             </div>
                           </TableCell>
-                          <TableCell className="text-center">
+                          <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                             <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Редактировать">
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -905,6 +980,79 @@ export default function InternshipDetailsPage() {
             </Button>
             <Button onClick={handleSaveStaffComment}>
               Сохранить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Модальное окно: Карьерный путь сотрудника в банке (стилистика модалок ЛК ДРП / Практиканты) */}
+      <Dialog open={!!careerModalStaff} onOpenChange={(open) => !open && setCareerModalStaff(null)}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-3">
+            <DialogTitle className="text-lg">Карьерный путь в банке</DialogTitle>
+            {careerModalStaff && (
+              <DialogDescription className="text-muted-foreground">
+                <span className="block text-sm font-medium text-foreground">
+                  {careerModalStaff.fullName}
+                </span>
+                {careerModalStaff.university && (
+                  <span className="block text-sm mt-1">
+                    ВУЗ: {getUniversityShortName(careerModalStaff.university)}
+                  </span>
+                )}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          {careerModalStaff && (
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Этапы карьеры</Label>
+                <ol className="space-y-3">
+                  <li>
+                    <div className="rounded-lg border border-border bg-background p-4">
+                      <p className="text-sm font-medium text-foreground">Стажировка</p>
+                      <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                        <p><span className="font-medium text-foreground">Период:</span> {formatDateRu(careerModalStaff.internshipStartDate)} — {formatDateRu(careerModalStaff.internshipEndDate)}</p>
+                        <p><span className="font-medium text-foreground">ССП:</span> {careerModalStaff.ssp || "—"}</p>
+                        <p><span className="font-medium text-foreground">ВСП:</span> {careerModalStaff.vsp || "—"}</p>
+                        <p><span className="font-medium text-foreground">Результат:</span> {careerModalStaff.internshipResult}</p>
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="rounded-lg border border-border bg-background p-4">
+                      <p className="text-sm font-medium text-foreground">{careerModalStaff.positionDepartment || "Должность в подразделении"}</p>
+                      <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                        <p><span className="font-medium text-foreground">ССП:</span> {careerModalStaff.ssp || "—"}</p>
+                        <p><span className="font-medium text-foreground">ВСП:</span> {careerModalStaff.vsp || "—"}</p>
+                        <p>
+                          <span className="font-medium text-foreground">Период:</span>{" "}
+                          {careerModalStaff.departmentHireDate
+                            ? `${formatDateRu(careerModalStaff.departmentHireDate)} — ${careerModalStaff.dismissalDate ? formatDateRu(careerModalStaff.dismissalDate) : "н.в."}`
+                            : "—"}
+                        </p>
+                        {careerModalStaff.status === "dismissed" && (
+                          <p><span className="font-medium text-foreground">Статус:</span> Уволен</p>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                </ol>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Текущий стаж в банке</Label>
+                <div className="rounded-lg border border-border bg-background p-4">
+                  <p className="text-xl font-semibold tabular-nums text-foreground">{getCurrentTenure(careerModalStaff)}</p>
+                  {careerModalStaff.status === "active" && careerModalStaff.departmentHireDate && (
+                    <p className="text-sm text-muted-foreground mt-1">с {formatDateRu(careerModalStaff.departmentHireDate)} по н.в.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCareerModalStaff(null)}>
+              Закрыть
             </Button>
           </DialogFooter>
         </DialogContent>

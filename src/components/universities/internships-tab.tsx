@@ -27,6 +27,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Plus, Calendar, ArrowRight, BarChart3, HelpCircle, X, Search } from "lucide-react";
 import { useInternships } from "@/contexts/internships-context";
+import { useInternshipExtra } from "@/contexts/internship-extra-context";
 import type { InternshipStatus } from "@/types/internships";
 import { getStatusBadgeColor, getInternshipTypeBadgeColor } from "@/lib/badge-colors";
 import { cn } from "@/lib/utils";
@@ -54,9 +55,21 @@ const getStatusText = (status: InternshipStatus) =>
 const { totalTrainees: defaultTotalTrainees, currentEmployees: defaultCurrentEmployees, conversionPercent: defaultConversionPercent } =
   getStaffSummary(getBaseStaffIndicators());
 
+const getDefaultDepartmentsForInternship = (internship: { name?: string | null }): string[] => {
+  if (internship.name?.trim() === "Data Science") {
+    return [
+      "Департамент анализа данных",
+      "Департамент искусственного интеллекта",
+      "Департамент машинного обучения",
+    ];
+  }
+  return [];
+};
+
 export function InternshipsTab() {
   const router = useRouter();
   const { internships, addInternship } = useInternships();
+  const { departmentsByInternship } = useInternshipExtra();
   const [activeTab, setActiveTab] = useState<(typeof INTERNSHIP_TABS)[number]["value"]>("internships");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<"startDate_asc" | "startDate_desc" | "status_asc" | "status_desc">("startDate_asc");
@@ -392,9 +405,47 @@ export function InternshipsTab() {
                                 </div>
                               </div>
                               <div className="border-t pt-3 mt-auto shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <p className="text-sm text-muted-foreground order-2 sm:order-1">
-                                  Подразделений: <span className="font-medium text-foreground">{internship.hiringDepartmentsCount ?? 0}</span>
-                                </p>
+                                <div className="text-sm text-muted-foreground order-2 sm:order-1 flex items-center gap-1.5">
+                                  <span>Подразделения:</span>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Badge variant="secondary" className="text-xs font-medium px-2 py-0.5 cursor-help">
+                                        {(() => {
+                                          const savedDepartments = departmentsByInternship[internship.id];
+                                          const fallbackDepartments = getDefaultDepartmentsForInternship(internship);
+                                          const departments = (savedDepartments && savedDepartments.length > 0)
+                                            ? savedDepartments
+                                            : fallbackDepartments;
+                                          const fromDepartments = departments.length;
+                                          const fallback = internship.hiringDepartmentsCount ?? 0;
+                                          return fromDepartments > 0 ? fromDepartments : fallback;
+                                        })()}
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-xs">
+                                      {(() => {
+                                        const savedDepartments = departmentsByInternship[internship.id];
+                                        const fallbackDepartments = getDefaultDepartmentsForInternship(internship);
+                                        const departments = (savedDepartments && savedDepartments.length > 0)
+                                          ? savedDepartments
+                                          : fallbackDepartments;
+                                        if (departments.length === 0) {
+                                          return <p>Нет данных по подразделениям</p>;
+                                        }
+                                        return (
+                                          <div className="space-y-1">
+                                            <p className="font-medium text-sm">Нанимающие подразделения:</p>
+                                            <ul className="list-disc list-inside text-sm">
+                                              {departments.map((name) => (
+                                                <li key={name}>{name}</li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        );
+                                      })()}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
                                 <Button variant="ghost" size="sm" className="w-full sm:w-auto justify-center text-primary order-1 sm:order-2 shrink-0" onClick={(e) => { e.stopPropagation(); router.push(`/universities/internship/${internship.id}`); }}>
                                   Подробнее <ArrowRight className="h-3.5 w-3.5 ml-2" />
                                 </Button>
@@ -474,10 +525,48 @@ export function InternshipsTab() {
                                 </div>
                               </div>
                             </div>
-                            <div className="border-t pt-3 mt-auto shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                              <p className="text-sm text-muted-foreground order-2 sm:order-1">
-                                Подразделений: <span className="font-medium text-foreground">{internship.hiringDepartmentsCount ?? 0}</span>
-                              </p>
+                              <div className="border-t pt-3 mt-auto shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <div className="text-sm text-muted-foreground order-2 sm:order-1 flex items-center gap-1.5">
+                                  <span>Подразделения:</span>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Badge variant="secondary" className="text-xs font-medium px-2 py-0.5 cursor-help">
+                                        {(() => {
+                                          const savedDepartments = departmentsByInternship[internship.id];
+                                          const fallbackDepartments = getDefaultDepartmentsForInternship(internship);
+                                          const departments = (savedDepartments && savedDepartments.length > 0)
+                                            ? savedDepartments
+                                            : fallbackDepartments;
+                                          const fromDepartments = departments.length;
+                                          const fallback = internship.hiringDepartmentsCount ?? 0;
+                                          return fromDepartments > 0 ? fromDepartments : fallback;
+                                        })()}
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-xs">
+                                      {(() => {
+                                        const savedDepartments = departmentsByInternship[internship.id];
+                                        const fallbackDepartments = getDefaultDepartmentsForInternship(internship);
+                                        const departments = (savedDepartments && savedDepartments.length > 0)
+                                          ? savedDepartments
+                                          : fallbackDepartments;
+                                        if (departments.length === 0) {
+                                          return <p>Нет данных по подразделениям</p>;
+                                        }
+                                        return (
+                                          <div className="space-y-1">
+                                            <p className="font-medium text-sm">Нанимающие подразделения:</p>
+                                            <ul className="list-disc list-inside text-sm">
+                                              {departments.map((name) => (
+                                                <li key={name}>{name}</li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        );
+                                      })()}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
                               <Button variant="ghost" size="sm" className="w-full sm:w-auto justify-center text-primary order-1 sm:order-2 shrink-0" onClick={(e) => { e.stopPropagation(); router.push(`/universities/internship/${internship.id}`); }}>
                                 Подробнее <ArrowRight className="h-3.5 w-3.5 ml-2" />
                               </Button>
