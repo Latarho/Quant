@@ -30,6 +30,7 @@ import { useInternships } from "@/contexts/internships-context";
 import type { InternshipStatus } from "@/types/internships";
 import { getStatusBadgeColor, getInternshipTypeBadgeColor } from "@/lib/badge-colors";
 import { cn } from "@/lib/utils";
+import { getBaseStaffIndicators, getStaffSummary } from "@/lib/internships/staff-table-data";
 
 const INTERNSHIP_TABS = [
   { value: "internships", label: "Стажировки" },
@@ -49,6 +50,9 @@ const STATUS_OPTIONS: { value: InternshipStatus; label: string }[] = [
 
 const getStatusText = (status: InternshipStatus) =>
   STATUS_OPTIONS.find((o) => o.value === status)?.label ?? status;
+
+const { totalTrainees: defaultTotalTrainees, currentEmployees: defaultCurrentEmployees, conversionPercent: defaultConversionPercent } =
+  getStaffSummary(getBaseStaffIndicators());
 
 export function InternshipsTab() {
   const router = useRouter();
@@ -354,17 +358,19 @@ export function InternshipsTab() {
                                         <Tooltip>
                                           <TooltipTrigger asChild>
                                             <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                              <div className="text-sm font-bold text-foreground leading-tight">{internship.completedTraineesCount ?? "—"}</div>
+                                              <div className="text-sm font-bold text-foreground leading-tight">{defaultTotalTrainees}</div>
                                               <div className="text-xs text-muted-foreground">Стажеры</div>
                                             </div>
                                           </TooltipTrigger>
-                                          <TooltipContent><p>Стажеры</p></TooltipContent>
+                                          <TooltipContent>
+                                            <p>Общее количество стажеров (строки в таблице кадровых показателей)</p>
+                                          </TooltipContent>
                                         </Tooltip>
                                         <span className="w-5 shrink-0 flex-shrink-0" aria-hidden />
                                         <Tooltip>
                                           <TooltipTrigger asChild>
                                             <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                              <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{internship.hiredEmployeesCount ?? "—"}</div>
+                                              <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{defaultCurrentEmployees}</div>
                                               <div className="text-xs text-muted-foreground">Сотрудники</div>
                                             </div>
                                           </TooltipTrigger>
@@ -374,11 +380,11 @@ export function InternshipsTab() {
                                         <Tooltip>
                                           <TooltipTrigger asChild>
                                             <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                              <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{internship.conversionRatePercent != null ? `${internship.conversionRatePercent}%` : "—"}</div>
+                                              <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{defaultConversionPercent != null ? `${defaultConversionPercent}%` : "—"}</div>
                                               <div className="text-xs text-muted-foreground">Конверсия</div>
                                             </div>
                                           </TooltipTrigger>
-                                          <TooltipContent><p>Конверсия</p></TooltipContent>
+                                          <TooltipContent><p>Конверсия = Сотрудники / Стажеры, в процентах</p></TooltipContent>
                                         </Tooltip>
                                       </div>
                                     </div>
@@ -435,17 +441,19 @@ export function InternshipsTab() {
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                            <div className="text-sm font-bold text-foreground leading-tight">{internship.completedTraineesCount ?? "—"}</div>
+                                            <div className="text-sm font-bold text-foreground leading-tight">{defaultTotalTrainees}</div>
                                             <div className="text-xs text-muted-foreground">Стажеры</div>
                                           </div>
                                         </TooltipTrigger>
-                                        <TooltipContent><p>Стажеры</p></TooltipContent>
+                                        <TooltipContent>
+                                          <p>Общее количество стажеров (строки в таблице кадровых показателей)</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                       <span className="w-5 shrink-0 flex-shrink-0" aria-hidden />
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                            <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{internship.hiredEmployeesCount ?? "—"}</div>
+                                            <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{defaultCurrentEmployees}</div>
                                             <div className="text-xs text-muted-foreground">Сотрудники</div>
                                           </div>
                                         </TooltipTrigger>
@@ -455,11 +463,11 @@ export function InternshipsTab() {
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
-                                            <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{internship.conversionRatePercent != null ? `${internship.conversionRatePercent}%` : "—"}</div>
+                                            <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{defaultConversionPercent != null ? `${defaultConversionPercent}%` : "—"}</div>
                                             <div className="text-xs text-muted-foreground">Конверсия</div>
                                           </div>
                                         </TooltipTrigger>
-                                        <TooltipContent><p>Конверсия</p></TooltipContent>
+                                        <TooltipContent><p>Конверсия = Сотрудники / Стажеры, в процентах</p></TooltipContent>
                                       </Tooltip>
                                     </div>
                                   </div>

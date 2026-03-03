@@ -37,6 +37,8 @@ import { formatDateObject } from "@/lib/date-utils";
 import { getStatusBadgeColor, getInternshipTypeBadgeColor } from "@/lib/badge-colors";
 import type { Internship, InternshipStatus, InternshipLocation, ApplicationStatus } from "@/types/internships";
 import { mockInternships, mockMentors } from "@/lib/internships/mock-data";
+import type { StaffIndicatorRow } from "@/lib/internships/staff-table-data";
+import { MOCK_UNIVERSITIES_FOR_STAFF, MOCK_STAFF_INDICATORS_BASE } from "@/lib/internships/staff-table-data";
 import { useInternships } from "@/contexts/internships-context";
 
 const INTERNSHIP_TYPE_OPTIONS = ["GPB.Level Up", "GPB.Experience", "GPB.IT Factory", "Стажировка МГИМО"] as const;
@@ -57,25 +59,6 @@ function getDefaultInfoBlockData(internship: Internship | null): InfoBlockData {
       ? ["Департамент анализа данных", "Департамент искусственного интеллекта", "Департамент машинного обучения"]
       : [],
   };
-}
-
-/** Запись кадровых показателей стажировки (формат как в ДРП — сотрудники) */
-interface StaffIndicatorRow {
-  id: string;
-  fullName: string;
-  university: string;
-  positionDepartment: string;
-  /** ССП — департамент */
-  ssp: string;
-  /** ВСП — управление / отдел */
-  vsp: string;
-  internshipStartDate: string;
-  internshipEndDate: string;
-  internshipResult: string;
-  departmentHireDate: string | null;
-  dismissalDate: string | null;
-  status: "active" | "dismissed";
-  comment?: string;
 }
 
 const formatDateRu = (dateStr: string) => {
@@ -152,43 +135,6 @@ const UNIVERSITY_SHORT_NAMES: Record<string, string> = {
 
 const getUniversityShortName = (fullName: string): string =>
   UNIVERSITY_SHORT_NAMES[fullName] ?? fullName;
-
-/** Список ВУЗов для распределения по стажерам (полные названия — в таблице показываем краткие) */
-const MOCK_UNIVERSITIES_FOR_STAFF = [
-  "Московский государственный университет",
-  "Санкт-Петербургский государственный университет",
-  "Московский физико-технический институт",
-  "Новосибирский государственный университет",
-  "Высшая школа экономики",
-];
-
-const MOCK_STAFF_INDICATORS_BASE: Omit<StaffIndicatorRow, "university">[] = [
-  { id: "1", fullName: "Иванов Иван Иванович", positionDepartment: "Аналитик-исследователь / Отдел аналитики", ssp: "Аналитика", vsp: "Отдел аналитики", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-03-20", dismissalDate: null, status: "active" },
-  { id: "2", fullName: "Петрова Анна Сергеевна", positionDepartment: "Разработчик / IT-департамент", ssp: "IT-департамент", vsp: "Управление разработки", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "3", fullName: "Сидоров Петр Олегович", positionDepartment: "Стажёр / Риски", ssp: "Риски", vsp: "Управление рисков", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-03-25", dismissalDate: null, status: "active" },
-  { id: "4", fullName: "Козлова Мария Александровна", positionDepartment: "Ведущий аналитик / Data Science", ssp: "Аналитика", vsp: "Отдел Data Science", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "5", fullName: "Новиков Дмитрий Игоревич", positionDepartment: "Стажёр / Корпоративный блок", ssp: "Корпоративный блок", vsp: "Управление корпоративных проектов", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-04-01", dismissalDate: null, status: "active" },
-  { id: "6", fullName: "Волкова Елена Сергеевна", positionDepartment: "Специалист / Операционный блок", ssp: "Операционный блок", vsp: "Операционное управление", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "7", fullName: "Морозов Алексей Владимирович", positionDepartment: "Стажёр / Риски", ssp: "Риски", vsp: "Управление рисков", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Уволен", departmentHireDate: null, dismissalDate: "2025-03-20", status: "dismissed" },
-  { id: "8", fullName: "Соколова Ольга Николаевна", positionDepartment: "Ведущий аналитик / Отдел аналитики", ssp: "Аналитика", vsp: "Отдел аналитики", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-03-28", dismissalDate: null, status: "active" },
-  { id: "9", fullName: "Лебедев Андрей Петрович", positionDepartment: "Разработчик / IT-департамент", ssp: "IT-департамент", vsp: "Управление разработки", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "10", fullName: "Кузнецова Татьяна Михайловна", positionDepartment: "Стажёр / HR-направление", ssp: "HR", vsp: "Управление по работе с персоналом", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "11", fullName: "Попов Сергей Андреевич", positionDepartment: "Аналитик-исследователь / Data Science", ssp: "Аналитика", vsp: "Отдел Data Science", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-04-07", dismissalDate: null, status: "active" },
-  { id: "12", fullName: "Васильева Наталья Олеговна", positionDepartment: "Стажёр / Финансы", ssp: "Финансы", vsp: "Финансовое управление", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "13", fullName: "Федоров Игорь Дмитриевич", positionDepartment: "Специалист / Юридический блок", ssp: "Юридический блок", vsp: "Юридическое управление", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "14", fullName: "Михайлова Юлия Викторовна", positionDepartment: "Аналитик-исследователь / Отдел аналитики", ssp: "Аналитика", vsp: "Отдел аналитики", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-03-22", dismissalDate: null, status: "active" },
-  { id: "15", fullName: "Егоров Павел Александрович", positionDepartment: "Разработчик / IT-департамент", ssp: "IT-департамент", vsp: "Управление разработки", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "16", fullName: "Никитина Анастасия Игоревна", positionDepartment: "Стажёр / Маркетинг", ssp: "Маркетинг", vsp: "Отдел маркетинга", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "17", fullName: "Орлов Владимир Сергеевич", positionDepartment: "Ведущий аналитик / Data Science", ssp: "Аналитика", vsp: "Отдел Data Science", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-04-01", dismissalDate: null, status: "active" },
-  { id: "18", fullName: "Захарова Кристина Дмитриевна", positionDepartment: "Стажёр / Риски", ssp: "Риски", vsp: "Управление рисков", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Уволен", departmentHireDate: null, dismissalDate: "2025-03-19", status: "dismissed" },
-  { id: "19", fullName: "Семёнов Роман Николаевич", positionDepartment: "Ведущий аналитик / Отдел аналитики", ssp: "Аналитика", vsp: "Отдел аналитики", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "20", fullName: "Голубева Дарья Андреевна", positionDepartment: "Разработчик / IT-департамент", ssp: "IT-департамент", vsp: "Управление разработки", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-03-24", dismissalDate: null, status: "active" },
-  { id: "21", fullName: "Виноградов Артём Олегович", positionDepartment: "Стажёр / Корпоративный блок", ssp: "Корпоративный блок", vsp: "Управление корпоративных проектов", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "22", fullName: "Борисова Виктория Павловна", positionDepartment: "Специалист / Операционный блок", ssp: "Операционный блок", vsp: "Операционное управление", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "23", fullName: "Королёв Максим Ильич", positionDepartment: "Аналитик-исследователь / Data Science", ssp: "Аналитика", vsp: "Отдел Data Science", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-03-26", dismissalDate: null, status: "active" },
-  { id: "24", fullName: "Герасимова Екатерина Владимировна", positionDepartment: "Стажёр / Финансы", ssp: "Финансы", vsp: "Финансовое управление", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: null, dismissalDate: null, status: "active" },
-  { id: "25", fullName: "Тихонов Глеб Сергеевич", positionDepartment: "Аналитик-исследователь / Отдел аналитики", ssp: "Аналитика", vsp: "Отдел аналитики", internshipStartDate: "2025-01-14", internshipEndDate: "2025-03-19", internshipResult: "Переведен", departmentHireDate: "2025-04-02", dismissalDate: null, status: "active" },
-];
 
 export default function InternshipDetailsPage() {
   const params = useParams();
@@ -388,6 +334,9 @@ export default function InternshipDetailsPage() {
   };
 
   const filteredStaffIndicators = staffIndicators;
+  const totalTrainees = filteredStaffIndicators.length;
+  const currentEmployees = filteredStaffIndicators.filter((row) => row.status === "active").length;
+  const conversionPercent = totalTrainees > 0 ? Math.round((currentEmployees / totalTrainees) * 100) : null;
 
   // Устанавливаем в breadcrumbs: название стажировки (если есть) или тип
   useEffect(() => {
@@ -531,30 +480,81 @@ export default function InternshipDetailsPage() {
               </CardHeader>
               {infoBlockOpen && (
               <CardContent className="space-y-6 pt-1">
-                {/* Воронка */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <BarChart3 className="h-4 w-4 shrink-0" />
-                    Воронка
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Воронка (слева) */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <BarChart3 className="h-4 w-4 shrink-0" />
+                      Воронка
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
+                        <div className="text-2xl font-semibold tabular-nums text-foreground">
+                          {currentInfoBlockData.funnel.applications}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">Заявки</div>
+                      </div>
+                      <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
+                        <div className="text-2xl font-semibold tabular-nums text-foreground">
+                          {currentInfoBlockData.funnel.targetApplications}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">Целевые заявки</div>
+                      </div>
+                      <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
+                        <div className="text-2xl font-semibold tabular-nums text-foreground">
+                          {currentInfoBlockData.funnel.interviews}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">Собеседования</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
-                      <div className="text-2xl font-semibold tabular-nums text-foreground">
-                        {currentInfoBlockData.funnel.applications}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">Заявки</div>
+
+                  {/* Результаты стажировки (справа) — те же метрики, что и в карточке */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <BarChart3 className="h-4 w-4 shrink-0" />
+                      Результаты
                     </div>
-                    <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
-                      <div className="text-2xl font-semibold tabular-nums text-foreground">
-                        {currentInfoBlockData.funnel.targetApplications}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">Целевые заявки</div>
-                    </div>
-                    <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
-                      <div className="text-2xl font-semibold tabular-nums text-foreground">
-                        {currentInfoBlockData.funnel.interviews}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">Собеседования</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center cursor-help">
+                            <div className="text-2xl font-semibold tabular-nums text-foreground">
+                              {totalTrainees}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">Стажеры</div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Общее количество стажеров (строки в таблице кадровых показателей)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center cursor-help">
+                            <div className="text-2xl font-semibold tabular-nums text-blue-600 dark:text-blue-400">
+                              {currentEmployees}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">Сотрудники</div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Сотрудники, работающие в банке на текущий момент</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center cursor-help">
+                            <div className="text-2xl font-semibold tabular-nums text-purple-600 dark:text-purple-400">
+                              {conversionPercent != null ? `${conversionPercent}%` : "—"}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">Конверсия</div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Конверсия = Сотрудники / Стажеры, в процентах</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
                 </div>
@@ -582,7 +582,7 @@ export default function InternshipDetailsPage() {
                     Подразделения
                   </div>
                   {currentInfoBlockData.departments.length > 0 ? (
-                    <div className="rounded-lg border divide-y dark:divide-border">
+                    <div className="rounded-lg">
                       {currentInfoBlockData.departments.map((d, i) => (
                         <div key={i} className="px-4 py-2.5 text-sm flex items-center gap-2">
                           <span className="size-1.5 rounded-full bg-primary/60 shrink-0" />
@@ -591,7 +591,7 @@ export default function InternshipDetailsPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+                    <div className="rounded-lg px-4 py-6 text-center text-sm text-muted-foreground">
                       Нет подразделений
                     </div>
                   )}
