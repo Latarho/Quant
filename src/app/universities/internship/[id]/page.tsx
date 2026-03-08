@@ -640,7 +640,7 @@ export default function InternshipDetailsPage() {
             </Card>
           </div>
 
-          {/* Кадровые показатели — коллапсируемый блок */}
+          {/* Стажеры — коллапсируемый блок */}
           <div className="w-full grid grid-cols-1 gap-4 mb-6">
             <Card className="min-w-0 w-full">
               <CardHeader className="rounded-t-xl">
@@ -656,7 +656,7 @@ export default function InternshipDetailsPage() {
                       className={cn("h-5 w-5 transition-transform", !staffBlockOpen && "-rotate-90")}
                     />
                   </Button>
-                  <CardTitle className="text-lg">Кадровые показатели</CardTitle>
+                  <CardTitle className="text-lg">Стажеры</CardTitle>
                 </div>
               </CardHeader>
               {staffBlockOpen && (
@@ -952,7 +952,7 @@ export default function InternshipDetailsPage() {
           </div>
       </div>
 
-      {/* Модальное окно комментария к сотруднику (кадровые показатели) */}
+      {/* Модальное окно комментария к стажеру (стажеры) */}
       <Dialog open={commentDialogOpen} onOpenChange={setCommentDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
