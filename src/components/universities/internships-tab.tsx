@@ -44,6 +44,15 @@ const SPOT_HIRING_LABEL = "Точечный найм";
 const INTERNSHIP_TYPE_OPTIONS = [...PROGRAM_TYPES, SPOT_HIRING_LABEL] as const;
 const MODAL_INTERNSHIP_TYPE_OPTIONS = [...PROGRAM_TYPES] as const;
 
+const INTERNSHIP_DIRECTIONS = [
+  "Разработка",
+  "Аналитика",
+  "Кибербезопасность",
+  "Дизайн",
+  "Product / бизнес",
+  "DevOps / инфраструктура",
+] as const;
+
 const STATUS_OPTIONS: { value: InternshipStatus; label: string }[] = [
   { value: "in_progress", label: "В процессе" },
   { value: "completed", label: "Завершена" },
@@ -72,15 +81,16 @@ export function InternshipsTab() {
   const { departmentsByInternship } = useInternshipExtra();
   const [activeTab, setActiveTab] = useState<(typeof INTERNSHIP_TABS)[number]["value"]>("internships");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<"startDate_asc" | "startDate_desc" | "status_asc" | "status_desc">("startDate_asc");
   const [internshipFeedFilters, setInternshipFeedFilters] = useState<{
     type: string[];
+    direction: string[];
     year: number[];
     status: InternshipStatus[];
-  }>({ type: [], year: [], status: [] });
+  }>({ type: [], direction: [], year: [], status: [] });
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     type: "GPB.Level Up" as string,
+    direction: "",
     name: "",
     startDate: "",
     endDate: "",
@@ -90,6 +100,7 @@ export function InternshipsTab() {
   const handleOpenModal = () => {
     setFormData({
       type: activeTab === "spot-hiring" ? "Стажировка МГИМО" : "GPB.Level Up",
+      direction: "",
       name: "",
       startDate: "",
       endDate: "",
@@ -102,6 +113,7 @@ export function InternshipsTab() {
     if (!formData.startDate || !formData.endDate) return;
     addInternship({
       type: formData.type,
+      direction: formData.direction || undefined,
       name: formData.name.trim() || undefined,
       startDate: formData.startDate,
       endDate: formData.endDate,
@@ -153,18 +165,21 @@ export function InternshipsTab() {
                 ? internships.filter((i) => PROGRAM_TYPES.includes(i.title as (typeof PROGRAM_TYPES)[number]))
                 : internships.filter((i) => i.title === SPOT_HIRING_LABEL);
               const listForType = baseList.filter((i) => {
+                if (internshipFeedFilters.direction.length > 0 && (!i.direction || !internshipFeedFilters.direction.includes(i.direction))) return false;
                 if (internshipFeedFilters.year.length > 0 && !internshipFeedFilters.year.includes(i.startDate.getFullYear())) return false;
                 if (internshipFeedFilters.status.length > 0 && !internshipFeedFilters.status.includes(i.status)) return false;
                 return true;
               });
               const listForYear = baseList.filter((i) => {
                 if (internshipFeedFilters.type.length > 0 && !internshipFeedFilters.type.includes(i.title)) return false;
+                if (internshipFeedFilters.direction.length > 0 && (!i.direction || !internshipFeedFilters.direction.includes(i.direction))) return false;
                 if (internshipFeedFilters.status.length > 0 && !internshipFeedFilters.status.includes(i.status)) return false;
                 return true;
               });
               const listForStatus = baseList.filter((i) => {
                 if (internshipFeedFilters.type.length > 0 && !internshipFeedFilters.type.includes(i.title)) return false;
                 if (internshipFeedFilters.year.length > 0 && !internshipFeedFilters.year.includes(i.startDate.getFullYear())) return false;
+                if (internshipFeedFilters.direction.length > 0 && (!i.direction || !internshipFeedFilters.direction.includes(i.direction))) return false;
                 return true;
               });
               const byType = listForType.reduce<Record<string, number>>((acc, i) => {
@@ -184,6 +199,7 @@ export function InternshipsTab() {
               const typeOptionsForTab = value === "internships" ? [...PROGRAM_TYPES] : [SPOT_HIRING_LABEL];
               let list = baseList.filter((i) => {
                 if (internshipFeedFilters.type.length > 0 && !internshipFeedFilters.type.includes(i.title)) return false;
+                if (internshipFeedFilters.direction.length > 0 && (!i.direction || !internshipFeedFilters.direction.includes(i.direction))) return false;
                 if (internshipFeedFilters.year.length > 0 && !internshipFeedFilters.year.includes(i.startDate.getFullYear())) return false;
                 if (internshipFeedFilters.status.length > 0 && !internshipFeedFilters.status.includes(i.status)) return false;
                 if (searchQuery.trim()) {
@@ -193,13 +209,7 @@ export function InternshipsTab() {
                 }
                 return true;
               });
-              const statusOrder: Record<InternshipStatus, number> = { in_progress: 0, completed: 1 };
-              list = [...list].sort((a, b) => {
-                if (sortBy === "startDate_asc") return a.startDate.getTime() - b.startDate.getTime();
-                if (sortBy === "startDate_desc") return b.startDate.getTime() - a.startDate.getTime();
-                if (sortBy === "status_asc") return statusOrder[a.status] - statusOrder[b.status];
-                return statusOrder[b.status] - statusOrder[a.status];
-              });
+              list = [...list].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
               const useScroll = list.length >= 5;
               const slots: (typeof list[0] | null)[] = useScroll
                 ? [...list]
@@ -212,18 +222,27 @@ export function InternshipsTab() {
                 <>
                   <div className="flex flex-wrap items-center gap-4 mb-4">
                     <div className="flex-1 min-w-[180px] space-y-2">
-                      <Label className="text-base font-semibold">Тип стажировки</Label>
+                      <Label className="text-base font-semibold">Программа</Label>
                       <MultiSelect
                         options={typeOptionsForTab
                           .filter((t) => (byType[t] ?? 0) > 0 || internshipFeedFilters.type.includes(t))
                           .map((t) => ({ value: t, label: `${t} (${byType[t] ?? 0})` }))}
                         selected={internshipFeedFilters.type}
                         onChange={(selected) => setInternshipFeedFilters((p) => ({ ...p, type: selected }))}
-                        placeholder="Выберите типы"
+                        placeholder="Выберите программы"
                       />
                       {typeOptionsForTab.every((t) => (byType[t] ?? 0) === 0) && (
                         <span className="text-sm text-muted-foreground">Нет данных</span>
                       )}
+                    </div>
+                    <div className="flex-1 min-w-[180px] space-y-2">
+                      <Label className="text-base font-semibold">Направление</Label>
+                      <MultiSelect
+                        options={INTERNSHIP_DIRECTIONS.map((d) => ({ value: d, label: d }))}
+                        selected={internshipFeedFilters.direction}
+                        onChange={(selected) => setInternshipFeedFilters((p) => ({ ...p, direction: selected }))}
+                        placeholder="Выберите направления"
+                      />
                     </div>
                     <div className="flex-1 min-w-[180px] space-y-2">
                       <Label className="text-base font-semibold">Период</Label>
@@ -261,20 +280,6 @@ export function InternshipsTab() {
                         placeholder="Выберите статусы"
                       />
                     </div>
-                    <div className="flex-1 min-w-[180px] space-y-2">
-                      <Label className="text-base font-semibold">Сортировка</Label>
-                      <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-                        <SelectTrigger className="w-full bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50">
-                          <SelectValue placeholder="Сортировка" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="startDate_asc">По дате начала (сначала ранние)</SelectItem>
-                          <SelectItem value="startDate_desc">По дате начала (сначала поздние)</SelectItem>
-                          <SelectItem value="status_asc">По статусу (В процессе → Завершена)</SelectItem>
-                          <SelectItem value="status_desc">По статусу (Завершена → В процессе)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
                   <div className="mb-2">
                     <div className="text-sm text-muted-foreground">
@@ -289,8 +294,14 @@ export function InternshipsTab() {
                     const activeFilters: Array<{ label: string; onRemove: () => void }> = [];
                     if (internshipFeedFilters.type.length > 0) {
                       activeFilters.push({
-                        label: `Тип: ${internshipFeedFilters.type.join(", ")}`,
+                        label: `Программа: ${internshipFeedFilters.type.join(", ")}`,
                         onRemove: () => setInternshipFeedFilters((p) => ({ ...p, type: [] })),
+                      });
+                    }
+                    if (internshipFeedFilters.direction.length > 0) {
+                      activeFilters.push({
+                        label: `Направление: ${internshipFeedFilters.direction.join(", ")}`,
+                        onRemove: () => setInternshipFeedFilters((p) => ({ ...p, direction: [] })),
                       });
                     }
                     if (internshipFeedFilters.year.length > 0) {
@@ -594,10 +605,11 @@ export function InternshipsTab() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {/* 1-я строка: программа и направление */}
             <div className="flex items-end gap-2">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label htmlFor="internship-type">Тип стажировки <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="internship-type">Программа <span className="text-destructive">*</span></Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
@@ -612,7 +624,7 @@ export function InternshipsTab() {
                   onValueChange={(v) => setFormData({ ...formData, type: v })}
                 >
                   <SelectTrigger id="internship-type" className="w-full">
-                    <SelectValue placeholder="Выберите тип" />
+                    <SelectValue placeholder="Выберите программу" />
                   </SelectTrigger>
                   <SelectContent>
                     {MODAL_INTERNSHIP_TYPE_OPTIONS.map((label) => (
@@ -623,6 +635,38 @@ export function InternshipsTab() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="internship-direction">Направление</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="z-[100]">
+                      <p>Выберите направление стажировки (например, разработка, аналитика, кибербезопасность)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Select
+                  value={formData.direction}
+                  onValueChange={(v) => setFormData({ ...formData, direction: v })}
+                >
+                  <SelectTrigger id="internship-direction" className="w-full">
+                    <SelectValue placeholder="Выберите направление" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INTERNSHIP_DIRECTIONS.map((direction) => (
+                      <SelectItem key={direction} value={direction}>
+                        {direction}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* 2-я строка: даты и статус */}
+            <div className="flex items-end gap-2">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-1">
                   <Label htmlFor="internship-start">Дата начала <span className="text-destructive">*</span></Label>

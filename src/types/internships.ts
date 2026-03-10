@@ -35,6 +35,7 @@ export interface Internship {
   completedTraineesCount?: number; // Стажеры (результат)
   hiredEmployeesCount?: number; // Сотрудники в банке (результат)
   conversionRatePercent?: number; // Конверсия %
+  direction?: string; // Направление стажировки (для фильтра)
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;

@@ -160,6 +160,7 @@ export default function InternshipDetailsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
     type: "",
+    direction: "",
     name: "",
     startDate: "",
     endDate: "",
@@ -230,6 +231,7 @@ export default function InternshipDetailsPage() {
     if (!displayInternship) return;
     setEditFormData({
       type: displayInternship.title,
+      direction: "",
       name: displayInternship.name ?? "",
       startDate: displayInternship.startDate instanceof Date ? displayInternship.startDate.toISOString().split("T")[0] : "",
       endDate: displayInternship.endDate instanceof Date ? displayInternship.endDate.toISOString().split("T")[0] : "",
@@ -1311,14 +1313,15 @@ export default function InternshipDetailsPage() {
           <DialogHeader>
             <DialogTitle>Редактировать стажировку</DialogTitle>
             <DialogDescription>
-              Измените тип, название, даты или статус стажировки
+              Измените направление, название, даты или статус стажировки
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {/* 1-я строка: программа и направление */}
             <div className="flex items-end gap-2">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label htmlFor="edit-internship-type">Тип стажировки <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="edit-internship-type">Программа <span className="text-destructive">*</span></Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
@@ -1333,7 +1336,7 @@ export default function InternshipDetailsPage() {
                   onValueChange={(v) => setEditFormData((prev) => ({ ...prev, type: v }))}
                 >
                   <SelectTrigger id="edit-internship-type" className="w-full">
-                    <SelectValue placeholder="Выберите тип" />
+                    <SelectValue placeholder="Выберите программу" />
                   </SelectTrigger>
                   <SelectContent>
                     {INTERNSHIP_TYPE_OPTIONS.map((label) => (
@@ -1344,6 +1347,40 @@ export default function InternshipDetailsPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="edit-internship-direction">Направление</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="z-[100]">
+                      <p>Выберите направление стажировки (например, разработка, аналитика, кибербезопасность)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Select
+                  value={editFormData.direction}
+                  onValueChange={(v) => setEditFormData((prev) => ({ ...prev, direction: v }))}
+                >
+                  <SelectTrigger id="edit-internship-direction" className="w-full">
+                    <SelectValue placeholder="Выберите направление" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Разработка", "Аналитика", "Кибербезопасность", "Дизайн", "Product / бизнес", "DevOps / инфраструктура"].map(
+                      (direction) => (
+                        <SelectItem key={direction} value={direction}>
+                          {direction}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* 2-я строка: даты и статус */}
+            <div className="flex items-end gap-2">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-1">
                   <Label htmlFor="edit-internship-startDate">Дата начала <span className="text-destructive">*</span></Label>

@@ -24,7 +24,7 @@ const navItems: { href: string; label: string; tab: string; icon: React.Componen
 ];
 
 /**
- * Боковая панель приложения Quant — навигация по разделам
+ * Боковая панель приложения «КАМПУС» — навигация по разделам
  */
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -53,7 +53,7 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-xl font-bold text-sidebar-foreground">
-              КВАНТ
+              КАМПУС
             </span>
           </div>
         </Link>

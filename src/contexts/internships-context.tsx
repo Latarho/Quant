@@ -5,6 +5,7 @@ import type { Internship, InternshipStatus } from "@/types/internships";
 
 export interface NewInternshipData {
   type: string;
+  direction?: string;
   name?: string;
   startDate: string;
   endDate: string;
@@ -41,6 +42,7 @@ function createInternshipFromData(data: NewInternshipData, id: string): Internsh
     requiredSkills: [],
     preferredSkills: [],
     location: "office",
+    direction: data.direction,
     createdAt: now,
     updatedAt: now,
     createdBy: "",
