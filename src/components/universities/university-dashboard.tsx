@@ -322,7 +322,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                 <p className="text-sm text-muted-foreground">Активных договоров</p>
                 <p className="text-3xl font-bold">{metrics.activeContracts}</p>
                 {metrics.expiringContracts > 0 && (
-                  <p className="text-xs text-orange-600 mt-1">
+                  <p className="text-sm text-orange-600 mt-1">
                     {metrics.expiringContracts} истекают в течение 90 дней
                   </p>
                 )}
@@ -340,7 +340,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
               <div>
                 <p className="text-sm text-muted-foreground">Стажеров (всего)</p>
                 <p className="text-3xl font-bold">{metrics.totalInterns}</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Активных: {metrics.activeInterns}
                 </p>
               </div>
@@ -375,10 +375,10 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                 <p className="text-sm text-muted-foreground">Мероприятий за год</p>
                 <p className="text-3xl font-bold">{metrics.totalEvents}</p>
                 <div className="flex gap-2 mt-1">
-                  <Badge variant="outline" className="text-xs bg-green-50 dark:bg-green-900/20">
+                  <Badge variant="outline" className="text-sm bg-green-50 dark:bg-green-900/20">
                     {metrics.eventsByStatus.completed} завершено
                   </Badge>
-                  <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20">
+                  <Badge variant="outline" className="text-sm bg-blue-50 dark:bg-blue-900/20">
                     {metrics.eventsByStatus.planned} план
                   </Badge>
                 </div>
@@ -498,7 +498,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                   angle={-45}
                   textAnchor="end"
                   height={80}
-                  className="text-xs"
+                  className="text-sm"
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
@@ -517,7 +517,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
           <CardContent>
             {metrics.topUniversitiesByEmployees.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart 
+                  <BarChart 
                   data={metrics.topUniversitiesByEmployees.map(uni => ({
                     name: uni.shortName || uni.name,
                     employees: uni.allEmployees || 0,
@@ -631,7 +631,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                 <XAxis 
                   dataKey="name" 
                   tick={{ fontSize: 12 }}
-                  className="text-xs"
+                  className="text-sm"
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
@@ -673,7 +673,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                   <XAxis 
                     dataKey="city" 
                     tick={{ fontSize: 12 }}
-                    className="text-xs"
+                    className="text-sm"
                   />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip />
@@ -708,8 +708,8 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                   tick={{ fontSize: 11 }}
                   angle={-45}
                   textAnchor="end"
-                  height={80}
-                  className="text-xs"
+                    height={80}
+                    className="text-sm"
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
@@ -734,7 +734,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                 <XAxis 
                   dataKey="year" 
                   tick={{ fontSize: 12 }}
-                  className="text-xs"
+                  className="text-sm"
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
@@ -783,7 +783,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                   <div>
                     <p className="text-sm text-muted-foreground">Стажеров</p>
                     <p className="text-3xl font-bold">{lineData.drp.interns}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       Активных: {lineData.drp.activeInterns}
                     </p>
                   </div>
@@ -922,7 +922,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                       angle={-45}
                       textAnchor="end"
                       height={80}
-                      className="text-xs"
+                      className="text-sm"
                     />
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip />
@@ -986,7 +986,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                   <div>
                     <p className="text-sm text-muted-foreground">ЗП студенты</p>
                     <p className="text-3xl font-bold">{lineData.bko.withSalaryStudents}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {lineData.bko.total > 0 ? Math.round((lineData.bko.withSalaryStudents / lineData.bko.total) * 100) : 0}% охват
                     </p>
                   </div>
@@ -1003,7 +1003,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                   <div>
                     <p className="text-sm text-muted-foreground">ЗП сотрудники</p>
                     <p className="text-3xl font-bold">{lineData.bko.withSalaryEmployees}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {lineData.bko.total > 0 ? Math.round((lineData.bko.withSalaryEmployees / lineData.bko.total) * 100) : 0}% охват
                     </p>
                   </div>
@@ -1022,7 +1022,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                     <p className="text-3xl font-bold">
                       {lineData.bko.withIE + lineData.bko.withTE + lineData.bko.withSBP + lineData.bko.withADM}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">ВУЗов</p>
+                    <p className="text-sm text-muted-foreground mt-1">ВУЗов</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                     <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
@@ -1058,7 +1058,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                       angle={-45}
                       textAnchor="end"
                       height={80}
-                      className="text-xs"
+                      className="text-sm"
                     />
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip />
@@ -1311,7 +1311,7 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                         angle={-45}
                         textAnchor="end"
                         height={80}
-                        className="text-xs"
+                        className="text-sm"
                       />
                       <YAxis 
                         tick={{ fontSize: 12 }}

@@ -29,7 +29,7 @@ function CooperationLineBadges({ university }: { university: University }) {
           <Badge
             key={record.id || idx}
             variant="outline"
-            className={`text-xs ${getCooperationLineBadgeColor(record.line)}`}
+            className={`text-sm ${getCooperationLineBadgeColor(record.line)}`}
           >
             {getCooperationLineLabel(record.line)}
           </Badge>
@@ -37,12 +37,12 @@ function CooperationLineBadges({ university }: { university: University }) {
       {(!university.cooperationLines || university.cooperationLines.length === 0) && university.cooperationLine &&
         (Array.isArray(university.cooperationLine) ? (
           university.cooperationLine.map((line, idx) => (
-            <Badge key={idx} variant="outline" className={`text-xs ${getCooperationLineBadgeColor(line)}`}>
+            <Badge key={idx} variant="outline" className={`text-sm ${getCooperationLineBadgeColor(line)}`}>
               {getCooperationLineLabel(line)}
             </Badge>
           ))
         ) : (
-          <Badge variant="outline" className={`text-xs ${getCooperationLineBadgeColor(university.cooperationLine)}`}>
+          <Badge variant="outline" className={`text-sm ${getCooperationLineBadgeColor(university.cooperationLine)}`}>
             {getCooperationLineLabel(university.cooperationLine)}
           </Badge>
         ))}
@@ -63,7 +63,7 @@ export function UniversityListPanel({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-sm">ВУЗы</h3>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-sm">
               {universities.length}
             </Badge>
           </div>
@@ -117,7 +117,7 @@ export function UniversityListPanel({
                       university.cooperationLine) && (
                       <div className="flex items-center gap-2 flex-wrap mt-0.5">
                         {university.shortName && (
-                          <div className="text-xs text-muted-foreground">{university.shortName}</div>
+                          <div className="text-sm text-muted-foreground">{university.shortName}</div>
                         )}
                         <CooperationLineBadges university={university} />
                       </div>

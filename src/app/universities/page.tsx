@@ -3440,7 +3440,7 @@ export default function UniversitiesPage() {
                         <div className="flex-shrink-0 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 rounded-lg px-3 py-2 border border-primary/20 shadow-sm">
                           <div className="flex items-center gap-1.5 mb-1.5">
                             <Users className="h-3.5 w-3.5 text-primary" />
-                            <span className="text-xs font-semibold text-foreground">Кадровые показатели</span>
+                            <span className="text-sm font-semibold text-foreground">Кадровые показатели</span>
                           </div>
                           <div className="flex gap-2">
                             <Tooltip>
@@ -3586,7 +3586,7 @@ export default function UniversitiesPage() {
                               <TabsTrigger value="branches" className="flex items-center gap-2">
                                 Филиалы ВУЗа
                                 {university.branchCurators && university.branchCurators.length > 0 && (
-                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                     {university.branchCurators.length}
                                   </Badge>
                                 )}
@@ -3613,7 +3613,7 @@ export default function UniversitiesPage() {
                                                 )}
                                                 title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                               />
-                                              <Badge variant="outline" className={`text-xs ${getCooperationLineBadgeColor(record.line)}`}>
+                                              <Badge variant="outline" className={`text-sm ${getCooperationLineBadgeColor(record.line)}`}>
                                                 {getCooperationLineLabel(record.line)}
                                               </Badge>
                                               <div className="flex items-center gap-2">
@@ -3631,13 +3631,13 @@ export default function UniversitiesPage() {
                                                       <div key={personIndex} className="flex items-center gap-2">
                                                         <Avatar className="h-10 w-10">
                                                           <AvatarImage src={person.image} alt={person.label} />
-                                                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                          <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                             {person.label.split(' ').slice(1, 3).map(n => n[0]).join('').toUpperCase()}
                                                           </AvatarFallback>
                                                         </Avatar>
                                                         <div className="flex flex-col">
                                                           <span className="text-sm font-medium">{person.label}</span>
-                                                          <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                          <span className="text-sm text-muted-foreground">{person.position}</span>
                                                         </div>
                                                       </div>
                                                     ) : null;
@@ -3668,7 +3668,7 @@ export default function UniversitiesPage() {
                                                       <Users className="h-4 w-4 text-primary" />
                                                       <span className="text-sm font-semibold">Контакты ВУЗа</span>
                                                       {publicContacts.length > 0 && (
-                                                        <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-medium">
+                                                        <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm font-medium">
                                                           {publicContacts.length}
                                                         </Badge>
                                                       )}
@@ -3682,11 +3682,11 @@ export default function UniversitiesPage() {
                                                                   <Table>
                                                                     <TableHeader>
                                                                       <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[200px]">ФИО</TableHead>
-                                                                <TableHead className="h-9 text-xs font-semibold w-[180px]">Должность</TableHead>
-                                                                <TableHead className="h-9 text-xs font-semibold w-[200px]">Телефон</TableHead>
-                                                                <TableHead className="h-9 text-xs font-semibold w-[180px]">Email</TableHead>
-                                                                <TableHead className="h-9 text-xs font-semibold w-[50px]"></TableHead>
+                                                                <TableHead className="h-9 text-sm font-semibold w-[200px]">ФИО</TableHead>
+                                                                <TableHead className="h-9 text-sm font-semibold w-[180px]">Должность</TableHead>
+                                                                <TableHead className="h-9 text-sm font-semibold w-[200px]">Телефон</TableHead>
+                                                                <TableHead className="h-9 text-sm font-semibold w-[180px]">Email</TableHead>
+                                                                <TableHead className="h-9 text-sm font-semibold w-[50px]"></TableHead>
                                                               </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
@@ -3699,7 +3699,7 @@ export default function UniversitiesPage() {
                                                                   value={contact.name}
                                                                   onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, name: e.target.value })}
                                                                   placeholder="ФИО"
-                                                                  className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                  className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                 />
                                                               </TableCell>
                                                                   <TableCell className="py-1.5 px-3">
@@ -3707,7 +3707,7 @@ export default function UniversitiesPage() {
                                                                       value={contact.position || ""}
                                                                       onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, position: e.target.value })}
                                                                       placeholder="Должность"
-                                                                      className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                      className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                     />
                                                                   </TableCell>
                                                                   <TableCell className="py-1.5 px-3">
@@ -3717,7 +3717,7 @@ export default function UniversitiesPage() {
                                                                         value={contact.phone || ""}
                                                                         onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, phone: e.target.value })}
                                                                         placeholder="Телефон"
-                                                                        className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                        className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                       />
                                                                     </div>
                                                                   </TableCell>
@@ -3729,7 +3729,7 @@ export default function UniversitiesPage() {
                                                                         value={contact.email || ""}
                                                                         onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, email: e.target.value })}
                                                                         placeholder="Email"
-                                                                        className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                        className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                       />
                                                                     </div>
                                                                   </TableCell>
@@ -3779,12 +3779,12 @@ export default function UniversitiesPage() {
                                             <div className="flex flex-wrap gap-2">
                                               {Array.isArray(university.cooperationLine) ? (
                                                 university.cooperationLine.map((line, index) => (
-                                                  <Badge key={index} variant="outline" className={`text-xs ${getCooperationLineBadgeColor(line)}`}>
+                                                  <Badge key={index} variant="outline" className={`text-sm ${getCooperationLineBadgeColor(line)}`}>
                                                     {getCooperationLineLabel(line)}
                                                   </Badge>
                                                 ))
                                               ) : (
-                                                <Badge variant="outline" className={`text-xs ${getCooperationLineBadgeColor(university.cooperationLine)}`}>
+                                                <Badge variant="outline" className={`text-sm ${getCooperationLineBadgeColor(university.cooperationLine)}`}>
                                                   {getCooperationLineLabel(university.cooperationLine)}
                                                 </Badge>
                                               )}
@@ -3813,13 +3813,13 @@ export default function UniversitiesPage() {
                                                       <div key={index} className="flex items-center gap-2">
                                                         <Avatar className="h-10 w-10">
                                                           <AvatarImage src={person.image} alt={person.label} />
-                                                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                          <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                             {person.label.split(' ').slice(1, 3).map(n => n[0]).join('').toUpperCase()}
                                                           </AvatarFallback>
                                                         </Avatar>
                                                         <div className="flex flex-col">
                                                           <span className="text-sm font-medium">{person.label}</span>
-                                                          <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                          <span className="text-sm text-muted-foreground">{person.position}</span>
                                                         </div>
                                                       </div>
                                                     ) : null;
@@ -3853,7 +3853,7 @@ export default function UniversitiesPage() {
                                           <div className="flex-1 space-y-1.5">
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                               <div className="space-y-1">
-                                                <Label htmlFor={`edit-curator-city-${curator.id}`} className="text-xs text-muted-foreground">Город</Label>
+                                                <Label htmlFor={`edit-curator-city-${curator.id}`} className="text-sm text-muted-foreground">Город</Label>
                                                 <Input
                                                   id={`edit-curator-city-${curator.id}`}
                                                   placeholder="Москва"
@@ -3863,7 +3863,7 @@ export default function UniversitiesPage() {
                                                 />
                                               </div>
                                               <div className="space-y-1">
-                                                <Label htmlFor={`edit-curator-branch-${curator.id}`} className="text-xs text-muted-foreground">Филиал</Label>
+                                                <Label htmlFor={`edit-curator-branch-${curator.id}`} className="text-sm text-muted-foreground">Филиал</Label>
                                                 <Input
                                                   id={`edit-curator-branch-${curator.id}`}
                                                   placeholder="Московский филиал"
@@ -3874,7 +3874,7 @@ export default function UniversitiesPage() {
                                               </div>
                                             </div>
                                             <div className="space-y-2">
-                                              <Label className="text-xs text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
+                                              <Label className="text-sm text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
                                               <div className="space-y-3">
                                                 {editingCurator.cooperationLines.map((record, index) => (
                                                   <div key={record.id} className="p-3 border rounded-lg space-y-2">
@@ -3913,7 +3913,7 @@ export default function UniversitiesPage() {
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-2">
                                                       <div className="space-y-1">
-                                                        <Label className="text-xs text-muted-foreground">Год начала</Label>
+                                                        <Label className="text-sm text-muted-foreground">Год начала</Label>
                                                         <Input
                                                           type="number"
                                                           value={record.year}
@@ -3928,7 +3928,7 @@ export default function UniversitiesPage() {
                                                         />
                                                       </div>
                                                       <div className="space-y-1">
-                                                        <Label className="text-xs text-muted-foreground">Ответственное лицо Банк</Label>
+                                                        <Label className="text-sm text-muted-foreground">Ответственное лицо Банк</Label>
                                                         <MultiSelect
                                                           options={responsiblePersons.map(p => ({ value: p.value, label: p.label }))}
                                                           selected={record.responsible}
@@ -4006,7 +4006,7 @@ export default function UniversitiesPage() {
                                                       <Separator orientation="vertical" className="h-6" />
                                                       <div className="flex items-center gap-2 flex-wrap">
                                                         {curator.cooperationLines.map((record, idx) => (
-                                                          <Badge key={record.id || idx} variant="outline" className={`text-xs ${getCooperationLineBadgeColor(record.line)}`}>
+                                                          <Badge key={record.id || idx} variant="outline" className={`text-sm ${getCooperationLineBadgeColor(record.line)}`}>
                                                             {getCooperationLineLabel(record.line)}
                                                           </Badge>
                                                         ))}
@@ -4030,7 +4030,7 @@ export default function UniversitiesPage() {
                                                             )}
                                                             title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                                           />
-                                                          <Badge variant="outline" className={`text-xs ${getCooperationLineBadgeColor(record.line)}`}>
+                                                          <Badge variant="outline" className={`text-sm ${getCooperationLineBadgeColor(record.line)}`}>
                                                             {getCooperationLineLabel(record.line)}
                                                           </Badge>
                                                           <div className="flex items-center gap-2">
@@ -4048,13 +4048,13 @@ export default function UniversitiesPage() {
                                                                   <div key={personIndex} className="flex items-center gap-2">
                                                                     <Avatar className="h-10 w-10">
                                                                       <AvatarImage src={person.image} alt={person.label} />
-                                                                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                                      <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                                         {person.label.split(' ').slice(1, 3).map(n => n[0]).join('').toUpperCase()}
                                                                       </AvatarFallback>
                                                                     </Avatar>
                                                                     <div className="flex flex-col">
                                                                       <span className="text-sm font-medium">{person.label}</span>
-                                                                      <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                                      <span className="text-sm text-muted-foreground">{person.position}</span>
                                                                     </div>
                                                                   </div>
                                                                 ) : null;
@@ -4085,7 +4085,7 @@ export default function UniversitiesPage() {
                                                                   <Users className="h-4 w-4 text-primary" />
                                                                   <span className="text-sm font-semibold">Контакты ВУЗа</span>
                                                                   {publicContacts.length > 0 && (
-                                                                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-medium">
+                                                                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm font-medium">
                                                                       {publicContacts.length}
                                                                     </Badge>
                                                                   )}
@@ -4098,12 +4098,12 @@ export default function UniversitiesPage() {
                                                                     <div className="rounded-lg border overflow-hidden">
                                                                       <Table>
                                                                         <TableHeader>
-                                                                          <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                                                            <TableHead className="h-9 text-xs font-semibold w-[200px]">ФИО</TableHead>
-                                                                            <TableHead className="h-9 text-xs font-semibold w-[180px]">Должность</TableHead>
-                                                                            <TableHead className="h-9 text-xs font-semibold w-[200px]">Телефон</TableHead>
-                                                                            <TableHead className="h-9 text-xs font-semibold w-[180px]">Email</TableHead>
-                                                                            <TableHead className="h-9 text-xs font-semibold w-[50px]"></TableHead>
+                                                                            <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                                                            <TableHead className="h-9 text-sm font-semibold w-[200px]">ФИО</TableHead>
+                                                                            <TableHead className="h-9 text-sm font-semibold w-[180px]">Должность</TableHead>
+                                                                            <TableHead className="h-9 text-sm font-semibold w-[200px]">Телефон</TableHead>
+                                                                            <TableHead className="h-9 text-sm font-semibold w-[180px]">Email</TableHead>
+                                                                            <TableHead className="h-9 text-sm font-semibold w-[50px]"></TableHead>
                                                                           </TableRow>
                                                                         </TableHeader>
                                                                         <TableBody>
@@ -4112,20 +4112,20 @@ export default function UniversitiesPage() {
                                                                             return (
                                                                             <TableRow key={contactIdx} className="group">
                                                                               <TableCell className="py-1.5 px-3">
-                                                                                <Input
-                                                                                  value={contact.name}
-                                                                                  onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, name: e.target.value })}
-                                                                                  placeholder="ФИО"
-                                                                                  className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
-                                                                                />
+                                                                                  <Input
+                                                                                    value={contact.name}
+                                                                                    onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, name: e.target.value })}
+                                                                                    placeholder="ФИО"
+                                                                                    className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                                  />
                                                                               </TableCell>
                                                                               <TableCell className="py-1.5 px-3">
-                                                                                <Input
-                                                                                  value={contact.position || ""}
-                                                                                  onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, position: e.target.value })}
-                                                                                  placeholder="Должность"
-                                                                                  className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
-                                                                                />
+                                                                                  <Input
+                                                                                    value={contact.position || ""}
+                                                                                    onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, position: e.target.value })}
+                                                                                    placeholder="Должность"
+                                                                                    className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                                  />
                                                                               </TableCell>
                                                                               <TableCell className="py-1.5 px-3">
                                                                                 <div className="flex items-center gap-1">
@@ -4134,7 +4134,7 @@ export default function UniversitiesPage() {
                                                                                     value={contact.phone || ""}
                                                                                     onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, phone: e.target.value })}
                                                                                     placeholder="Телефон"
-                                                                                    className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                                    className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                                   />
                                                                                 </div>
                                                                               </TableCell>
@@ -4146,7 +4146,7 @@ export default function UniversitiesPage() {
                                                                                     value={contact.email || ""}
                                                                                     onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, email: e.target.value })}
                                                                                     placeholder="Email"
-                                                                                    className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                                    className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                                   />
                                                                                 </div>
                                                                               </TableCell>
@@ -4360,18 +4360,18 @@ export default function UniversitiesPage() {
                                       className={`p-4 relative ${isExpired ? 'border-2 border-red-300' : ''}`}
                                     >
                                       {isExpired && (
-                                        <div className="absolute -top-3 left-4 px-2 bg-red-100 text-red-700 text-xs font-medium rounded border border-red-300">
+                                        <div className="absolute -top-3 left-4 px-2 bg-red-100 text-red-700 text-sm font-medium rounded border border-red-300">
                                           Истек срок действия договора
                                         </div>
                                       )}
                                       <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1 space-y-3">
                                           <div className="flex items-center gap-2 flex-wrap">
-                                            <Badge variant="outline" className={`text-xs ${getContractTypeBadgeColor(contract.type)}`}>
+                                            <Badge variant="outline" className={`text-sm ${getContractTypeBadgeColor(contract.type)}`}>
                                               {contractTypeLabels[contract.type]}
                                             </Badge>
                                             {contract.contractBranch && (
-                                              <Badge variant="secondary" className="text-xs">
+                                              <Badge variant="secondary" className="text-sm">
                                                 {contract.contractBranch}
                                               </Badge>
                                             )}
@@ -4617,7 +4617,7 @@ export default function UniversitiesPage() {
                                 className={`p-3 relative hover:shadow-md transition-shadow cursor-pointer ${showExpiredState ? "border-2 border-red-300" : ""}`}
                               >
                                 {showExpiredState && (
-                                  <div className="absolute -top-3 left-4 px-2 bg-red-100 text-red-700 text-xs font-medium rounded border border-red-300">
+                                  <div className="absolute -top-3 left-4 px-2 bg-red-100 text-red-700 text-sm font-medium rounded border border-red-300">
                                     Истек срок действия договора
                                   </div>
                                 )}
@@ -4625,16 +4625,16 @@ export default function UniversitiesPage() {
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       {contract.cooperationLine && (
-                                        <Badge variant="outline" className={cn("text-xs", cooperationLineBadgeColors[contract.cooperationLine])}>
+                                        <Badge variant="outline" className={cn("text-sm", cooperationLineBadgeColors[contract.cooperationLine])}>
                                           {cooperationLineLabels[contract.cooperationLine]}
                                         </Badge>
                                       )}
-                                      <Badge variant="outline" className={cn("text-xs", getContractTypeBadgeColor(contract.type))}>
+                                      <Badge variant="outline" className={cn("text-sm", getContractTypeBadgeColor(contract.type))}>
                                         {getContractTypeLabel(contract)}
                                       </Badge>
                                     </div>
                                     {contract.contractBranch && (
-                                      <Badge variant="secondary" className="text-xs shrink-0">
+                                      <Badge variant="secondary" className="text-sm shrink-0">
                                         {contract.contractBranch}
                                       </Badge>
                                     )}
@@ -4919,7 +4919,7 @@ export default function UniversitiesPage() {
                                               <TableRow key={contract.id}>
                                                 <TableCell className="px-4 whitespace-normal">
                                                   {contract.cooperationLine ? (
-                                                    <Badge variant="outline" className={cn("text-xs px-2 py-0.5", cooperationLineBadgeColors[contract.cooperationLine])}>
+                                                    <Badge variant="outline" className={cn("text-sm px-2 py-0.5", cooperationLineBadgeColors[contract.cooperationLine])}>
                                                       {cooperationLineLabels[contract.cooperationLine]}
                                                     </Badge>
                                                   ) : (
@@ -4927,13 +4927,13 @@ export default function UniversitiesPage() {
                                                   )}
                                                 </TableCell>
                                                 <TableCell className="px-4 whitespace-normal">
-                                                  <Badge variant="outline" className={cn("text-xs px-2 py-0.5", getContractTypeBadgeColor(contract.type))}>
+                                                  <Badge variant="outline" className={cn("text-sm px-2 py-0.5", getContractTypeBadgeColor(contract.type))}>
                                                     {getContractTypeLabel(contract)}
                                                   </Badge>
                                                 </TableCell>
                                                 <TableCell className="px-4 whitespace-normal">
                                                   {contract.contractBranch ? (
-                                                    <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                                                    <Badge variant="secondary" className="text-sm px-2 py-0.5">
                                                       {contract.contractBranch}
                                                     </Badge>
                                                   ) : (
@@ -4956,11 +4956,11 @@ export default function UniversitiesPage() {
                                                 </TableCell>
                                                 <TableCell className="px-4 whitespace-normal">
                                                   {contract.archived ? (
-                                                    <Badge variant="outline" className="text-xs px-2 py-0.5">Архивный</Badge>
+                                                    <Badge variant="outline" className="text-sm px-2 py-0.5">Архивный</Badge>
                                                   ) : showExpired ? (
-                                                    <Badge variant="destructive" className="text-xs px-2 py-0.5">Истёк срок</Badge>
+                                                    <Badge variant="destructive" className="text-sm px-2 py-0.5">Истёк срок</Badge>
                                                   ) : (
-                                                    <Badge variant="outline" className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>
+                                                    <Badge variant="outline" className="text-sm px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>
                                                   )}
                                                 </TableCell>
                                                 <TableCell className="px-4 whitespace-normal max-w-[200px]">
@@ -5446,11 +5446,11 @@ export default function UniversitiesPage() {
                                                       <div className="flex items-center justify-between gap-2 flex-wrap">
                                                         <div className="flex items-center gap-1.5">
                                                           {event.cooperationLine && event.cooperationLine.length > 0 && event.cooperationLine.map((line) => (
-                                                            <Badge key={line} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(line))}>
+                                                            <Badge key={line} variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(line))}>
                                                               {getCooperationLineLabel(line)}
                                                             </Badge>
                                                           ))}
-                                                          <Badge variant="outline" className={cn("text-xs", eventTypeBadgeColors[event.type])}>
+                                                          <Badge variant="outline" className={cn("text-sm", eventTypeBadgeColors[event.type])}>
                                                             {eventTypeLabels[event.type]}
                                                           </Badge>
                                                           <span className="text-xs text-muted-foreground">
@@ -5458,7 +5458,7 @@ export default function UniversitiesPage() {
                                                           </span>
                                                         </div>
                                                         <div className="flex items-center gap-1.5">
-                                                          <Badge variant="outline" className={cn("text-xs", getStatusBadgeColor(event.status))}>
+                                                          <Badge variant="outline" className={cn("text-sm", getStatusBadgeColor(event.status))}>
                                                             {eventStatusLabels[event.status]}
                                                           </Badge>
                                                           {isExpanded ? (
@@ -5485,7 +5485,7 @@ export default function UniversitiesPage() {
                                                         <div className="pt-2.5 mt-2 border-t space-y-2.5">
                                                           {/* Тег Головной ВУЗ / Филиал */}
                                                           {event.branch && (
-                                                            <Badge variant="secondary" className="text-xs">
+                                                            <Badge variant="secondary" className="text-sm">
                                                               {event.branch}
                                                             </Badge>
                                                           )}
@@ -5811,7 +5811,7 @@ export default function UniversitiesPage() {
                                               {eventStatusLabels[event.status]}
                                             </Badge>
                                             {event.cooperationLine && event.cooperationLine.length > 0 && event.cooperationLine.map((line) => (
-                                              <Badge key={line} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(line))}>
+                                              <Badge key={line} variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(line))}>
                                                 {getCooperationLineLabel(line)}
                                               </Badge>
                                             ))}
@@ -5831,7 +5831,7 @@ export default function UniversitiesPage() {
                                               })()}
                             </span>
                                             {event.branch && (
-                                              <Badge variant="secondary" className="text-xs">{event.branch}</Badge>
+                                              <Badge variant="secondary" className="text-sm">{event.branch}</Badge>
                                             )}
                                           </div>
                                       {event.comments && (
@@ -5952,7 +5952,7 @@ export default function UniversitiesPage() {
                                   <TabsTrigger value="branches" className="flex items-center gap-2">
                                     Филиалы ВУза
                                     {university.branchCurators && university.branchCurators.length > 0 && (
-                                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                         {university.branchCurators.length}
                                       </Badge>
                                     )}
@@ -6005,7 +6005,7 @@ export default function UniversitiesPage() {
                                                         )}
                                                         title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                                       />
-                                                      <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                      <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                         {getCooperationLineLabel(record.line)}
                                                       </Badge>
                                                       <div className="flex items-center gap-2">
@@ -6057,13 +6057,13 @@ export default function UniversitiesPage() {
                                                               <Users className="h-4 w-4 text-primary" />
                                                               <span className="text-sm font-semibold">Контакты ВУза</span>
                                                               {contacts.length > 0 && (
-                                                                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-medium">{contacts.length}</Badge>
+                                                                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm font-medium">{contacts.length}</Badge>
                                                               )}
                                                             </div>
                                                             <Button
                                                               variant="outline"
                                                               size="sm"
-                                                              className="h-7 px-2 text-xs"
+                                                              className="h-7 px-2 text-sm"
                                                               onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleAddContactInMain(university.id, record.id);
@@ -6081,12 +6081,12 @@ export default function UniversitiesPage() {
                                                                   <Table>
                                                                     <TableHeader>
                                                                       <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[200px]">ФИО</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[180px]">Должность</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[200px]">Телефон</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[180px]">Email</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[100px] text-center">Публичный</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[50px]"></TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[200px]">ФИО</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[180px]">Должность</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[200px]">Телефон</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[180px]">Email</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[100px] text-center">Публичный</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[50px]"></TableHead>
                                                                       </TableRow>
                                                                     </TableHeader>
                                                                     <TableBody>
@@ -6097,7 +6097,7 @@ export default function UniversitiesPage() {
                                                                               value={contact.name}
                                                                               onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, name: e.target.value })}
                                                                               placeholder="ФИО"
-                                                                              className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                              className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                             />
                                                                           </TableCell>
                                                                           <TableCell className="py-1.5 px-3">
@@ -6105,7 +6105,7 @@ export default function UniversitiesPage() {
                                                                               value={contact.position || ""}
                                                                               onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, position: e.target.value })}
                                                                               placeholder="Должность"
-                                                                              className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                              className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                             />
                                                                           </TableCell>
                                                                           <TableCell className="py-1.5 px-3">
@@ -6115,7 +6115,7 @@ export default function UniversitiesPage() {
                                                                                 value={contact.phone || ""}
                                                                                 onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, phone: e.target.value })}
                                                                                 placeholder="Телефон"
-                                                                                className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                                className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                               />
                                                                             </div>
                                                                           </TableCell>
@@ -6127,7 +6127,7 @@ export default function UniversitiesPage() {
                                                                                 value={contact.email || ""}
                                                                                 onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, email: e.target.value })}
                                                                                 placeholder="Email"
-                                                                                className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                                className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                               />
                                                                             </div>
                                                                           </TableCell>
@@ -6180,7 +6180,7 @@ export default function UniversitiesPage() {
                                                   </div>
                                                   <div className="flex flex-col items-end gap-2 shrink-0">
                                                     <div className="flex items-center gap-2">
-                                                      <Label htmlFor={`bko-line-active-${record.id}`} className="text-xs text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
+                                                      <Label htmlFor={`bko-line-active-${record.id}`} className="text-sm text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
                                                       <Switch
                                                         id={`bko-line-active-${record.id}`}
                                                         checked={record.isActive !== false}
@@ -6228,7 +6228,7 @@ export default function UniversitiesPage() {
                                                       <div className="flex-1 space-y-1.5">
                                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                           <div className="space-y-1">
-                                                            <Label htmlFor={`bko-edit-curator-city-${curator.id}`} className="text-xs text-muted-foreground">Город</Label>
+                                                            <Label htmlFor={`bko-edit-curator-city-${curator.id}`} className="text-sm text-muted-foreground">Город</Label>
                                                             <Input
                                                               id={`bko-edit-curator-city-${curator.id}`}
                                                               placeholder="Москва"
@@ -6238,7 +6238,7 @@ export default function UniversitiesPage() {
                                                             />
                                                           </div>
                                                           <div className="space-y-1">
-                                                            <Label htmlFor={`bko-edit-curator-branch-${curator.id}`} className="text-xs text-muted-foreground">Филиал</Label>
+                                                            <Label htmlFor={`bko-edit-curator-branch-${curator.id}`} className="text-sm text-muted-foreground">Филиал</Label>
                                                             <Input
                                                               id={`bko-edit-curator-branch-${curator.id}`}
                                                               placeholder="Московский филиал"
@@ -6249,7 +6249,7 @@ export default function UniversitiesPage() {
                                                           </div>
                                                         </div>
                                                         <div className="space-y-2">
-                                                          <Label className="text-xs text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
+                                                          <Label className="text-sm text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
                                                           <div className="space-y-3">
                                                             {editingCurator.cooperationLines.filter((r) => r.line === "bko").map((record, index) => {
                                                               const origIndex = editingCurator.cooperationLines.findIndex((r) => r === record);
@@ -6394,7 +6394,7 @@ export default function UniversitiesPage() {
                                                                   <Separator orientation="vertical" className="h-6" />
                                                                   <div className="flex items-center gap-2 flex-wrap">
                                                                     {bkoLinesInBranch.map((record, idx) => (
-                                                                      <Badge key={record.id || idx} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                                      <Badge key={record.id || idx} variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                                         {getCooperationLineLabel(record.line)}
                                                                       </Badge>
                                                                     ))}
@@ -6448,7 +6448,7 @@ export default function UniversitiesPage() {
                                                                           )}
                                                                           title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                                                         />
-                                                                        <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                                        <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                                           {getCooperationLineLabel(record.line)}
                                                                         </Badge>
                                                                         <div className="flex items-center gap-2">
@@ -6466,13 +6466,13 @@ export default function UniversitiesPage() {
                                                                                 <div key={personIndex} className="flex items-center gap-2">
                                                                                   <Avatar className="h-10 w-10">
                                                                                     <AvatarImage src={person.image} alt={person.label} />
-                                                                                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                                                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                                                       {person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}
                                                                                     </AvatarFallback>
                                                                                   </Avatar>
                                                                                   <div className="flex flex-col">
                                                                                     <span className="text-sm font-medium">{person.label}</span>
-                                                                                    <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                                                    <span className="text-sm text-muted-foreground">{person.position}</span>
                                                                                   </div>
                                                                                 </div>
                                                                               ) : null;
@@ -7573,7 +7573,7 @@ export default function UniversitiesPage() {
                                                     )}
                                                     title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                                   />
-                                                  <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                  <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                     {getCooperationLineLabel(record.line)}
                                                   </Badge>
                                                   <div className="flex items-center gap-2">
@@ -7819,7 +7819,7 @@ export default function UniversitiesPage() {
                                                       return (
                                                         <div key={record.id} className="p-3 border rounded-lg space-y-2">
                                                           <div className="flex items-center gap-2">
-                                                            <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor("cntr"))}>{getCooperationLineLabel("cntr")}</Badge>
+                                                            <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor("cntr"))}>{getCooperationLineLabel("cntr")}</Badge>
                                                             <Button
                                                               variant="ghost"
                                                               size="icon"
@@ -7938,7 +7938,7 @@ export default function UniversitiesPage() {
                                                           <Separator orientation="vertical" className="h-6" />
                                                           <div className="flex items-center gap-2 flex-wrap">
                                                             {cntrLinesInBranch.map((record, idx) => (
-                                                              <Badge key={record.id || idx} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                              <Badge key={record.id || idx} variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                                 {getCooperationLineLabel(record.line)}
                                                               </Badge>
                                                             ))}
@@ -7992,7 +7992,7 @@ export default function UniversitiesPage() {
                                                                   )}
                                                                   title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                                                 />
-                                                                <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                                <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                                   {getCooperationLineLabel(record.line)}
                                                                 </Badge>
                                                                 <div className="flex items-center gap-2">
@@ -8379,11 +8379,11 @@ export default function UniversitiesPage() {
                                         <div className="flex items-start justify-between gap-4">
                                           <div className="flex-1 space-y-3">
                                             <div className="flex items-center gap-2 flex-wrap">
-                                              <Badge variant="outline" className="text-xs">
+                                              <Badge variant="outline" className="text-sm">
                                                 {getDevelopmentTypeLabel(item.developmentType)}
                                               </Badge>
                                               {item.branch && (
-                                                <Badge variant="secondary" className="text-xs">
+                                                <Badge variant="secondary" className="text-sm">
                                                   {item.branch}
                                                 </Badge>
                                               )}
@@ -8804,21 +8804,21 @@ export default function UniversitiesPage() {
                                         <div className="flex items-start justify-between gap-4">
                                           <div className="flex-1 space-y-3">
                                             <div className="flex items-center gap-2 flex-wrap">
-                                              <Badge variant="outline" className="text-xs">
+                                              <Badge variant="outline" className="text-sm">
                                                 {item.projectName}
                                               </Badge>
                                               {item.branch && (
-                                                <Badge variant="secondary" className="text-xs">
+                                                <Badge variant="secondary" className="text-sm">
                                                   {item.branch}
                                                 </Badge>
                                               )}
                                               {item.fundingAmount && (
-                                                <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                                                <Badge variant="outline" className="text-sm bg-primary/10 text-primary border-primary/20">
                                                   {formatFundingAmount(item.fundingAmount)}
                                                 </Badge>
                                               )}
                                               {item.supportFormat && (
-                                                <Badge variant="outline" className="text-xs">
+                                                <Badge variant="outline" className="text-sm">
                                                   {formatSupportFormat(item.supportFormat)}
                                                 </Badge>
                                               )}
@@ -9046,7 +9046,7 @@ export default function UniversitiesPage() {
                                           <div className="flex-1 space-y-3">
                                             <div className="flex items-center gap-2 flex-wrap">
                                               {item.branch && (
-                                                <Badge variant="outline" className="text-xs">
+                                                <Badge variant="outline" className="text-sm">
                                                   {item.branch}
                                                 </Badge>
                                               )}
@@ -9463,7 +9463,7 @@ export default function UniversitiesPage() {
                                                       )}
                                                       <div className="pt-2.5 mt-2 border-t space-y-2.5">
                                                         {item.branch && (
-                                                          <Badge variant="secondary" className="text-xs">
+                                                          <Badge variant="secondary" className="text-sm">
                                                             {item.branch}
                                                           </Badge>
                                                         )}
@@ -10204,7 +10204,7 @@ export default function UniversitiesPage() {
                                                   <div className="flex-1 space-y-3">
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                       {item.branch && (
-                                                        <Badge variant="secondary" className="text-xs">
+                                                        <Badge variant="secondary" className="text-sm">
                                                           {item.branch}
                                                         </Badge>
                                                       )}
@@ -10546,7 +10546,7 @@ export default function UniversitiesPage() {
                                           <div className="flex-1 space-y-3">
                                             <div className="flex items-center gap-2 flex-wrap">
                                               {item.branch && (
-                                                <Badge variant="secondary" className="text-xs">
+                                                <Badge variant="secondary" className="text-sm">
                                                   {item.branch}
                                                 </Badge>
                                               )}
@@ -11056,7 +11056,7 @@ export default function UniversitiesPage() {
                                                         )}
                                                         title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                                       />
-                                                      <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                      <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                         {getCooperationLineLabel(record.line)}
                                                       </Badge>
                                                       <div className="flex items-center gap-2">
@@ -11448,7 +11448,7 @@ export default function UniversitiesPage() {
                                                                   <Separator orientation="vertical" className="h-6" />
                                                                   <div className="flex items-center gap-2 flex-wrap">
                                                                     {allLinesInBranch.map((record, idx) => (
-                                                                      <Badge key={record.id || idx} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                                      <Badge key={record.id || idx} variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                                         {getCooperationLineLabel(record.line)}
                                                                       </Badge>
                                                                     ))}
@@ -11502,7 +11502,7 @@ export default function UniversitiesPage() {
                                                                           )}
                                                                           title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                                                         />
-                                                                        <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                                        <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                                           {getCooperationLineLabel(record.line)}
                                                                         </Badge>
                                                                         <div className="flex items-center gap-2">
@@ -17133,7 +17133,7 @@ export default function UniversitiesPage() {
                     <Label>Основная линия сотрудничества</Label>
                     {(isDrpCabinetEventDialog || isEcosystemCabinetEventDialog || isCntrCabinetEventDialog) ? (
                       <div className="flex items-center h-10 px-3 rounded-md border bg-muted/50">
-                        <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(isDrpCabinetEventDialog ? "drp" : isEcosystemCabinetEventDialog ? "ecosystem" : "cntr"))}>
+                        <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(isDrpCabinetEventDialog ? "drp" : isEcosystemCabinetEventDialog ? "ecosystem" : "cntr"))}>
                           {isDrpCabinetEventDialog ? "ДРП" : isEcosystemCabinetEventDialog ? "Экосистема" : "ЦНТР"}
                         </Badge>
                       </div>
@@ -17249,7 +17249,7 @@ export default function UniversitiesPage() {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                          <Label htmlFor="event-uc-name" className="text-xs">ФИО</Label>
+                          <Label htmlFor="event-uc-name" className="text-sm">ФИО</Label>
                           <Input
                             id="event-uc-name"
                             value={newEvent.universityContact.name}
@@ -17259,7 +17259,7 @@ export default function UniversitiesPage() {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor="event-uc-position" className="text-xs">Должность</Label>
+                          <Label htmlFor="event-uc-position" className="text-sm">Должность</Label>
                           <Input
                             id="event-uc-position"
                             value={newEvent.universityContact.position}
@@ -17269,7 +17269,7 @@ export default function UniversitiesPage() {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor="event-uc-phone" className="text-xs">Телефон</Label>
+                          <Label htmlFor="event-uc-phone" className="text-sm">Телефон</Label>
                           <Input
                             id="event-uc-phone"
                             value={newEvent.universityContact.phone}
@@ -17279,7 +17279,7 @@ export default function UniversitiesPage() {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor="event-uc-email" className="text-xs">Email</Label>
+                          <Label htmlFor="event-uc-email" className="text-sm">Email</Label>
                           <Input
                             id="event-uc-email"
                             type="email"
@@ -18186,7 +18186,7 @@ export default function UniversitiesPage() {
                           <div className="flex items-start justify-between">
                             <div className="flex-1 space-y-1">
                               <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-sm">
                                   {getActionText(item.action)}
                                 </Badge>
                                 {item.field && (

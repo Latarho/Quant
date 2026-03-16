@@ -577,7 +577,7 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
                             <Badge 
                               key={cl.id || idx} 
                               variant="outline" 
-                              className={cn("text-xs", getCooperationLineBadgeColor(cl.line))}
+                              className={cn("text-sm", getCooperationLineBadgeColor(cl.line))}
                             >
                               {getCooperationLineLabel(cl.line)}
                             </Badge>

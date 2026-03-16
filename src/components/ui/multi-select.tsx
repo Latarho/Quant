@@ -151,7 +151,7 @@ export function MultiSelect({
                       {option.badge && (
                         <Badge
                           variant="outline"
-                          className={cn("text-xs shrink-0", option.badgeClassName)}
+                          className={cn("text-sm shrink-0", option.badgeClassName)}
                         >
                           {option.badge}
                         </Badge>

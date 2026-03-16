@@ -416,7 +416,7 @@ export default function InternshipDetailsPage() {
           </Button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <Badge variant="outline" className={cn("text-xs font-medium", getInternshipTypeBadgeColor(displayInternship.title))}>
+              <Badge variant="outline" className={cn("text-sm font-medium", getInternshipTypeBadgeColor(displayInternship.title))}>
                 {displayInternship.title}
               </Badge>
               <span className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
@@ -433,7 +433,7 @@ export default function InternshipDetailsPage() {
                   year: "numeric",
                 }).replace(/\//g, ".")}
               </span>
-              <Badge variant="outline" className={cn("text-xs font-medium", getInternshipStatusColor(displayInternship.status))}>
+              <Badge variant="outline" className={cn("text-sm font-medium", getInternshipStatusColor(displayInternship.status))}>
                 {getInternshipStatusText(displayInternship.status)}
               </Badge>
             </div>
@@ -512,19 +512,19 @@ export default function InternshipDetailsPage() {
                         <div className="text-2xl font-semibold tabular-nums text-foreground">
                           {currentInfoBlockData.funnel.applications}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">Заявки</div>
+                        <div className="text-sm text-muted-foreground mt-1">Заявки</div>
                       </div>
                       <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
                         <div className="text-2xl font-semibold tabular-nums text-foreground">
                           {currentInfoBlockData.funnel.targetApplications}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">Целевые заявки</div>
+                        <div className="text-sm text-muted-foreground mt-1">Целевые заявки</div>
                       </div>
                       <div className="rounded-lg border bg-muted/30 dark:bg-muted/20 p-4 text-center">
                         <div className="text-2xl font-semibold tabular-nums text-foreground">
                           {currentInfoBlockData.funnel.interviews}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">Собеседования</div>
+                        <div className="text-sm text-muted-foreground mt-1">Собеседования</div>
                       </div>
                     </div>
                   </div>
@@ -542,7 +542,7 @@ export default function InternshipDetailsPage() {
                             <div className="text-2xl font-semibold tabular-nums text-foreground">
                               {totalTrainees}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">Стажеры</div>
+                            <div className="text-sm text-muted-foreground mt-1">Стажеры</div>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -555,7 +555,7 @@ export default function InternshipDetailsPage() {
                             <div className="text-2xl font-semibold tabular-nums text-blue-600 dark:text-blue-400">
                               {currentEmployees}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">Сотрудники</div>
+                            <div className="text-sm text-muted-foreground mt-1">Сотрудники</div>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -568,7 +568,7 @@ export default function InternshipDetailsPage() {
                             <div className="text-2xl font-semibold tabular-nums text-purple-600 dark:text-purple-400">
                               {conversionPercent != null ? `${conversionPercent}%` : "—"}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">Конверсия</div>
+                            <div className="text-sm text-muted-foreground mt-1">Конверсия</div>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -620,17 +620,17 @@ export default function InternshipDetailsPage() {
                 {/* Дополнительно: город и зарплата */}
                 {(displayInternship.city || displayInternship.salary) ? (
                   <div className="pt-2 border-t space-y-2">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Дополнительно</div>
+                    <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Дополнительно</div>
                     <div className="flex flex-wrap gap-6">
                       {displayInternship.city && (
                         <div>
-                          <span className="text-xs text-muted-foreground">Город</span>
+                          <span className="text-sm text-muted-foreground">Город</span>
                           <p className="text-sm font-medium">{displayInternship.city}</p>
                         </div>
                       )}
                       {displayInternship.salary && (
                         <div>
-                          <span className="text-xs text-muted-foreground">Зарплата</span>
+                          <span className="text-sm text-muted-foreground">Зарплата</span>
                           <p className="text-sm font-medium">{displayInternship.salary.toLocaleString("ru-RU")} ₽</p>
                         </div>
                       )}
@@ -799,7 +799,7 @@ export default function InternshipDetailsPage() {
                             <Badge
                               variant="outline"
                               className={cn(
-                                "text-xs px-2 py-0.5",
+                                "text-sm px-2 py-0.5",
                                 row.internshipResult === "Переведен"
                                   ? "bg-green-100 text-green-700 border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700"
                                   : "bg-red-100 text-red-700 border-red-300 dark:bg-red-900 dark:text-red-200 dark:border-red-700"
@@ -834,7 +834,7 @@ export default function InternshipDetailsPage() {
                                   <TooltipTrigger asChild>
                                     <Badge
                                       variant="outline"
-                                      className="text-xs px-2 py-0.5 cursor-help bg-red-100 text-red-700 border-red-300 dark:bg-red-900 dark:text-red-200 dark:border-red-700"
+                                      className="text-sm px-2 py-0.5 cursor-help bg-red-100 text-red-700 border-red-300 dark:bg-red-900 dark:text-red-200 dark:border-red-700"
                                     >
                                       Уволен
                                     </Badge>
@@ -848,7 +848,7 @@ export default function InternshipDetailsPage() {
                               ) : (
                                 <Badge
                                   variant="outline"
-                                  className={cn("text-xs px-2 py-0.5", getStatusBadgeColor("active"))}
+                                  className={cn("text-sm px-2 py-0.5", getStatusBadgeColor("active"))}
                                 >
                                   Работает
                                 </Badge>
@@ -1266,7 +1266,7 @@ export default function InternshipDetailsPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-sm">
                               {getActionText(item.action)}
                             </Badge>
                             {item.field && (
@@ -1287,7 +1287,7 @@ export default function InternshipDetailsPage() {
                               </div>
                             </div>
                           )}
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <User className="h-3 w-3" />
                             <span>{item.user}</span>
                             <Clock className="h-3 w-3 ml-2" />
@@ -1496,7 +1496,7 @@ export default function InternshipDetailsPage() {
               <Label className="text-sm font-medium">Воронка (количество)</Label>
               <div className="grid grid-cols-3 gap-3 mt-2">
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Заявки</Label>
+                  <Label className="text-sm text-muted-foreground">Заявки</Label>
                   <Input
                     type="number"
                     min={0}
@@ -1510,7 +1510,7 @@ export default function InternshipDetailsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Целевые заявки</Label>
+                  <Label className="text-sm text-muted-foreground">Целевые заявки</Label>
                   <Input
                     type="number"
                     min={0}
@@ -1524,7 +1524,7 @@ export default function InternshipDetailsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Собеседования</Label>
+                  <Label className="text-sm text-muted-foreground">Собеседования</Label>
                   <Input
                     type="number"
                     min={0}

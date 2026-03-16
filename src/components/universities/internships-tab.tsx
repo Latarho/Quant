@@ -134,7 +134,7 @@ export function InternshipsTab() {
               return (
                 <TabsTrigger key={value} value={value} className="flex items-center gap-2">
                   {label}
-                  <Badge variant="secondary" className="text-xs font-medium shrink-0">
+                  <Badge variant="secondary" className="text-sm font-medium shrink-0">
                     {count}
                   </Badge>
                 </TabsTrigger>
@@ -352,13 +352,13 @@ export function InternshipsTab() {
                         {slots.map((internship, index) =>
                           internship ? (
                             <Card key={internship.id} className="p-3 min-h-0 flex flex-col relative">
-                              <Badge variant="outline" className={cn("absolute top-3 right-3 text-xs shrink-0", getStatusBadgeColor(internship.status))}>
+                              <Badge variant="outline" className={cn("absolute top-3 right-3 text-sm shrink-0", getStatusBadgeColor(internship.status))}>
                                 {getStatusText(internship.status)}
                               </Badge>
                               <div className="flex-1 min-w-0 flex flex-col">
                                 <div className="pr-20">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <Badge variant="outline" className={cn("text-xs font-medium shrink-0 w-fit", getInternshipTypeBadgeColor(internship.title))}>
+                                    <Badge variant="outline" className={cn("text-sm font-medium shrink-0 w-fit", getInternshipTypeBadgeColor(internship.title))}>
                                       {internship.title}
                                     </Badge>
                                     <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
@@ -383,7 +383,7 @@ export function InternshipsTab() {
                                           <TooltipTrigger asChild>
                                             <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
                                               <div className="text-sm font-bold text-foreground leading-tight">{defaultTotalTrainees}</div>
-                                              <div className="text-xs text-muted-foreground">Стажеры</div>
+                                              <div className="text-sm text-muted-foreground">Стажеры</div>
                                             </div>
                                           </TooltipTrigger>
                                           <TooltipContent>
@@ -395,7 +395,7 @@ export function InternshipsTab() {
                                           <TooltipTrigger asChild>
                                             <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
                                               <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{defaultCurrentEmployees}</div>
-                                              <div className="text-xs text-muted-foreground">Сотрудники</div>
+                                              <div className="text-sm text-muted-foreground">Сотрудники</div>
                                             </div>
                                           </TooltipTrigger>
                                           <TooltipContent><p>Сотрудники, работающие в банке на текущий момент</p></TooltipContent>
@@ -405,7 +405,7 @@ export function InternshipsTab() {
                                           <TooltipTrigger asChild>
                                             <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
                                               <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{defaultConversionPercent != null ? `${defaultConversionPercent}%` : "—"}</div>
-                                              <div className="text-xs text-muted-foreground">Конверсия</div>
+                                              <div className="text-sm text-muted-foreground">Конверсия</div>
                                             </div>
                                           </TooltipTrigger>
                                           <TooltipContent><p>Конверсия = Сотрудники / Стажеры, в процентах</p></TooltipContent>
@@ -420,7 +420,7 @@ export function InternshipsTab() {
                                   <span>Подразделения:</span>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <Badge variant="secondary" className="text-xs font-medium px-2 py-0.5 cursor-help">
+                                      <Badge variant="secondary" className="text-sm font-medium px-2 py-0.5 cursor-help">
                                         {(() => {
                                           const savedDepartments = departmentsByInternship[internship.id];
                                           const fallbackDepartments = getDefaultDepartmentsForInternship(internship);
@@ -473,13 +473,13 @@ export function InternshipsTab() {
                       {slots.map((internship, index) =>
                         internship ? (
                           <Card key={internship.id} className="p-3 min-h-0 flex flex-col relative">
-                            <Badge variant="outline" className={cn("absolute top-3 right-3 text-xs shrink-0", getStatusBadgeColor(internship.status))}>
+                            <Badge variant="outline" className={cn("absolute top-3 right-3 text-sm shrink-0", getStatusBadgeColor(internship.status))}>
                               {getStatusText(internship.status)}
                             </Badge>
                             <div className="flex-1 min-w-0 flex flex-col">
                               <div className="pr-20">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <Badge variant="outline" className={cn("text-xs font-medium shrink-0 w-fit", getInternshipTypeBadgeColor(internship.title))}>
+                                  <Badge variant="outline" className={cn("text-sm font-medium shrink-0 w-fit", getInternshipTypeBadgeColor(internship.title))}>
                                     {internship.title}
                                   </Badge>
                                   <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
@@ -504,7 +504,7 @@ export function InternshipsTab() {
                                         <TooltipTrigger asChild>
                                           <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
                                             <div className="text-sm font-bold text-foreground leading-tight">{defaultTotalTrainees}</div>
-                                            <div className="text-xs text-muted-foreground">Стажеры</div>
+                                            <div className="text-sm text-muted-foreground">Стажеры</div>
                                           </div>
                                         </TooltipTrigger>
                                         <TooltipContent>
@@ -516,7 +516,7 @@ export function InternshipsTab() {
                                         <TooltipTrigger asChild>
                                           <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
                                             <div className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight">{defaultCurrentEmployees}</div>
-                                            <div className="text-xs text-muted-foreground">Сотрудники</div>
+                                            <div className="text-sm text-muted-foreground">Сотрудники</div>
                                           </div>
                                         </TooltipTrigger>
                                         <TooltipContent><p>Сотрудники, работающие в банке на текущий момент</p></TooltipContent>
@@ -526,7 +526,7 @@ export function InternshipsTab() {
                                         <TooltipTrigger asChild>
                                           <div className="bg-background/80 rounded border border-primary/20 text-center cursor-help min-w-0 flex-1 py-1">
                                             <div className="text-sm font-bold text-purple-600 dark:text-purple-400 leading-tight">{defaultConversionPercent != null ? `${defaultConversionPercent}%` : "—"}</div>
-                                            <div className="text-xs text-muted-foreground">Конверсия</div>
+                                            <div className="text-sm text-muted-foreground">Конверсия</div>
                                           </div>
                                         </TooltipTrigger>
                                         <TooltipContent><p>Конверсия = Сотрудники / Стажеры, в процентах</p></TooltipContent>
@@ -541,7 +541,7 @@ export function InternshipsTab() {
                                   <span>Подразделения:</span>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <Badge variant="secondary" className="text-xs font-medium px-2 py-0.5 cursor-help">
+                                      <Badge variant="secondary" className="text-sm font-medium px-2 py-0.5 cursor-help">
                                         {(() => {
                                           const savedDepartments = departmentsByInternship[internship.id];
                                           const fallbackDepartments = getDefaultDepartmentsForInternship(internship);
