@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { GraduationCap, Briefcase, FileText, BarChart3 } from "lucide-react";
+import { GraduationCap, Briefcase, FileText, BarChart3, ChevronDown, ChevronRight } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
   Sidebar,
@@ -32,6 +32,7 @@ export function AppSidebar() {
   const searchParams = useSearchParams();
   const isCollapsed = React.useMemo(() => state === "collapsed", [state]);
   const currentTab = searchParams.get("tab") ?? "universities";
+  const [isUniversitiesOpen, setIsUniversitiesOpen] = React.useState(false);
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -61,16 +62,76 @@ export function AppSidebar() {
 
       <SidebarContent className="gap-4 py-3 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
         <SidebarMenu className="gap-3 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:max-w-8 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-3">
-          {navItems.map(({ href, label, tab, icon: Icon }) => (
-            <SidebarMenuItem key={tab}>
-              <SidebarMenuButton asChild isActive={pathname === "/universities" && currentTab === tab} tooltip={label} >
-                <Link href={href}>
-                  <Icon className="size-4 shrink-0" />
-                  <span>{label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {navItems.map(({ href, label, tab, icon: Icon }) => {
+            if (tab === "universities") {
+              return (
+                <SidebarMenuItem key={tab}>
+                  <SidebarMenuButton
+                    tooltip={label}
+                    className="justify-between"
+                    isActive={pathname === "/universities" && currentTab === tab}
+                    onClick={() => setIsUniversitiesOpen((prev) => !prev)}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Icon className="size-4 shrink-0" />
+                      <span>{label}</span>
+                    </span>
+                    {isUniversitiesOpen ? (
+                      <ChevronDown className="size-3 shrink-0" />
+                    ) : (
+                      <ChevronRight className="size-3 shrink-0" />
+                    )}
+                  </SidebarMenuButton>
+
+                  {isUniversitiesOpen && !isCollapsed && (
+                    <div className="mt-1 ml-7 flex flex-col gap-1 text-sm text-sidebar-foreground/80">
+                      <Link
+                        href="/universities?tab=universities&line=drp&lineTab=overview"
+                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
+                      >
+                        ДРП
+                      </Link>
+                      <Link
+                        href="/universities?tab=universities&line=bko&lineTab=overview"
+                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
+                      >
+                        БКО
+                      </Link>
+                      <Link
+                        href="/universities?tab=universities&line=ecosystem&lineTab=overview"
+                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
+                      >
+                        Экосистема
+                      </Link>
+                      <Link
+                        href="/universities?tab=universities&line=cntr&lineTab=overview"
+                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
+                      >
+                        ЦНТР
+                      </Link>
+                      <Link
+                        href="/universities?tab=universities&line=dkm&lineTab=overview"
+                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
+                      >
+                        ДКМ
+                      </Link>
+                    </div>
+                  )}
+                </SidebarMenuItem>
+              );
+            }
+
+            return (
+              <SidebarMenuItem key={tab}>
+                <SidebarMenuButton asChild isActive={pathname === "/universities" && currentTab === tab} tooltip={label}>
+                  <Link href={href}>
+                    <Icon className="size-4 shrink-0" />
+                    <span>{label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarContent>
 

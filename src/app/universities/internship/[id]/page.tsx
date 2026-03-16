@@ -729,38 +729,38 @@ export default function InternshipDetailsPage() {
                   <Table className={staffFullView ? "min-w-[1200px]" : "min-w-full"}>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        <TableHead className="text-sm font-medium sticky left-0 z-10 bg-background">
+                        <TableHead className="text-sm font-semibold sticky left-0 z-10 bg-background">
                           ФИО
                         </TableHead>
-                        <TableHead className="text-sm font-medium">ВУЗ</TableHead>
-                        <TableHead className="text-sm font-medium">Должность</TableHead>
-                        <TableHead className="text-sm font-medium">ССП</TableHead>
-                        <TableHead className="text-sm font-medium">ВСП</TableHead>
-                        <TableHead className="text-sm font-medium max-w-[8.5rem]">
+                        <TableHead className="text-sm font-semibold">ВУЗ</TableHead>
+                        <TableHead className="text-sm font-semibold">Должность</TableHead>
+                        <TableHead className="text-sm font-semibold">ССП</TableHead>
+                        <TableHead className="text-sm font-semibold">ВСП</TableHead>
+                        <TableHead className="text-sm font-semibold max-w-[8.5rem]">
                           <span className="block">Дата приема на</span>
                           <span className="block">стажировку</span>
                         </TableHead>
-                        <TableHead className="text-sm font-medium max-w-[8.5rem]">
+                        <TableHead className="text-sm font-semibold max-w-[8.5rem]">
                           <span className="block">Дата окончания</span>
                           <span className="block">стажировки</span>
                         </TableHead>
-                        <TableHead className="text-sm font-medium">Результат стажировки</TableHead>
-                        <TableHead className="text-sm font-medium max-w-[8.5rem]">
+                        <TableHead className="text-sm font-semibold">Результат стажировки</TableHead>
+                        <TableHead className="text-sm font-semibold max-w-[8.5rem]">
                           <span className="block">Дата приема в</span>
                           <span className="block">ССП/ВСП</span>
                         </TableHead>
                         {staffFullView && (
                           <>
-                            <TableHead className="text-sm font-medium max-w-[8.5rem]">
+                            <TableHead className="text-sm font-semibold max-w-[8.5rem]">
                               <span className="block">Дата увольнения</span>
                             </TableHead>
-                            <TableHead className="text-sm font-medium">Этап увольнения</TableHead>
-                            <TableHead className="text-sm font-medium">Трудовой стаж в банке</TableHead>
-                            <TableHead className="text-sm font-medium">Комментарий</TableHead>
+                            <TableHead className="text-sm font-semibold">Этап увольнения</TableHead>
+                            <TableHead className="text-sm font-semibold">Трудовой стаж в банке</TableHead>
+                            <TableHead className="text-sm font-semibold">Комментарий</TableHead>
                           </>
                         )}
-                        <TableHead className="text-sm font-medium text-center">Статус</TableHead>
-                        <TableHead className="text-sm font-medium text-center">Действия</TableHead>
+                        <TableHead className="text-sm font-semibold text-center">Статус</TableHead>
+                        <TableHead className="text-sm font-semibold text-center">Действия</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

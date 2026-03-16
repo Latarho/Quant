@@ -145,6 +145,19 @@ export default function UniversitiesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
+  // Активная линия сотрудничества и вкладка линии (ДРП, БКО, Экосистема, ЦНТР, ДКМ)
+  const rawLine = searchParams.get("line");
+  const activeLine: "drp" | "bko" | "ecosystem" | "cntr" | "dkm" | null =
+    rawLine === "drp" || rawLine === "bko" || rawLine === "ecosystem" || rawLine === "cntr" || rawLine === "dkm"
+      ? rawLine
+      : null;
+
+  const rawLineTab = searchParams.get("lineTab");
+  const activeLineTab: "overview" | "events" | "contracts" | "cabinet" =
+    rawLineTab === "events" || rawLineTab === "contracts" || rawLineTab === "cabinet"
+      ? rawLineTab
+      : "overview";
+
   // Состояние для администрирования
   const [universities, setUniversities] = useState<University[]>(mockUniversities);
   const [selectedUniversity, setSelectedUniversity] = useState<string | null>(null);
@@ -3568,15 +3581,56 @@ export default function UniversitiesPage() {
                     <Separator />
                     <CardContent className="overflow-x-hidden">
                       <Tabs value={universityDetailTab} onValueChange={(v) => setUniversityDetailTab(v as typeof universityDetailTab)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-7">
-                          <TabsTrigger value="general">Общая информация</TabsTrigger>
-                          <TabsTrigger value="eventsFeed">Лента мероприятий</TabsTrigger>
-                          <TabsTrigger value="kaleidoscope">Договорная база</TabsTrigger>
-                          <TabsTrigger value="bko">Личный кабинет БКО</TabsTrigger>
-                          <TabsTrigger value="cntr">Личный кабинет ЦНТР</TabsTrigger>
-                          <TabsTrigger value="drpCabinet">Личный кабинет ДРП</TabsTrigger>
-                          <TabsTrigger value="ecosystemCabinet">Личный кабинет Экосистема</TabsTrigger>
-                        </TabsList>
+                        {activeLine === "drp" && (
+                          <TabsList className="grid w-full grid-cols-4">
+                            <TabsTrigger value="general">Общая информация</TabsTrigger>
+                            <TabsTrigger value="eventsFeed">Лента мероприятий</TabsTrigger>
+                            <TabsTrigger value="kaleidoscope">Договорная база</TabsTrigger>
+                            <TabsTrigger value="drpCabinet">Личный кабинет ДРП</TabsTrigger>
+                          </TabsList>
+                        )}
+                        {activeLine === "bko" && (
+                          <TabsList className="grid w-full grid-cols-4">
+                            <TabsTrigger value="general">Общая информация</TabsTrigger>
+                            <TabsTrigger value="eventsFeed">Лента мероприятий</TabsTrigger>
+                            <TabsTrigger value="kaleidoscope">Договорная база</TabsTrigger>
+                            <TabsTrigger value="bko">Личный кабинет БКО</TabsTrigger>
+                          </TabsList>
+                        )}
+                        {activeLine === "cntr" && (
+                          <TabsList className="grid w-full grid-cols-4">
+                            <TabsTrigger value="general">Общая информация</TabsTrigger>
+                            <TabsTrigger value="eventsFeed">Лента мероприятий</TabsTrigger>
+                            <TabsTrigger value="kaleidoscope">Договорная база</TabsTrigger>
+                            <TabsTrigger value="cntr">Личный кабинет ЦНТР</TabsTrigger>
+                          </TabsList>
+                        )}
+                        {activeLine === "ecosystem" && (
+                          <TabsList className="grid w-full grid-cols-4">
+                            <TabsTrigger value="general">Общая информация</TabsTrigger>
+                            <TabsTrigger value="eventsFeed">Лента мероприятий</TabsTrigger>
+                            <TabsTrigger value="kaleidoscope">Договорная база</TabsTrigger>
+                            <TabsTrigger value="ecosystemCabinet">Личный кабинет Экосистема</TabsTrigger>
+                          </TabsList>
+                        )}
+                        {activeLine === "dkm" && (
+                          <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="general">Общая информация</TabsTrigger>
+                            <TabsTrigger value="eventsFeed">Лента мероприятий</TabsTrigger>
+                            <TabsTrigger value="kaleidoscope">Договорная база</TabsTrigger>
+                          </TabsList>
+                        )}
+                        {!activeLine && (
+                          <TabsList className="grid w-full grid-cols-7">
+                            <TabsTrigger value="general">Общая информация</TabsTrigger>
+                            <TabsTrigger value="eventsFeed">Лента мероприятий</TabsTrigger>
+                            <TabsTrigger value="kaleidoscope">Договорная база</TabsTrigger>
+                            <TabsTrigger value="bko">Личный кабинет БКО</TabsTrigger>
+                            <TabsTrigger value="cntr">Личный кабинет ЦНТР</TabsTrigger>
+                            <TabsTrigger value="drpCabinet">Личный кабинет ДРП</TabsTrigger>
+                            <TabsTrigger value="ecosystemCabinet">Личный кабинет Экосистема</TabsTrigger>
+                          </TabsList>
+                        )}
                         
                         {/* Таб 1: Общая информация */}
                         <TabsContent value="general" className="space-y-4 mt-4">
