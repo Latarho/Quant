@@ -1,12 +1,29 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Глобальное подключение шрифтов Gazprombank Sans */
+@font-face {
+  font-family: "Gazprombank Sans";
+  src: url("/fonts/Gazprombank_Sans_Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gazprombank Sans";
+  src: url("/fonts/Gazprombank_Sans_DemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: "Gazprombank Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
