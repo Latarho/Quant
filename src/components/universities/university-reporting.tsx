@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState, useMemo } from "react";
@@ -10,11 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { getCooperationLineBadgeColor } from "@/lib/badge-colors";
 import { getCooperationLineLabel } from "@/lib/universities/constants";
 import { cn } from "@/lib/utils";
 import { EVENT_TYPE_OPTIONS, EVENT_TYPE_LABELS } from "@/lib/event-types";
 import { formatDateOrDefault } from "@/lib/date-utils";
+import {
+  formatCurrencyFull,
+  getContractTypeName,
+  getEventStatusName,
+  getPracticeStatusName,
+  getSupportFormatName,
+} from "@/lib/format-utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
@@ -31,10 +38,6 @@ import {
   Briefcase,
   Upload,
   X,
-  ChevronLeft,
-  ChevronsLeft,
-  ChevronsRight,
-  ChevronRight
 } from "lucide-react";
 import type {
   University,
@@ -48,6 +51,7 @@ import type {
   CNTRInfrastructureItem,
   CNTRAgreementItem,
   BranchCurator,
+  CooperationLine,
 } from "@/types/universities";
 
 interface UniversityReportingProps {
@@ -60,7 +64,7 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
   const [filtersDialogOpen, setFiltersDialogOpen] = useState(false);
   const [filters, setFilters] = useState<{
     cities: string[];
-    lines: ("drp" | "bko" | "cntr")[];
+    lines: CooperationLine[];
   }>({
     cities: [],
     lines: [],
@@ -250,55 +254,9 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
     }));
   }, [universities]);
 
-  const getContractTypeName = (type: string) => {
-    const types: Record<string, string> = {
-      cooperation: "Сотрудничество",
-      scholarship: "Стипендия",
-      internship: "Стажировка",
-      bankDepartment: "Кафедра банка",
-    };
-    return types[type] || type;
-  };
-
   const getEventTypeName = (type: string) => EVENT_TYPE_LABELS[type as keyof typeof EVENT_TYPE_LABELS] ?? type;
 
-  const getEventStatusName = (status: string) => {
-    const statuses: Record<string, string> = {
-      planned: "Запланировано",
-      in_progress: "В процессе",
-      completed: "Завершено",
-      cancelled: "Отменено",
-    };
-    return statuses[status] || status;
-  };
-
-  const getPracticeStatusName = (status?: string) => {
-    const statuses: Record<string, string> = {
-      not_meets: "Не соответствует",
-      meets: "Соответствует",
-      exceeds: "Превосходит",
-    };
-    return status ? statuses[status] || status : "—";
-  };
-
-  const getSupportFormatName = (format?: string) => {
-    const formats: Record<string, string> = {
-      "grant-cofinancing": "Грант/софинансирование",
-      "ordered-rd-center-lift": "Заказной НИОКР / Центр-лифт",
-      "targeted-charity": "Целевая благотворительность",
-    };
-    return format ? formats[format] || format : "—";
-  };
-
-  const formatCurrency = (amount?: number) => {
-    if (!amount) return "—";
-    return new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(amount);
-  };
-
-  // Функция экспорта (заглушка)
-  const handleExport = (format: "xlsx" | "csv" | "pdf") => {
-    alert(`Экспорт в ${format.toUpperCase()} будет реализован`);
-  };
+  const formatCurrency = formatCurrencyFull;
 
   return (
     <div className="space-y-6">
@@ -593,88 +551,14 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
             </Table>
           </div>
 
-          {/* Пагинация */}
-          {(() => {
-            const totalPages = Math.ceil(filteredUniversities.length / itemsPerPage);
-            
-            if (totalPages <= 1 && filteredUniversities.length <= 10) {
-              return null;
-            }
-            
-            return (
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="universities-items-per-page" className="text-sm text-muted-foreground">
-                    Показать:
-                  </Label>
-                  <Select
-                    value={itemsPerPage.toString()}
-                    onValueChange={(value) => {
-                      setItemsPerPage(Number(value));
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <SelectTrigger id="universities-items-per-page" className="w-[80px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="text-sm text-muted-foreground">
-                    из {filteredUniversities.length}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Страница {currentPage} из {totalPages}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setCurrentPage(1)}
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setCurrentPage(totalPages)}
-                      disabled={currentPage === totalPages}
-                    >
-                      <ChevronsRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          <TablePagination
+            currentPage={currentPage}
+            totalItems={filteredUniversities.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={setItemsPerPage}
+            id="universities"
+          />
         </TabsContent>
 
         {/* Договоры */}
@@ -940,88 +824,14 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
             </Table>
           </div>
 
-          {/* Пагинация */}
-          {(() => {
-            const totalPages = Math.ceil(allContracts.length / contractsItemsPerPage);
-            
-            if (totalPages <= 1 && allContracts.length <= 10) {
-              return null;
-            }
-            
-            return (
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="contracts-items-per-page" className="text-sm text-muted-foreground">
-                    Показать:
-                  </Label>
-                  <Select
-                    value={contractsItemsPerPage.toString()}
-                    onValueChange={(value) => {
-                      setContractsItemsPerPage(Number(value));
-                      setContractsPage(1);
-                    }}
-                  >
-                    <SelectTrigger id="contracts-items-per-page" className="w-[80px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="text-sm text-muted-foreground">
-                    из {allContracts.length}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Страница {contractsPage} из {totalPages}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setContractsPage(1)}
-                      disabled={contractsPage === 1}
-                    >
-                      <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setContractsPage(contractsPage - 1)}
-                      disabled={contractsPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setContractsPage(contractsPage + 1)}
-                      disabled={contractsPage === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setContractsPage(totalPages)}
-                      disabled={contractsPage === totalPages}
-                    >
-                      <ChevronsRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          <TablePagination
+            currentPage={contractsPage}
+            totalItems={allContracts.length}
+            itemsPerPage={contractsItemsPerPage}
+            onPageChange={setContractsPage}
+            onItemsPerPageChange={setContractsItemsPerPage}
+            id="contracts"
+          />
         </TabsContent>
 
         {/* Мероприятия */}
@@ -1272,88 +1082,14 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
             </Table>
           </div>
 
-          {/* Пагинация */}
-          {(() => {
-            const totalPages = Math.ceil(allEvents.length / eventsItemsPerPage);
-            
-            if (totalPages <= 1 && allEvents.length <= 10) {
-              return null;
-            }
-            
-            return (
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="events-items-per-page" className="text-sm text-muted-foreground">
-                    Показать:
-                  </Label>
-                  <Select
-                    value={eventsItemsPerPage.toString()}
-                    onValueChange={(value) => {
-                      setEventsItemsPerPage(Number(value));
-                      setEventsPage(1);
-                    }}
-                  >
-                    <SelectTrigger id="events-items-per-page" className="w-[80px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="text-sm text-muted-foreground">
-                    из {allEvents.length}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Страница {eventsPage} из {totalPages}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setEventsPage(1)}
-                      disabled={eventsPage === 1}
-                    >
-                      <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setEventsPage(eventsPage - 1)}
-                      disabled={eventsPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setEventsPage(eventsPage + 1)}
-                      disabled={eventsPage === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setEventsPage(totalPages)}
-                      disabled={eventsPage === totalPages}
-                    >
-                      <ChevronsRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          <TablePagination
+            currentPage={eventsPage}
+            totalItems={allEvents.length}
+            itemsPerPage={eventsItemsPerPage}
+            onPageChange={setEventsPage}
+            onItemsPerPageChange={setEventsItemsPerPage}
+            id="events"
+          />
         </TabsContent>
 
         {/* Кадры */}
@@ -1563,88 +1299,14 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
                 </Table>
               </div>
 
-              {/* Пагинация */}
-              {(() => {
-                const totalPages = Math.ceil(allInterns.length / internsItemsPerPage);
-                
-                if (totalPages <= 1 && allInterns.length <= 10) {
-                  return null;
-                }
-                
-                return (
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="interns-items-per-page" className="text-sm text-muted-foreground">
-                        Показать:
-                      </Label>
-                      <Select
-                        value={internsItemsPerPage.toString()}
-                        onValueChange={(value) => {
-                          setInternsItemsPerPage(Number(value));
-                          setInternsPage(1);
-                        }}
-                      >
-                        <SelectTrigger id="interns-items-per-page" className="w-[80px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="10">10</SelectItem>
-                          <SelectItem value="25">25</SelectItem>
-                          <SelectItem value="50">50</SelectItem>
-                          <SelectItem value="100">100</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <span className="text-sm text-muted-foreground">
-                        из {allInterns.length}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        Страница {internsPage} из {totalPages}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setInternsPage(1)}
-                          disabled={internsPage === 1}
-                        >
-                          <ChevronsLeft className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setInternsPage(internsPage - 1)}
-                          disabled={internsPage === 1}
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setInternsPage(internsPage + 1)}
-                          disabled={internsPage === totalPages}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setInternsPage(totalPages)}
-                          disabled={internsPage === totalPages}
-                        >
-                          <ChevronsRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
+              <TablePagination
+                currentPage={internsPage}
+                totalItems={allInterns.length}
+                itemsPerPage={internsItemsPerPage}
+                onPageChange={setInternsPage}
+                onItemsPerPageChange={setInternsItemsPerPage}
+                id="interns"
+              />
             </TabsContent>
 
             {/* Практиканты */}
@@ -1846,88 +1508,14 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
                 </Table>
               </div>
 
-              {/* Пагинация */}
-              {(() => {
-                const totalPages = Math.ceil(allPractitioners.length / practitionersItemsPerPage);
-                
-                if (totalPages <= 1 && allPractitioners.length <= 10) {
-                  return null;
-                }
-                
-                return (
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="practitioners-items-per-page" className="text-sm text-muted-foreground">
-                        Показать:
-                      </Label>
-                      <Select
-                        value={practitionersItemsPerPage.toString()}
-                        onValueChange={(value) => {
-                          setPractitionersItemsPerPage(Number(value));
-                          setPractitionersPage(1);
-                        }}
-                      >
-                        <SelectTrigger id="practitioners-items-per-page" className="w-[80px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="10">10</SelectItem>
-                          <SelectItem value="25">25</SelectItem>
-                          <SelectItem value="50">50</SelectItem>
-                          <SelectItem value="100">100</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <span className="text-sm text-muted-foreground">
-                        из {allPractitioners.length}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        Страница {practitionersPage} из {totalPages}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setPractitionersPage(1)}
-                          disabled={practitionersPage === 1}
-                        >
-                          <ChevronsLeft className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setPractitionersPage(practitionersPage - 1)}
-                          disabled={practitionersPage === 1}
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setPractitionersPage(practitionersPage + 1)}
-                          disabled={practitionersPage === totalPages}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setPractitionersPage(totalPages)}
-                          disabled={practitionersPage === totalPages}
-                        >
-                          <ChevronsRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
+              <TablePagination
+                currentPage={practitionersPage}
+                totalItems={allPractitioners.length}
+                itemsPerPage={practitionersItemsPerPage}
+                onPageChange={setPractitionersPage}
+                onItemsPerPageChange={setPractitionersItemsPerPage}
+                id="practitioners"
+              />
             </TabsContent>
           </Tabs>
         </TabsContent>
@@ -2024,88 +1612,14 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
             </Table>
           </div>
 
-          {/* Пагинация */}
-          {(() => {
-            const totalPages = Math.ceil(bkoData.length / bkoItemsPerPage);
-            
-            if (totalPages <= 1 && bkoData.length <= 10) {
-              return null;
-            }
-            
-            return (
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="bko-items-per-page" className="text-sm text-muted-foreground">
-                    Показать:
-                  </Label>
-                  <Select
-                    value={bkoItemsPerPage.toString()}
-                    onValueChange={(value) => {
-                      setBkoItemsPerPage(Number(value));
-                      setBkoPage(1);
-                    }}
-                  >
-                    <SelectTrigger id="bko-items-per-page" className="w-[80px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="text-sm text-muted-foreground">
-                    из {bkoData.length}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Страница {bkoPage} из {totalPages}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setBkoPage(1)}
-                      disabled={bkoPage === 1}
-                    >
-                      <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setBkoPage(bkoPage - 1)}
-                      disabled={bkoPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setBkoPage(bkoPage + 1)}
-                      disabled={bkoPage === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setBkoPage(totalPages)}
-                      disabled={bkoPage === totalPages}
-                    >
-                      <ChevronsRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          <TablePagination
+            currentPage={bkoPage}
+            totalItems={bkoData.length}
+            itemsPerPage={bkoItemsPerPage}
+            onPageChange={setBkoPage}
+            onItemsPerPageChange={setBkoItemsPerPage}
+            id="bko"
+          />
         </TabsContent>
 
         {/* ЦНТР */}
@@ -2176,88 +1690,14 @@ export function UniversityReporting({ universities }: UniversityReportingProps) 
             </Table>
           </div>
 
-          {/* Пагинация */}
-          {(() => {
-            const totalPages = Math.ceil(allCntrProjects.length / cntrItemsPerPage);
-            
-            if (totalPages <= 1 && allCntrProjects.length <= 10) {
-              return null;
-            }
-            
-            return (
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="cntr-items-per-page" className="text-sm text-muted-foreground">
-                    Показать:
-                  </Label>
-                  <Select
-                    value={cntrItemsPerPage.toString()}
-                    onValueChange={(value) => {
-                      setCntrItemsPerPage(Number(value));
-                      setCntrPage(1);
-                    }}
-                  >
-                    <SelectTrigger id="cntr-items-per-page" className="w-[80px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="text-sm text-muted-foreground">
-                    из {allCntrProjects.length}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Страница {cntrPage} из {totalPages}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setCntrPage(1)}
-                      disabled={cntrPage === 1}
-                    >
-                      <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setCntrPage(cntrPage - 1)}
-                      disabled={cntrPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setCntrPage(cntrPage + 1)}
-                      disabled={cntrPage === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setCntrPage(totalPages)}
-                      disabled={cntrPage === totalPages}
-                    >
-                      <ChevronsRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          <TablePagination
+            currentPage={cntrPage}
+            totalItems={allCntrProjects.length}
+            itemsPerPage={cntrItemsPerPage}
+            onPageChange={setCntrPage}
+            onItemsPerPageChange={setCntrItemsPerPage}
+            id="cntr"
+          />
         </TabsContent>
       </Tabs>
     </div>

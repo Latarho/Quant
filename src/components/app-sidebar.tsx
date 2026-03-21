@@ -11,28 +11,48 @@ import {
   SidebarContent,
   SidebarHeader,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 
-const navItems: { href: string; label: string; tab: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const UNIVERSITY_SUBLINES = [
+  { key: "drp", label: "ДРП", href: "/universities?tab=universities&line=drp&lineTab=overview" },
+  { key: "bko", label: "БКО", href: "/universities?tab=universities&line=bko&lineTab=overview" },
+  { key: "ecosystem", label: "Экосистема", href: "/universities?tab=universities&line=ecosystem&lineTab=overview" },
+  { key: "cntr", label: "ЦНТР", href: "/universities?tab=universities&line=cntr&lineTab=overview" },
+  { key: "dkm", label: "ДКМ", href: "/universities?tab=universities&line=dkm&lineTab=overview" },
+] as const;
+
+const navItems = [
   { href: "/universities?tab=universities", label: "ВУЗы", tab: "universities", icon: GraduationCap },
   { href: "/universities?tab=internships", label: "Стажировки", tab: "internships", icon: Briefcase },
   { href: "/universities?tab=reporting", label: "Отчетность", tab: "reporting", icon: FileText },
   { href: "/universities?tab=dashboard", label: "Дэшборд", tab: "dashboard", icon: BarChart3 },
-];
+] as const;
 
-/**
- * Боковая панель приложения «КАМПУС» — навигация по разделам
- */
 export function AppSidebar() {
   const { state } = useSidebar();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isCollapsed = React.useMemo(() => state === "collapsed", [state]);
+  const isCollapsed = state === "collapsed";
   const currentTab = searchParams.get("tab") ?? "universities";
-  const [isUniversitiesOpen, setIsUniversitiesOpen] = React.useState(false);
+  const activeLine = searchParams.get("line");
+
+  const isOnUniversitiesTab = pathname === "/universities" && currentTab === "universities";
+  const [isUniversitiesOpen, setIsUniversitiesOpen] = React.useState(isOnUniversitiesTab && !!activeLine);
+
+  React.useEffect(() => {
+    if (isOnUniversitiesTab && activeLine) {
+      setIsUniversitiesOpen(true);
+    }
+  }, [isOnUniversitiesTab, activeLine]);
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -54,85 +74,74 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-xl font-bold text-sidebar-foreground">
-              КАМПУС
+              ППРСВУЗ
             </span>
           </div>
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="gap-4 py-3 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
-        <SidebarMenu className="gap-3 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:max-w-8 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-3">
-          {navItems.map(({ href, label, tab, icon: Icon }) => {
-            if (tab === "universities") {
-              return (
-                <SidebarMenuItem key={tab}>
-                  <SidebarMenuButton
-                    tooltip={label}
-                    className="justify-between"
-                    isActive={pathname === "/universities" && currentTab === tab}
-                    onClick={() => setIsUniversitiesOpen((prev) => !prev)}
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Icon className="size-4 shrink-0" />
-                      <span>{label}</span>
-                    </span>
-                    {isUniversitiesOpen ? (
-                      <ChevronDown className="size-3 shrink-0" />
-                    ) : (
-                      <ChevronRight className="size-3 shrink-0" />
-                    )}
-                  </SidebarMenuButton>
+      <SidebarContent className="gap-2 py-3">
+        <SidebarGroup>
+          <SidebarGroupLabel>Работа с ВУЗами</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-1">
+              {navItems.map(({ href, label, tab, icon: Icon }) => {
+                if (tab === "universities") {
+                  return (
+                    <SidebarMenuItem key={tab}>
+                      <SidebarMenuButton
+                        tooltip={label}
+                        className="gap-2"
+                        isActive={isOnUniversitiesTab}
+                        onClick={() => setIsUniversitiesOpen((prev) => !prev)}
+                      >
+                        <Icon className="size-4 shrink-0" />
+                        <span className="inline-flex items-center gap-1">
+                          <span>{label}</span>
+                          {isUniversitiesOpen ? (
+                            <ChevronDown className="size-3 shrink-0" />
+                          ) : (
+                            <ChevronRight className="size-3 shrink-0" />
+                          )}
+                        </span>
+                      </SidebarMenuButton>
 
-                  {isUniversitiesOpen && !isCollapsed && (
-                    <div className="mt-1 ml-7 flex flex-col gap-1 text-sm text-sidebar-foreground/80">
-                      <Link
-                        href="/universities?tab=universities&line=drp&lineTab=overview"
-                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
-                      >
-                        ДРП
-                      </Link>
-                      <Link
-                        href="/universities?tab=universities&line=bko&lineTab=overview"
-                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
-                      >
-                        БКО
-                      </Link>
-                      <Link
-                        href="/universities?tab=universities&line=ecosystem&lineTab=overview"
-                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
-                      >
-                        Экосистема
-                      </Link>
-                      <Link
-                        href="/universities?tab=universities&line=cntr&lineTab=overview"
-                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
-                      >
-                        ЦНТР
-                      </Link>
-                      <Link
-                        href="/universities?tab=universities&line=dkm&lineTab=overview"
-                        className="text-left hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/40 rounded-md px-2 py-1"
-                      >
-                        ДКМ
-                      </Link>
-                    </div>
-                  )}
-                </SidebarMenuItem>
-              );
-            }
+                      {isUniversitiesOpen && (
+                        <SidebarMenuSub>
+                          {UNIVERSITY_SUBLINES.map((sub) => (
+                            <SidebarMenuSubItem key={sub.key}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={activeLine === sub.key}
+                              >
+                                <Link href={sub.href}>{sub.label}</Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      )}
+                    </SidebarMenuItem>
+                  );
+                }
 
-            return (
-              <SidebarMenuItem key={tab}>
-                <SidebarMenuButton asChild isActive={pathname === "/universities" && currentTab === tab} tooltip={label}>
-                  <Link href={href}>
-                    <Icon className="size-4 shrink-0" />
-                    <span>{label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
+                return (
+                  <SidebarMenuItem key={tab}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === "/universities" && currentTab === tab}
+                      tooltip={label}
+                    >
+                      <Link href={href}>
+                        <Icon className="size-4 shrink-0" />
+                        <span>{label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-2">

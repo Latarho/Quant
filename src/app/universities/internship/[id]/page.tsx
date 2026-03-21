@@ -1081,7 +1081,7 @@ export default function InternshipDetailsPage() {
               <Label htmlFor="new-staff-university">ВУЗ *</Label>
               <Select
                 value={newStaffForm.university}
-                onValueChange={(v) => setNewStaffForm((p) => ({ ...p, university: v }))}
+                onValueChange={(v) => setNewStaffForm((p) => ({ ...p, university: v as typeof p.university }))}
               >
                 <SelectTrigger id="new-staff-university">
                   <SelectValue />

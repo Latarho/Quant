@@ -1,8 +1,9 @@
-// @ts-nocheck
 "use client";
 
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MetricCard } from "@/components/ui/metric-card";
+import { formatCurrency } from "@/lib/format-utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -186,15 +187,6 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
     };
   }, [universities]);
 
-  const formatCurrency = (amount: number) => {
-    if (amount >= 1000000) {
-      return `${(amount / 1000000).toFixed(1)} млн ₽`;
-    }
-    if (amount >= 1000) {
-      return `${(amount / 1000).toFixed(0)} тыс ₽`;
-    }
-    return `${amount} ₽`;
-  };
 
   const maxEmployees = Math.max(...metrics.topUniversitiesByEmployees.map(u => u.allEmployees || 0), 1);
   const maxEvents = Math.max(...Object.values(metrics.eventsByType), 1);
@@ -301,69 +293,32 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
         <TabsContent value="overview" className="space-y-6 mt-6">
       {/* Основные метрики - первый ряд */}
       <div className="grid grid-cols-4 gap-[18px]">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">ВУЗов-партнеров</p>
-                <p className="text-3xl font-bold">{metrics.totalUniversities}</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <GraduationCap className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Активных договоров</p>
-                <p className="text-3xl font-bold">{metrics.activeContracts}</p>
-                {metrics.expiringContracts > 0 && (
-                  <p className="text-sm text-orange-600 mt-1">
-                    {metrics.expiringContracts} истекают в течение 90 дней
-                  </p>
-                )}
-              </div>
-              <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Стажеров (всего)</p>
-                <p className="text-3xl font-bold">{metrics.totalInterns}</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Активных: {metrics.activeInterns}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Практикантов</p>
-                <p className="text-3xl font-bold">{metrics.totalPractitioners}</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                <UserCheck className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          label="ВУЗов-партнеров"
+          value={metrics.totalUniversities}
+          icon={<GraduationCap className="h-6 w-6 text-primary" />}
+        />
+        <MetricCard
+          label="Активных договоров"
+          value={metrics.activeContracts}
+          subtitle={metrics.expiringContracts > 0 ? `${metrics.expiringContracts} истекают в течение 90 дней` : undefined}
+          subtitleClassName="text-orange-600"
+          icon={<FileText className="h-6 w-6 text-green-600 dark:text-green-400" />}
+          iconBgClassName="bg-green-100 dark:bg-green-900/30"
+        />
+        <MetricCard
+          label="Стажеров (всего)"
+          value={metrics.totalInterns}
+          subtitle={`Активных: ${metrics.activeInterns}`}
+          icon={<Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />}
+          iconBgClassName="bg-blue-100 dark:bg-blue-900/30"
+        />
+        <MetricCard
+          label="Практикантов"
+          value={metrics.totalPractitioners}
+          icon={<UserCheck className="h-6 w-6 text-purple-600 dark:text-purple-400" />}
+          iconBgClassName="bg-purple-100 dark:bg-purple-900/30"
+        />
       </div>
 
       {/* Второй ряд метрик */}
@@ -390,47 +345,24 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Кафедр банка</p>
-                <p className="text-3xl font-bold">{metrics.totalBankDepartments}</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Проектов ЦНТР</p>
-                <p className="text-3xl font-bold">{metrics.totalProjects}</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-teal-600 dark:text-teal-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Финансирование ЦНТР</p>
-                <p className="text-3xl font-bold">{formatCurrency(metrics.totalFunding)}</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                <Handshake className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          label="Кафедр банка"
+          value={metrics.totalBankDepartments}
+          icon={<Building2 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />}
+          iconBgClassName="bg-indigo-100 dark:bg-indigo-900/30"
+        />
+        <MetricCard
+          label="Проектов ЦНТР"
+          value={metrics.totalProjects}
+          icon={<TrendingUp className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
+          iconBgClassName="bg-teal-100 dark:bg-teal-900/30"
+        />
+        <MetricCard
+          label="Финансирование ЦНТР"
+          value={formatCurrency(metrics.totalFunding)}
+          icon={<Handshake className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />}
+          iconBgClassName="bg-emerald-100 dark:bg-emerald-900/30"
+        />
       </div>
 
       {/* Графики и детальная информация */}
@@ -638,10 +570,6 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
                 <Bar 
                   dataKey="value" 
                   radius={[4, 4, 0, 0]}
-                  fill={(entry, index) => {
-                    const colors = ["#d4c88f", "#d4a574", "#8b9dc3"];
-                    return colors[index % colors.length];
-                  }}
                 >
                   {[
                     { fill: "#d4c88f" },
@@ -763,64 +691,10 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
         <TabsContent value="drp" className="space-y-6 mt-6">
           {/* Метрики ДРП */}
           <div className="grid grid-cols-4 gap-[18px]">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">ВУЗов с ДРП</p>
-                    <p className="text-3xl font-bold">{lineData.drp.universities}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <GraduationCap className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Стажеров</p>
-                    <p className="text-3xl font-bold">{lineData.drp.interns}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Активных: {lineData.drp.activeInterns}
-                    </p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                    <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Практикантов</p>
-                    <p className="text-3xl font-bold">{lineData.drp.practitioners}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                    <UserCheck className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Мероприятий</p>
-                    <p className="text-3xl font-bold">{lineData.drp.events}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <MetricCard label="ВУЗов с ДРП" value={lineData.drp.universities} icon={<GraduationCap className="h-6 w-6 text-primary" />} />
+            <MetricCard label="Стажеров" value={lineData.drp.interns} subtitle={`Активных: ${lineData.drp.activeInterns}`} icon={<Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />} iconBgClassName="bg-blue-100 dark:bg-blue-900/30" />
+            <MetricCard label="Практикантов" value={lineData.drp.practitioners} icon={<UserCheck className="h-6 w-6 text-purple-600 dark:text-purple-400" />} iconBgClassName="bg-purple-100 dark:bg-purple-900/30" />
+            <MetricCard label="Мероприятий" value={lineData.drp.events} icon={<Calendar className="h-6 w-6 text-orange-600 dark:text-orange-400" />} iconBgClassName="bg-orange-100 dark:bg-orange-900/30" />
           </div>
 
           {/* Графики ДРП */}
@@ -966,70 +840,10 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
         <TabsContent value="bko" className="space-y-6 mt-6">
           {/* Метрики БКО */}
           <div className="grid grid-cols-4 gap-[18px]">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">ВУЗов с БКО</p>
-                    <p className="text-3xl font-bold">{lineData.bko.total}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <GraduationCap className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">ЗП студенты</p>
-                    <p className="text-3xl font-bold">{lineData.bko.withSalaryStudents}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {lineData.bko.total > 0 ? Math.round((lineData.bko.withSalaryStudents / lineData.bko.total) * 100) : 0}% охват
-                    </p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">ЗП сотрудники</p>
-                    <p className="text-3xl font-bold">{lineData.bko.withSalaryEmployees}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {lineData.bko.total > 0 ? Math.round((lineData.bko.withSalaryEmployees / lineData.bko.total) * 100) : 0}% охват
-                    </p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                    <UserCheck className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Транзакционные</p>
-                    <p className="text-3xl font-bold">
-                      {lineData.bko.withIE + lineData.bko.withTE + lineData.bko.withSBP + lineData.bko.withADM}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">ВУЗов</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <MetricCard label="ВУЗов с БКО" value={lineData.bko.total} icon={<GraduationCap className="h-6 w-6 text-primary" />} />
+            <MetricCard label="ЗП студенты" value={lineData.bko.withSalaryStudents} subtitle={`${lineData.bko.total > 0 ? Math.round((lineData.bko.withSalaryStudents / lineData.bko.total) * 100) : 0}% охват`} icon={<Users className="h-6 w-6 text-green-600 dark:text-green-400" />} iconBgClassName="bg-green-100 dark:bg-green-900/30" />
+            <MetricCard label="ЗП сотрудники" value={lineData.bko.withSalaryEmployees} subtitle={`${lineData.bko.total > 0 ? Math.round((lineData.bko.withSalaryEmployees / lineData.bko.total) * 100) : 0}% охват`} icon={<UserCheck className="h-6 w-6 text-blue-600 dark:text-blue-400" />} iconBgClassName="bg-blue-100 dark:bg-blue-900/30" />
+            <MetricCard label="Транзакционные" value={lineData.bko.withIE + lineData.bko.withTE + lineData.bko.withSBP + lineData.bko.withADM} subtitle="ВУЗов" icon={<TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />} iconBgClassName="bg-purple-100 dark:bg-purple-900/30" />
           </div>
 
           {/* Графики БКО */}
@@ -1112,61 +926,10 @@ export function UniversityDashboard({ universities }: UniversityDashboardProps) 
         <TabsContent value="cntr" className="space-y-6 mt-6">
           {/* Метрики ЦНТР */}
           <div className="grid grid-cols-4 gap-[18px]">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">ВУЗов с ЦНТР</p>
-                    <p className="text-3xl font-bold">{lineData.cntr.universities}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <GraduationCap className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Проектов</p>
-                    <p className="text-3xl font-bold">{lineData.cntr.projects}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-teal-600 dark:text-teal-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Инфраструктура</p>
-                    <p className="text-3xl font-bold">{lineData.cntr.infrastructure}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Финансирование</p>
-                    <p className="text-3xl font-bold">{formatCurrency(lineData.cntr.funding)}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                    <Handshake className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <MetricCard label="ВУЗов с ЦНТР" value={lineData.cntr.universities} icon={<GraduationCap className="h-6 w-6 text-primary" />} />
+            <MetricCard label="Проектов" value={lineData.cntr.projects} icon={<TrendingUp className="h-6 w-6 text-teal-600 dark:text-teal-400" />} iconBgClassName="bg-teal-100 dark:bg-teal-900/30" />
+            <MetricCard label="Инфраструктура" value={lineData.cntr.infrastructure} icon={<Building2 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />} iconBgClassName="bg-indigo-100 dark:bg-indigo-900/30" />
+            <MetricCard label="Финансирование" value={formatCurrency(lineData.cntr.funding)} icon={<Handshake className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />} iconBgClassName="bg-emerald-100 dark:bg-emerald-900/30" />
           </div>
 
           {/* Графики ЦНТР */}

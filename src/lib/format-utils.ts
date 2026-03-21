@@ -49,3 +49,76 @@ export function debounce<T extends (...args: unknown[]) => void>(
     timeoutId = setTimeout(() => func(...args), wait);
   };
 }
+
+export function formatCurrency(amount: number | undefined | null): string {
+  if (!amount) return "—";
+  if (amount >= 1_000_000) {
+    return `${(amount / 1_000_000).toFixed(1)} млн ₽`;
+  }
+  if (amount >= 1_000) {
+    return `${(amount / 1_000).toFixed(0)} тыс ₽`;
+  }
+  return `${amount} ₽`;
+}
+
+export function formatCurrencyFull(amount: number | undefined | null): string {
+  if (!amount) return "—";
+  return new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+const STUDENT_STATUS_LABELS: Record<string, string> = {
+  "not-started": "Не начато",
+  invited: "Приглашен",
+  "in-progress": "В процессе",
+  completed: "Завершено",
+};
+
+export function getStudentStatusText(status: string): string {
+  return STUDENT_STATUS_LABELS[status] ?? status;
+}
+
+const CONTRACT_TYPE_LABELS: Record<string, string> = {
+  cooperation: "Сотрудничество",
+  scholarship: "Стипендия",
+  internship: "Стажировка",
+  bankDepartment: "Кафедра банка",
+};
+
+export function getContractTypeName(type: string): string {
+  return CONTRACT_TYPE_LABELS[type] ?? type;
+}
+
+const EVENT_STATUS_LABELS: Record<string, string> = {
+  planned: "Запланировано",
+  in_progress: "В процессе",
+  completed: "Завершено",
+  cancelled: "Отменено",
+};
+
+export function getEventStatusName(status: string): string {
+  return EVENT_STATUS_LABELS[status] ?? status;
+}
+
+const PRACTICE_STATUS_LABELS: Record<string, string> = {
+  not_meets: "Не соответствует",
+  meets: "Соответствует",
+  exceeds: "Превосходит",
+};
+
+export function getPracticeStatusName(status?: string): string {
+  return status ? (PRACTICE_STATUS_LABELS[status] ?? status) : "—";
+}
+
+const SUPPORT_FORMAT_LABELS: Record<string, string> = {
+  "grant-cofinancing": "Грант/софинансирование",
+  "ordered-rd-center-lift": "Заказной НИОКР / Центр-лифт",
+  "targeted-charity": "Целевая благотворительность",
+};
+
+export function getSupportFormatName(format?: string): string {
+  return format ? (SUPPORT_FORMAT_LABELS[format] ?? format) : "—";
+}

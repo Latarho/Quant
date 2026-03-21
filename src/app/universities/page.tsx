@@ -84,61 +84,17 @@ import {
   getNextReserveStudent,
 } from "@/lib/internships/business-logic";
 import { UniversityDashboard, UniversityReporting, InternshipsTab, UniversityListPanel } from "@/components/universities";
-import { mockUniversities, mockDepartments, mockEmployees, mockNotifications, type Notification, type EmailTemplate } from "@/lib/universities/mock-universities";
+import { mockUniversities, mockNotifications, type Notification } from "@/lib/universities/mock-universities";
 import { availableBranches, cooperationLines, responsiblePersons, getCooperationLineLabel } from "@/lib/universities/constants";
 import { getInitials, validateEmail, validateURL, validateDates } from "@/lib/format-utils";
 import { getUniversityChangeHistory, type ChangeHistory } from "@/lib/universities/university-utils";
 import { formatDate, formatDateObject } from "@/lib/date-utils";
 
-// Функции для партнерств - удалены
+import { getStudentStatusText } from "@/lib/format-utils";
+import { emailTemplates, replaceTemplateVariables } from "@/lib/universities/email-templates";
 
-// Функция для получения цвета статуса студента (использует централизованные цвета)
 const getStudentStatusColor = (status: string) => {
   return getStatusBadgeColor(status);
-};
-
-// Функция для получения текста статуса студента
-const getStudentStatusText = (status: string) => {
-  switch (status) {
-    case "not-started":
-      return "Не начато";
-    case "invited":
-      return "Приглашен";
-    case "in-progress":
-      return "В процессе";
-    case "completed":
-      return "Завершено";
-    default:
-      return status;
-  }
-};
-
-
-// Шаблоны email
-const emailTemplates: EmailTemplate[] = [
-  {
-    id: "invitation",
-    name: "Приглашение на партнерство",
-    subject: "Приглашение участвовать в партнерстве: {{partnershipName}}",
-    body: "Уважаемый(ая) {{studentName}}!\n\nПриглашаем вас принять участие в программе {{partnershipName}}.\n\nДата начала: {{startDate}}\n\nСсылка на партнерство: {{uniqueLink}}\n\nС уважением,\nКоманда университета",
-    variables: ["studentName", "partnershipName", "startDate", "uniqueLink"],
-  },
-  {
-    id: "reminder",
-    name: "Напоминание о партнерстве",
-    subject: "Напоминание: {{partnershipName}}",
-    body: "Уважаемый(ая) {{studentName}}!\n\nНапоминаем вам о вашем участии в программе {{partnershipName}}.\n\nТекущий статус: {{status}}\n\nСсылка: {{uniqueLink}}\n\nС уважением,\nКоманда университета",
-    variables: ["studentName", "partnershipName", "status", "uniqueLink"],
-  },
-];
-
-// Замена переменных в шаблоне
-const replaceTemplateVariables = (template: string, variables: Record<string, string>): string => {
-  let result = template;
-  Object.entries(variables).forEach(([key, value]) => {
-    result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
-  });
-  return result;
 };
 
 export default function UniversitiesPage() {
