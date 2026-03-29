@@ -33,7 +33,7 @@ export function MetricCard({
               </p>
             )}
           </div>
-          <div className={cn("h-12 w-12 rounded-full flex items-center justify-center", iconBgClassName)}>
+          <div className={cn("flex size-12 items-center justify-center rounded-full", iconBgClassName)}>
             {icon}
           </div>
         </div>

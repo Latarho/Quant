@@ -5463,7 +5463,7 @@ export default function UniversitiesPage() {
                                                           <Badge variant="outline" className={cn("text-sm", eventTypeBadgeColors[event.type])}>
                                                             {eventTypeLabels[event.type]}
                                                           </Badge>
-                                                          <span className="text-xs text-muted-foreground">
+                                                          <span className="text-sm text-muted-foreground">
                                                             {formatDate(event.date)} — {formatDate(event.endDate)}
                                                           </span>
                                                         </div>
@@ -5510,7 +5510,7 @@ export default function UniversitiesPage() {
                                                                   <span className="font-medium">{event.universityContact.name || "—"}</span>
                                                                   {event.universityContact.position && <span className="text-muted-foreground"> ({event.universityContact.position})</span>}
                                                                   {(event.universityContact.phone || event.universityContact.email) && (
-                                                                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-muted-foreground text-xs">
+                                                                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-muted-foreground text-sm">
                                                                       {event.universityContact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{event.universityContact.phone}</span>}
                                                                       {event.universityContact.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{event.universityContact.email}</span>}
                                                                     </div>
@@ -5855,7 +5855,7 @@ export default function UniversitiesPage() {
                                               <Label className="text-sm font-semibold">Материалы:</Label>
                                               <div className="flex flex-wrap gap-1">
                                                 {event.ecosystemData.materials.map((mat) => (
-                                                  <span key={mat.id} className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-0.5 text-xs">
+                                                  <span key={mat.id} className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-0.5 text-sm">
                                                     <FileText className="h-3 w-3 text-muted-foreground" />
                                                     <span className="truncate max-w-[120px]" title={mat.name}>{mat.name}</span>
                                                   </span>
@@ -6033,13 +6033,13 @@ export default function UniversitiesPage() {
                                                               <div key={personIndex} className="flex items-center gap-2">
                                                                 <Avatar className="h-10 w-10">
                                                                   <AvatarImage src={person.image} alt={person.label} />
-                                                                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                                     {person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}
                                                                   </AvatarFallback>
                                                                 </Avatar>
                                                                 <div className="flex flex-col">
                                                                   <span className="text-sm font-medium">{person.label}</span>
-                                                                  <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                                  <span className="text-sm text-muted-foreground">{person.position}</span>
                                                                 </div>
                                                               </div>
                                                             ) : null;
@@ -6300,7 +6300,7 @@ export default function UniversitiesPage() {
                                                                   </div>
                                                                   <div className="grid grid-cols-2 gap-2">
                                                                     <div className="space-y-1">
-                                                                      <Label className="text-xs text-muted-foreground">Год начала</Label>
+                                                                      <Label className="text-sm text-muted-foreground">Год начала</Label>
                                                                       <Input
                                                                         type="number"
                                                                         value={record.year}
@@ -6315,7 +6315,7 @@ export default function UniversitiesPage() {
                                                                       />
                                                                     </div>
                                                                     <div className="space-y-1">
-                                                                      <Label className="text-xs text-muted-foreground">Ответственное лицо Банк</Label>
+                                                                      <Label className="text-sm text-muted-foreground">Ответственное лицо Банк</Label>
                                                                       <MultiSelect
                                                                         options={responsiblePersons.map(p => ({ value: p.value, label: p.label }))}
                                                                         selected={record.responsible}
@@ -6509,12 +6509,12 @@ export default function UniversitiesPage() {
                                                                                 {isCollapsed ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                                                                                 <Users className="h-4 w-4 text-primary" />
                                                                                 <span className="text-sm font-semibold">Контакты ВУза</span>
-                                                                                {contacts.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-medium">{contacts.length}</Badge>}
+                                                                                {contacts.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm font-medium">{contacts.length}</Badge>}
                                                                               </div>
                                                                               <Button
                                                                                 variant="outline"
                                                                                 size="sm"
-                                                                                className="h-7 px-2 text-xs"
+                                                                                className="h-7 px-2 text-sm"
                                                                                 onClick={(e) => {
                                                                                   e.stopPropagation();
                                                                                   handleAddContactInBranch(university.id, curator.id, record.id);
@@ -6532,33 +6532,33 @@ export default function UniversitiesPage() {
                                                                                     <Table>
                                                                                       <TableHeader>
                                                                                         <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[200px]">ФИО</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[180px]">Должность</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[200px]">Телефон</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[180px]">Email</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[100px] text-center">Публичный</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[50px]"></TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[200px]">ФИО</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[180px]">Должность</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[200px]">Телефон</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[180px]">Email</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[100px] text-center">Публичный</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[50px]"></TableHead>
                                                                                         </TableRow>
                                                                                       </TableHeader>
                                                                                       <TableBody>
                                                                                         {contacts.map((contact, contactIdx) => (
                                                                                           <TableRow key={contactIdx} className="group">
                                                                                             <TableCell className="py-1.5 px-3">
-                                                                                              <Input value={contact.name} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, name: e.target.value })} placeholder="ФИО" className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
+                                                                                              <Input value={contact.name} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, name: e.target.value })} placeholder="ФИО" className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
                                                                                             </TableCell>
                                                                                             <TableCell className="py-1.5 px-3">
-                                                                                              <Input value={contact.position || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, position: e.target.value })} placeholder="Должность" className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
+                                                                                              <Input value={contact.position || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, position: e.target.value })} placeholder="Должность" className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
                                                                                             </TableCell>
                                                                                             <TableCell className="py-1.5 px-3">
                                                                                               <div className="flex items-center gap-1">
                                                                                                 <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
-                                                                                                <Input value={contact.phone || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, phone: e.target.value })} placeholder="Телефон" className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
+                                                                                                <Input value={contact.phone || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, phone: e.target.value })} placeholder="Телефон" className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
                                                                                               </div>
                                                                                             </TableCell>
                                                                                             <TableCell className="py-1.5 px-3">
                                                                                               <div className="flex items-center gap-1">
                                                                                                 <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
-                                                                                                <Input type="email" value={contact.email || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, email: e.target.value })} placeholder="Email" className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
+                                                                                                <Input type="email" value={contact.email || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, email: e.target.value })} placeholder="Email" className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
                                                                                               </div>
                                                                                             </TableCell>
                                                                                             <TableCell className="py-1.5 px-3 text-center">
@@ -6599,7 +6599,7 @@ export default function UniversitiesPage() {
                                                                     </div>
                                                                     <div className="flex flex-col items-end gap-2 shrink-0">
                                                                       <div className="flex items-center gap-2">
-                                                                        <Label htmlFor={`bko-branch-line-active-${curator.id}-${record.id}`} className="text-xs text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
+                                                                        <Label htmlFor={`bko-branch-line-active-${curator.id}-${record.id}`} className="text-sm text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
                                                                         <Switch
                                                                           id={`bko-branch-line-active-${curator.id}-${record.id}`}
                                                                           checked={record.isActive !== false}
@@ -6762,12 +6762,12 @@ export default function UniversitiesPage() {
                                               return (
                                                 <TableRow key={c.id}>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    <Badge variant="outline" className="text-xs px-2 py-0.5">
+                                                    <Badge variant="outline" className="text-sm px-2 py-0.5">
                                                       {blockLabel}
                                                     </Badge>
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    {c.contractBranch ? <Badge variant="secondary" className="text-xs px-2 py-0.5">{c.contractBranch}</Badge> : <span className="text-muted-foreground">—</span>}
+                                                    {c.contractBranch ? <Badge variant="secondary" className="text-sm px-2 py-0.5">{c.contractBranch}</Badge> : <span className="text-muted-foreground">—</span>}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
                                                     <div className="flex flex-col gap-0.5">
@@ -6780,7 +6780,7 @@ export default function UniversitiesPage() {
                                                     {c.period ? `${formatDate(c.period.start)} — ${formatDate(c.period.end)}` : "—"}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    {c.archived ? <Badge variant="outline" className="text-xs px-2 py-0.5">Архивный</Badge> : showExpired ? <Badge variant="destructive" className="text-xs px-2 py-0.5">Истёк срок</Badge> : <Badge variant="outline" className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>}
+                                                    {c.archived ? <Badge variant="outline" className="text-sm px-2 py-0.5">Архивный</Badge> : showExpired ? <Badge variant="destructive" className="text-sm px-2 py-0.5">Истёк срок</Badge> : <Badge variant="outline" className="text-sm px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal max-w-[200px]">
                                                     {c.asddLink ? <a href={c.asddLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{c.asddLink}</a> : "—"}
@@ -6964,12 +6964,12 @@ export default function UniversitiesPage() {
                                               return (
                                                 <TableRow key={c.id}>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    <Badge variant="outline" className="text-xs px-2 py-0.5">
+                                                    <Badge variant="outline" className="text-sm px-2 py-0.5">
                                                       {blockLabel}
                                                     </Badge>
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    {c.contractBranch ? <Badge variant="secondary" className="text-xs px-2 py-0.5">{c.contractBranch}</Badge> : <span className="text-muted-foreground">—</span>}
+                                                    {c.contractBranch ? <Badge variant="secondary" className="text-sm px-2 py-0.5">{c.contractBranch}</Badge> : <span className="text-muted-foreground">—</span>}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
                                                     <div className="flex flex-col gap-0.5">
@@ -6982,7 +6982,7 @@ export default function UniversitiesPage() {
                                                     {c.period ? `${formatDate(c.period.start)} — ${formatDate(c.period.end)}` : "—"}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    {c.archived ? <Badge variant="outline" className="text-xs px-2 py-0.5">Архивный</Badge> : showExpired ? <Badge variant="destructive" className="text-xs px-2 py-0.5">Истёк срок</Badge> : <Badge variant="outline" className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>}
+                                                    {c.archived ? <Badge variant="outline" className="text-sm px-2 py-0.5">Архивный</Badge> : showExpired ? <Badge variant="destructive" className="text-sm px-2 py-0.5">Истёк срок</Badge> : <Badge variant="outline" className="text-sm px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal max-w-[200px]">
                                                     {c.asddLink ? <a href={c.asddLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{c.asddLink}</a> : "—"}
@@ -7082,12 +7082,12 @@ export default function UniversitiesPage() {
                                               return (
                                                 <TableRow key={c.id}>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    <Badge variant="outline" className="text-xs px-2 py-0.5">
+                                                    <Badge variant="outline" className="text-sm px-2 py-0.5">
                                                       {blockLabel}
                                                     </Badge>
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    {c.contractBranch ? <Badge variant="secondary" className="text-xs px-2 py-0.5">{c.contractBranch}</Badge> : <span className="text-muted-foreground">—</span>}
+                                                    {c.contractBranch ? <Badge variant="secondary" className="text-sm px-2 py-0.5">{c.contractBranch}</Badge> : <span className="text-muted-foreground">—</span>}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
                                                     <div className="flex flex-col gap-0.5">
@@ -7100,7 +7100,7 @@ export default function UniversitiesPage() {
                                                     {c.period ? `${formatDate(c.period.start)} — ${formatDate(c.period.end)}` : "—"}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    {c.archived ? <Badge variant="outline" className="text-xs px-2 py-0.5">Архивный</Badge> : showExpired ? <Badge variant="destructive" className="text-xs px-2 py-0.5">Истёк срок</Badge> : <Badge variant="outline" className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>}
+                                                    {c.archived ? <Badge variant="outline" className="text-sm px-2 py-0.5">Архивный</Badge> : showExpired ? <Badge variant="destructive" className="text-sm px-2 py-0.5">Истёк срок</Badge> : <Badge variant="outline" className="text-sm px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal max-w-[200px]">
                                                     {c.asddLink ? <a href={c.asddLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{c.asddLink}</a> : "—"}
@@ -7200,12 +7200,12 @@ export default function UniversitiesPage() {
                                               return (
                                                 <TableRow key={c.id}>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    <Badge variant="outline" className="text-xs px-2 py-0.5">
+                                                    <Badge variant="outline" className="text-sm px-2 py-0.5">
                                                       {blockLabel}
                                                     </Badge>
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    {c.contractBranch ? <Badge variant="secondary" className="text-xs px-2 py-0.5">{c.contractBranch}</Badge> : <span className="text-muted-foreground">—</span>}
+                                                    {c.contractBranch ? <Badge variant="secondary" className="text-sm px-2 py-0.5">{c.contractBranch}</Badge> : <span className="text-muted-foreground">—</span>}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
                                                     <div className="flex flex-col gap-0.5">
@@ -7218,7 +7218,7 @@ export default function UniversitiesPage() {
                                                     {c.period ? `${formatDate(c.period.start)} — ${formatDate(c.period.end)}` : "—"}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal">
-                                                    {c.archived ? <Badge variant="outline" className="text-xs px-2 py-0.5">Архивный</Badge> : showExpired ? <Badge variant="destructive" className="text-xs px-2 py-0.5">Истёк срок</Badge> : <Badge variant="outline" className="text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>}
+                                                    {c.archived ? <Badge variant="outline" className="text-sm px-2 py-0.5">Архивный</Badge> : showExpired ? <Badge variant="destructive" className="text-sm px-2 py-0.5">Истёк срок</Badge> : <Badge variant="outline" className="text-sm px-2 py-0.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">Активный</Badge>}
                                                   </TableCell>
                                                   <TableCell className="px-4 whitespace-normal max-w-[200px]">
                                                     {c.asddLink ? <a href={c.asddLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{c.asddLink}</a> : "—"}
@@ -7474,7 +7474,7 @@ export default function UniversitiesPage() {
                               <TabsTrigger value="events" className="flex items-center justify-center gap-2">
                                 Мероприятия
                                 {university.cntrEventsItems && university.cntrEventsItems.length > 0 && (
-                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                     {university.cntrEventsItems.length}
                                   </Badge>
                                 )}
@@ -7482,7 +7482,7 @@ export default function UniversitiesPage() {
                               <TabsTrigger value="infrastructure" className="flex items-center justify-center gap-2">
                                 Инфраструктура
                                 {university.cntrInfrastructure && university.cntrInfrastructure.length > 0 && (
-                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                     {university.cntrInfrastructure.length}
                                   </Badge>
                                 )}
@@ -7490,7 +7490,7 @@ export default function UniversitiesPage() {
                               <TabsTrigger value="projects" className="flex items-center justify-center gap-2">
                                 Развитие НТП
                                 {university.cntrProjects && university.cntrProjects.length > 0 && (
-                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                     {university.cntrProjects.length}
                                   </Badge>
                                 )}
@@ -7498,7 +7498,7 @@ export default function UniversitiesPage() {
                               <TabsTrigger value="accelerator" className="flex items-center justify-center gap-2">
                                 Акселератор
                                 {university.cntrAcceleratorItems && university.cntrAcceleratorItems.length > 0 && (
-                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                     {university.cntrAcceleratorItems.length}
                                   </Badge>
                                 )}
@@ -7506,7 +7506,7 @@ export default function UniversitiesPage() {
                               <TabsTrigger value="agreements" className="flex items-center justify-center gap-2">
                                 Соглашения
                                 {university.cntrAgreementItems && university.cntrAgreementItems.length > 0 && (
-                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                     {university.cntrAgreementItems.length}
                                   </Badge>
                                 )}
@@ -7514,7 +7514,7 @@ export default function UniversitiesPage() {
                               <TabsTrigger value="educational" className="flex items-center justify-center gap-2">
                                 Образование
                                 {university.cntrEducationalProjectsItems && university.cntrEducationalProjectsItems.length > 0 && (
-                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                     {university.cntrEducationalProjectsItems.length}
                                   </Badge>
                                 )}
@@ -7531,7 +7531,7 @@ export default function UniversitiesPage() {
                                   <TabsTrigger value="branches" className="flex items-center gap-2">
                                     Филиалы ВУЗа
                                     {university.branchCurators && university.branchCurators.length > 0 && (
-                                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                         {university.branchCurators.length}
                                       </Badge>
                                     )}
@@ -7601,13 +7601,13 @@ export default function UniversitiesPage() {
                                                           <div key={personIndex} className="flex items-center gap-2">
                                                             <Avatar className="h-10 w-10">
                                                               <AvatarImage src={person.image} alt={person.label} />
-                                                              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                              <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                                 {person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}
                                                               </AvatarFallback>
                                                             </Avatar>
                                                             <div className="flex flex-col">
                                                               <span className="text-sm font-medium">{person.label}</span>
-                                                              <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                              <span className="text-sm text-muted-foreground">{person.position}</span>
                                                             </div>
                                                           </div>
                                                         ) : null;
@@ -7635,13 +7635,13 @@ export default function UniversitiesPage() {
                                                           <Users className="h-4 w-4 text-primary" />
                                                           <span className="text-sm font-semibold">Контакты ВУза</span>
                                                           {contacts.length > 0 && (
-                                                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-medium">{contacts.length}</Badge>
+                                                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm font-medium">{contacts.length}</Badge>
                                                           )}
                                                         </div>
                                                         <Button
                                                           variant="outline"
                                                           size="sm"
-                                                          className="h-7 px-2 text-xs"
+                                                          className="h-7 px-2 text-sm"
                                                           onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleAddContactInMain(university.id, record.id);
@@ -7659,12 +7659,12 @@ export default function UniversitiesPage() {
                                                               <Table>
                                                                 <TableHeader>
                                                                   <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                                                    <TableHead className="h-9 text-xs font-semibold w-[200px]">ФИО</TableHead>
-                                                                    <TableHead className="h-9 text-xs font-semibold w-[180px]">Должность</TableHead>
-                                                                    <TableHead className="h-9 text-xs font-semibold w-[200px]">Телефон</TableHead>
-                                                                    <TableHead className="h-9 text-xs font-semibold w-[180px]">Email</TableHead>
-                                                                    <TableHead className="h-9 text-xs font-semibold w-[100px] text-center">Публичный</TableHead>
-                                                                    <TableHead className="h-9 text-xs font-semibold w-[50px]"></TableHead>
+                                                                    <TableHead className="h-9 text-sm font-semibold w-[200px]">ФИО</TableHead>
+                                                                    <TableHead className="h-9 text-sm font-semibold w-[180px]">Должность</TableHead>
+                                                                    <TableHead className="h-9 text-sm font-semibold w-[200px]">Телефон</TableHead>
+                                                                    <TableHead className="h-9 text-sm font-semibold w-[180px]">Email</TableHead>
+                                                                    <TableHead className="h-9 text-sm font-semibold w-[100px] text-center">Публичный</TableHead>
+                                                                    <TableHead className="h-9 text-sm font-semibold w-[50px]"></TableHead>
                                                                   </TableRow>
                                                                 </TableHeader>
                                                                 <TableBody>
@@ -7675,7 +7675,7 @@ export default function UniversitiesPage() {
                                                                           value={contact.name}
                                                                           onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, name: e.target.value })}
                                                                           placeholder="ФИО"
-                                                                          className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                          className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                         />
                                                                       </TableCell>
                                                                       <TableCell className="py-1.5 px-3">
@@ -7683,7 +7683,7 @@ export default function UniversitiesPage() {
                                                                           value={contact.position || ""}
                                                                           onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, position: e.target.value })}
                                                                           placeholder="Должность"
-                                                                          className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                          className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                         />
                                                                       </TableCell>
                                                                       <TableCell className="py-1.5 px-3">
@@ -7693,7 +7693,7 @@ export default function UniversitiesPage() {
                                                                             value={contact.phone || ""}
                                                                             onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, phone: e.target.value })}
                                                                             placeholder="Телефон"
-                                                                            className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                            className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                           />
                                                                         </div>
                                                                       </TableCell>
@@ -7705,7 +7705,7 @@ export default function UniversitiesPage() {
                                                                             value={contact.email || ""}
                                                                             onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, email: e.target.value })}
                                                                             placeholder="Email"
-                                                                            className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                            className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                           />
                                                                         </div>
                                                                       </TableCell>
@@ -7756,7 +7756,7 @@ export default function UniversitiesPage() {
                                               </div>
                                               <div className="flex flex-col items-end gap-2 shrink-0">
                                                 <div className="flex items-center gap-2">
-                                                  <Label htmlFor={`cntr-line-active-${record.id}`} className="text-xs text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
+                                                  <Label htmlFor={`cntr-line-active-${record.id}`} className="text-sm text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
                                                   <Switch
                                                     id={`cntr-line-active-${record.id}`}
                                                     checked={record.isActive !== false}
@@ -7801,7 +7801,7 @@ export default function UniversitiesPage() {
                                               <div className="flex-1 space-y-1.5">
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                   <div className="space-y-1">
-                                                    <Label htmlFor={`cntr-edit-curator-city-${curator.id}`} className="text-xs text-muted-foreground">Город</Label>
+                                                    <Label htmlFor={`cntr-edit-curator-city-${curator.id}`} className="text-sm text-muted-foreground">Город</Label>
                                                     <Input
                                                       id={`cntr-edit-curator-city-${curator.id}`}
                                                       placeholder="Москва"
@@ -7811,7 +7811,7 @@ export default function UniversitiesPage() {
                                                     />
                                                   </div>
                                                   <div className="space-y-1">
-                                                    <Label htmlFor={`cntr-edit-curator-branch-${curator.id}`} className="text-xs text-muted-foreground">Филиал</Label>
+                                                    <Label htmlFor={`cntr-edit-curator-branch-${curator.id}`} className="text-sm text-muted-foreground">Филиал</Label>
                                                     <Input
                                                       id={`cntr-edit-curator-branch-${curator.id}`}
                                                       placeholder="Московский филиал"
@@ -7822,7 +7822,7 @@ export default function UniversitiesPage() {
                                                   </div>
                                                 </div>
                                                 <div className="space-y-2">
-                                                  <Label className="text-xs text-muted-foreground">Линии сотрудничества ЦНТР (максимум 3)</Label>
+                                                  <Label className="text-sm text-muted-foreground">Линии сотрудничества ЦНТР (максимум 3)</Label>
                                                   <div className="space-y-3">
                                                     {editingCurator.cooperationLines.filter((r) => r.line === "cntr").map((record) => {
                                                       const origIndex = editingCurator.cooperationLines.findIndex((r) => r === record);
@@ -7844,7 +7844,7 @@ export default function UniversitiesPage() {
                                                           </div>
                                                           <div className="grid grid-cols-2 gap-2">
                                                             <div className="space-y-1">
-                                                              <Label className="text-xs text-muted-foreground">Год начала</Label>
+                                                              <Label className="text-sm text-muted-foreground">Год начала</Label>
                                                               <Input
                                                                 type="number"
                                                                 value={record.year}
@@ -7859,7 +7859,7 @@ export default function UniversitiesPage() {
                                                               />
                                                             </div>
                                                             <div className="space-y-1">
-                                                              <Label className="text-xs text-muted-foreground">Ответственное лицо Банк</Label>
+                                                              <Label className="text-sm text-muted-foreground">Ответственное лицо Банк</Label>
                                                               <MultiSelect
                                                                 options={responsiblePersons.map(p => ({ value: p.value, label: p.label }))}
                                                                 selected={record.responsible}
@@ -8020,13 +8020,13 @@ export default function UniversitiesPage() {
                                                                         <div key={personIndex} className="flex items-center gap-2">
                                                                           <Avatar className="h-10 w-10">
                                                                             <AvatarImage src={person.image} alt={person.label} />
-                                                                            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                                            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                                               {person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}
                                                                             </AvatarFallback>
                                                                           </Avatar>
                                                                           <div className="flex flex-col">
                                                                             <span className="text-sm font-medium">{person.label}</span>
-                                                                            <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                                            <span className="text-sm text-muted-foreground">{person.position}</span>
                                                                           </div>
                                                                         </div>
                                                                       ) : null;
@@ -8037,7 +8037,7 @@ export default function UniversitiesPage() {
                                                             </div>
                                                             <div className="flex flex-col items-end gap-2 shrink-0">
                                                               <div className="flex items-center gap-2">
-                                                                <Label htmlFor={`cntr-branch-line-active-${curator.id}-${record.id}`} className="text-xs text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
+                                                                <Label htmlFor={`cntr-branch-line-active-${curator.id}-${record.id}`} className="text-sm text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
                                                                 <Switch
                                                                   id={`cntr-branch-line-active-${curator.id}-${record.id}`}
                                                                   checked={record.isActive !== false}
@@ -9438,7 +9438,7 @@ export default function UniversitiesPage() {
                                                       <div className="flex items-center justify-between gap-2 flex-wrap">
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                           <Badge variant="outline" className={getEventTypeBadgeClassName(eventType)}>{EVENT_TYPE_LABELS[eventType]}</Badge>
-                                                          <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor("cntr"))}>
+                                                          <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor("cntr"))}>
                                                             {getCooperationLineLabel("cntr")}
                                                           </Badge>
                                                           <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -9457,7 +9457,7 @@ export default function UniversitiesPage() {
                                                           <Label className="text-sm font-semibold">Материалы:</Label>
                                                           <div className="flex flex-wrap gap-1">
                                                             {item.materials.map((mat) => (
-                                                              <span key={mat.id} className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-0.5 text-xs">
+                                                              <span key={mat.id} className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-0.5 text-sm">
                                                                 <FileText className="h-3 w-3 text-muted-foreground" />
                                                                 <span className="truncate max-w-[120px]" title={mat.name}>{mat.name}</span>
                                                               </span>
@@ -9486,7 +9486,7 @@ export default function UniversitiesPage() {
                                                                 <span className="font-medium">{item.universityContact.name || "—"}</span>
                                                                 {item.universityContact.position && <span className="text-muted-foreground"> ({item.universityContact.position})</span>}
                                                                 {(item.universityContact.phone || item.universityContact.email) && (
-                                                                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-muted-foreground text-xs">
+                                                                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-muted-foreground text-sm">
                                                                     {item.universityContact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{item.universityContact.phone}</span>}
                                                                     {item.universityContact.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{item.universityContact.email}</span>}
                                                                   </div>
@@ -9540,7 +9540,7 @@ export default function UniversitiesPage() {
                                                     </div>
                                                     <div className="flex flex-col items-end gap-2 shrink-0">
                                                       <div className="flex items-center gap-2">
-                                                        <Label htmlFor={`cntr-event-feed-switch-${item.id}`} className="text-xs text-muted-foreground cursor-pointer leading-tight block text-right">
+                                                        <Label htmlFor={`cntr-event-feed-switch-${item.id}`} className="text-sm text-muted-foreground cursor-pointer leading-tight block text-right">
                                                           В ленте
                                                           <br />
                                                           мероприятий
@@ -11023,7 +11023,7 @@ export default function UniversitiesPage() {
                                         <TabsTrigger value="branches" className="flex items-center gap-2">
                                           Филиалы ВУЗа
                                           {university.branchCurators && university.branchCurators.length > 0 && (
-                                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                               {university.branchCurators.length}
                                             </Badge>
                                           )}
@@ -11084,13 +11084,13 @@ export default function UniversitiesPage() {
                                                               <div key={personIndex} className="flex items-center gap-2">
                                                                 <Avatar className="h-10 w-10">
                                                                   <AvatarImage src={person.image} alt={person.label} />
-                                                                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                                     {person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}
                                                                   </AvatarFallback>
                                                                 </Avatar>
                                                                 <div className="flex flex-col">
                                                                   <span className="text-sm font-medium">{person.label}</span>
-                                                                  <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                                  <span className="text-sm text-muted-foreground">{person.position}</span>
                                                                 </div>
                                                               </div>
                                                             ) : null;
@@ -11119,13 +11119,13 @@ export default function UniversitiesPage() {
                                                               <Users className="h-4 w-4 text-primary" />
                                                               <span className="text-sm font-semibold">Контакты ВУза</span>
                                                               {contacts.length > 0 && (
-                                                                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-medium">{contacts.length}</Badge>
+                                                                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm font-medium">{contacts.length}</Badge>
                                                               )}
                                                             </div>
                                                             <Button
                                                               variant="outline"
                                                               size="sm"
-                                                              className="h-7 px-2 text-xs"
+                                                              className="h-7 px-2 text-sm"
                                                               onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleAddContactInMain(university.id, record.id);
@@ -11143,12 +11143,12 @@ export default function UniversitiesPage() {
                                                                   <Table>
                                                                     <TableHeader>
                                                                       <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                                                      <TableHead className="h-9 text-xs font-semibold w-[200px]">ФИО</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[180px]">Должность</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[200px]">Телефон</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[180px]">Email</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[100px] text-center">Публичный</TableHead>
-                                                                        <TableHead className="h-9 text-xs font-semibold w-[50px]"></TableHead>
+                                                                      <TableHead className="h-9 text-sm font-semibold w-[200px]">ФИО</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[180px]">Должность</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[200px]">Телефон</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[180px]">Email</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[100px] text-center">Публичный</TableHead>
+                                                                        <TableHead className="h-9 text-sm font-semibold w-[50px]"></TableHead>
                                                                       </TableRow>
                                                                     </TableHeader>
                                                                     <TableBody>
@@ -11159,7 +11159,7 @@ export default function UniversitiesPage() {
                                                                               value={contact.name}
                                                                               onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, name: e.target.value })}
                                                                               placeholder="ФИО"
-                                                                              className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                              className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                             />
                                                                           </TableCell>
                                                                           <TableCell className="py-1.5 px-3">
@@ -11167,7 +11167,7 @@ export default function UniversitiesPage() {
                                                                               value={contact.position || ""}
                                                                               onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, position: e.target.value })}
                                                                               placeholder="Должность"
-                                                                              className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                              className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                             />
                                                                           </TableCell>
                                                                           <TableCell className="py-1.5 px-3">
@@ -11177,7 +11177,7 @@ export default function UniversitiesPage() {
                                                                                 value={contact.phone || ""}
                                                                                 onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, phone: e.target.value })}
                                                                                 placeholder="Телефон"
-                                                                                className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                                className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                               />
                                                                             </div>
                                                                           </TableCell>
@@ -11189,7 +11189,7 @@ export default function UniversitiesPage() {
                                                                                 value={contact.email || ""}
                                                                                 onChange={(e) => handleUpdateContactInMain(university.id, record.id, contactIdx, { ...contact, email: e.target.value })}
                                                                                 placeholder="Email"
-                                                                                className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
+                                                                                className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1"
                                                                               />
                                                                             </div>
                                                                           </TableCell>
@@ -11242,7 +11242,7 @@ export default function UniversitiesPage() {
                                                   </div>
                                                   <div className="flex flex-col items-end gap-2 shrink-0">
                                                     <div className="flex items-center gap-2">
-                                                      <Label htmlFor={`drp-line-active-${record.id}`} className="text-xs text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
+                                                      <Label htmlFor={`drp-line-active-${record.id}`} className="text-sm text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
                                                       <Switch
                                                         id={`drp-line-active-${record.id}`}
                                                         checked={record.isActive !== false}
@@ -11292,7 +11292,7 @@ export default function UniversitiesPage() {
                                                       <div className="flex-1 space-y-1.5">
                                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                           <div className="space-y-1">
-                                                            <Label htmlFor={`drp-edit-curator-city-${curator.id}`} className="text-xs text-muted-foreground">Город</Label>
+                                                            <Label htmlFor={`drp-edit-curator-city-${curator.id}`} className="text-sm text-muted-foreground">Город</Label>
                                                             <Input
                                                               id={`drp-edit-curator-city-${curator.id}`}
                                                               placeholder="Москва"
@@ -11302,7 +11302,7 @@ export default function UniversitiesPage() {
                                                             />
                                                           </div>
                                                           <div className="space-y-1">
-                                                            <Label htmlFor={`drp-edit-curator-branch-${curator.id}`} className="text-xs text-muted-foreground">Филиал</Label>
+                                                            <Label htmlFor={`drp-edit-curator-branch-${curator.id}`} className="text-sm text-muted-foreground">Филиал</Label>
                                                             <Input
                                                               id={`drp-edit-curator-branch-${curator.id}`}
                                                               placeholder="Московский филиал"
@@ -11313,7 +11313,7 @@ export default function UniversitiesPage() {
                                                           </div>
                                                         </div>
                                                         <div className="space-y-2">
-                                                          <Label className="text-xs text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
+                                                          <Label className="text-sm text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
                                                           <div className="space-y-3">
                                                             {editingCurator.cooperationLines.map((record, index) => {
                                                               const origIndex = index;
@@ -11354,7 +11354,7 @@ export default function UniversitiesPage() {
                                                                   </div>
                                                                   <div className="grid grid-cols-2 gap-2">
                                                                     <div className="space-y-1">
-                                                                      <Label className="text-xs text-muted-foreground">Год начала</Label>
+                                                                      <Label className="text-sm text-muted-foreground">Год начала</Label>
                                                                       <Input
                                                                         type="number"
                                                                         value={record.year}
@@ -11369,7 +11369,7 @@ export default function UniversitiesPage() {
                                                                       />
                                                                     </div>
                                                                     <div className="space-y-1">
-                                                                      <Label className="text-xs text-muted-foreground">Ответственное лицо Банк</Label>
+                                                                      <Label className="text-sm text-muted-foreground">Ответственное лицо Банк</Label>
                                                                       <MultiSelect
                                                                         options={responsiblePersons.map(p => ({ value: p.value, label: p.label }))}
                                                                         selected={record.responsible}
@@ -11530,13 +11530,13 @@ export default function UniversitiesPage() {
                                                                                 <div key={personIndex} className="flex items-center gap-2">
                                                                                   <Avatar className="h-10 w-10">
                                                                                     <AvatarImage src={person.image} alt={person.label} />
-                                                                                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                                                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                                                       {person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}
                                                                                     </AvatarFallback>
                                                                                   </Avatar>
                                                                                   <div className="flex flex-col">
                                                                                     <span className="text-sm font-medium">{person.label}</span>
-                                                                                    <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                                                    <span className="text-sm text-muted-foreground">{person.position}</span>
                                                                                   </div>
                                                                                 </div>
                                                                               ) : null;
@@ -11563,12 +11563,12 @@ export default function UniversitiesPage() {
                                                                                 {isCollapsed ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                                                                                 <Users className="h-4 w-4 text-primary" />
                                                                                 <span className="text-sm font-semibold">Контакты ВУза</span>
-                                                                                {contacts.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-medium">{contacts.length}</Badge>}
+                                                                                {contacts.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm font-medium">{contacts.length}</Badge>}
                                                                               </div>
                                                                               <Button
                                                                                 variant="outline"
                                                                                 size="sm"
-                                                                                className="h-7 px-2 text-xs"
+                                                                                className="h-7 px-2 text-sm"
                                                                                 onClick={(e) => {
                                                                                   e.stopPropagation();
                                                                                   handleAddContactInBranch(university.id, curator.id, record.id);
@@ -11586,33 +11586,33 @@ export default function UniversitiesPage() {
                                                                                     <Table>
                                                                                       <TableHeader>
                                                                                         <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[200px]">ФИО</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[180px]">Должность</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[200px]">Телефон</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[180px]">Email</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[100px] text-center">Публичный</TableHead>
-                                                                                          <TableHead className="h-9 text-xs font-semibold w-[50px]"></TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[200px]">ФИО</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[180px]">Должность</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[200px]">Телефон</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[180px]">Email</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[100px] text-center">Публичный</TableHead>
+                                                                                          <TableHead className="h-9 text-sm font-semibold w-[50px]"></TableHead>
                                                                                         </TableRow>
                                                                                       </TableHeader>
                                                                                       <TableBody>
                                                                                         {contacts.map((contact, contactIdx) => (
                                                                                           <TableRow key={contactIdx} className="group">
                                                                                             <TableCell className="py-1.5 px-3">
-                                                                                              <Input value={contact.name} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, name: e.target.value })} placeholder="ФИО" className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
+                                                                                              <Input value={contact.name} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, name: e.target.value })} placeholder="ФИО" className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
                                                                                             </TableCell>
                                                                                             <TableCell className="py-1.5 px-3">
-                                                                                              <Input value={contact.position || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, position: e.target.value })} placeholder="Должность" className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
+                                                                                              <Input value={contact.position || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, position: e.target.value })} placeholder="Должность" className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
                                                                                             </TableCell>
                                                                                             <TableCell className="py-1.5 px-3">
                                                                                               <div className="flex items-center gap-1">
                                                                                                 <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
-                                                                                                <Input value={contact.phone || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, phone: e.target.value })} placeholder="Телефон" className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
+                                                                                                <Input value={contact.phone || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, phone: e.target.value })} placeholder="Телефон" className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
                                                                                               </div>
                                                                                             </TableCell>
                                                                                             <TableCell className="py-1.5 px-3">
                                                                                               <div className="flex items-center gap-1">
                                                                                                 <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
-                                                                                                <Input type="email" value={contact.email || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, email: e.target.value })} placeholder="Email" className="h-7 text-xs border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
+                                                                                                <Input type="email" value={contact.email || ""} onChange={(e) => handleUpdateContactInBranch(university.id, curator.id, record.id, contactIdx, { ...contact, email: e.target.value })} placeholder="Email" className="h-7 text-sm border-0 bg-transparent hover:bg-muted/50 focus:bg-background px-1" />
                                                                                               </div>
                                                                                             </TableCell>
                                                                                             <TableCell className="py-1.5 px-3 text-center">
@@ -11653,7 +11653,7 @@ export default function UniversitiesPage() {
                                                                     </div>
                                                                     <div className="flex flex-col items-end gap-2 shrink-0">
                                                                       <div className="flex items-center gap-2">
-                                                                        <Label htmlFor={`drp-branch-line-active-${curator.id}-${record.id}`} className="text-xs text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
+                                                                        <Label htmlFor={`drp-branch-line-active-${curator.id}-${record.id}`} className="text-sm text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
                                                                         <Switch
                                                                           id={`drp-branch-line-active-${curator.id}-${record.id}`}
                                                                           checked={record.isActive !== false}
@@ -11946,7 +11946,7 @@ export default function UniversitiesPage() {
                                                             <div className="flex items-center gap-2 flex-wrap">
                                                               <Badge variant="outline" className={getEventTypeBadgeClassName(event.type)}>{eventTypeLabels[event.type]}</Badge>
                                                               {event.cooperationLine && event.cooperationLine.length > 0 && event.cooperationLine.map((line) => (
-                                                                <Badge key={line} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(line))}>
+                                                                <Badge key={line} variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(line))}>
                                                                   {getCooperationLineLabel(line)}
                                                                 </Badge>
                                                               ))}
@@ -11966,7 +11966,7 @@ export default function UniversitiesPage() {
                                                               <Label className="text-sm font-semibold">Материалы:</Label>
                                                               <div className="flex flex-wrap gap-1">
                                                                 {event.ecosystemData.materials.map((mat) => (
-                                                                  <span key={mat.id} className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-0.5 text-xs">
+                                                                  <span key={mat.id} className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-0.5 text-sm">
                                                                     <FileText className="h-3 w-3 text-muted-foreground" />
                                                                     <span className="truncate max-w-[120px]" title={mat.name}>{mat.name}</span>
                                                                   </span>
@@ -11983,7 +11983,7 @@ export default function UniversitiesPage() {
                                                           {/* Горизонтальная черта и блок: тег филиала, ВУЗ (контакт мероприятия или университета), Банк */}
                                                           <div className="pt-2.5 mt-2 border-t space-y-2.5">
                                                             {event.branch && (
-                                                              <Badge variant="secondary" className="text-xs">
+                                                              <Badge variant="secondary" className="text-sm">
                                                                 {event.branch}
                                                               </Badge>
                                                             )}
@@ -11996,7 +11996,7 @@ export default function UniversitiesPage() {
                                                                     <span className="font-medium">{event.universityContact.name || "—"}</span>
                                                                     {event.universityContact.position && <span className="text-muted-foreground"> ({event.universityContact.position})</span>}
                                                                     {(event.universityContact.phone || event.universityContact.email) && (
-                                                                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-muted-foreground text-xs">
+                                                                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-muted-foreground text-sm">
                                                                         {event.universityContact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{event.universityContact.phone}</span>}
                                                                         {event.universityContact.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{event.universityContact.email}</span>}
                                                                       </div>
@@ -12050,7 +12050,7 @@ export default function UniversitiesPage() {
                                                         </div>
                                                         <div className="flex flex-col items-end gap-2 shrink-0">
                                                           <div className="flex items-center gap-2">
-                                                            <Label htmlFor={`event-feed-switch-${event.id}`} className="text-xs text-muted-foreground cursor-pointer leading-tight block text-right">
+                                                            <Label htmlFor={`event-feed-switch-${event.id}`} className="text-sm text-muted-foreground cursor-pointer leading-tight block text-right">
                                                               В ленте
                                                               <br />
                                                               мероприятий
@@ -12275,18 +12275,18 @@ export default function UniversitiesPage() {
                                               return (
                                                 <Card key={contract.id} className={`p-4 relative ${isExpired ? "border-2 border-red-300" : ""}`}>
                                                   {isExpired && (
-                                                    <div className="absolute -top-3 left-4 px-2 bg-red-100 text-red-700 text-xs font-medium rounded border border-red-300">
+                                                    <div className="absolute -top-3 left-4 px-2 bg-red-100 text-red-700 text-sm font-medium rounded border border-red-300">
                                                       Истек срок действия договора
                                                     </div>
                                                   )}
                                                   <div className="flex items-start justify-between gap-4">
                                                     <div className="flex-1 space-y-3">
                                                       <div className="flex items-center gap-2 flex-wrap">
-                                                        <Badge variant="outline" className={cn("text-xs", getContractTypeBadgeColor(contract.type))}>
+                                                        <Badge variant="outline" className={cn("text-sm", getContractTypeBadgeColor(contract.type))}>
                                                           {contractTypeLabels[contract.type]}
                                                         </Badge>
                                                         {contract.contractBranch && (
-                                                          <Badge variant="secondary" className="text-xs">{contract.contractBranch}</Badge>
+                                                          <Badge variant="secondary" className="text-sm">{contract.contractBranch}</Badge>
                                                         )}
                                                       </div>
                                                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
@@ -12991,7 +12991,7 @@ export default function UniversitiesPage() {
                                                                           <Badge
                                                                             variant="outline"
                                                                             className={cn(
-                                                                              "text-xs px-2 py-0.5 cursor-help",
+                                                                              "text-sm px-2 py-0.5 cursor-help",
                                                                               getStatusBadgeColor("cancelled")
                                                                             )}
                                                                           >
@@ -13012,7 +13012,7 @@ export default function UniversitiesPage() {
                                                                       <Badge
                                                                         variant="outline"
                                                                         className={cn(
-                                                                          "text-xs px-2 py-0.5",
+                                                                          "text-sm px-2 py-0.5",
                                                                           getStatusBadgeColor("active")
                                                                         )}
                                                                       >
@@ -13028,7 +13028,7 @@ export default function UniversitiesPage() {
                                                                             <Badge
                                                                               variant="outline"
                                                                               className={cn(
-                                                                                "text-xs px-2 py-0.5 cursor-help",
+                                                                                "text-sm px-2 py-0.5 cursor-help",
                                                                                 getStatusBadgeColor("approved")
                                                                               )}
                                                                             >
@@ -13051,7 +13051,7 @@ export default function UniversitiesPage() {
                                                                         <Badge
                                                                           variant="outline"
                                                                           className={cn(
-                                                                            "text-xs px-2 py-0.5",
+                                                                            "text-sm px-2 py-0.5",
                                                                             getStatusBadgeColor("approved")
                                                                           )}
                                                                         >
@@ -13062,7 +13062,7 @@ export default function UniversitiesPage() {
                                                                       <Badge
                                                                         variant="outline"
                                                                         className={cn(
-                                                                          "text-xs px-2 py-0.5",
+                                                                          "text-sm px-2 py-0.5",
                                                                           getStatusBadgeColor("notStarted")
                                                                         )}
                                                                       >
@@ -13077,7 +13077,7 @@ export default function UniversitiesPage() {
                                                                           <Badge
                                                                             variant="outline"
                                                                             className={cn(
-                                                                              "text-xs px-2 py-0.5 cursor-help",
+                                                                              "text-sm px-2 py-0.5 cursor-help",
                                                                               getStatusBadgeColor("approved")
                                                                             )}
                                                                           >
@@ -13101,7 +13101,7 @@ export default function UniversitiesPage() {
                                                                       <Badge
                                                                         variant="outline"
                                                                         className={cn(
-                                                                          "text-xs px-2 py-0.5",
+                                                                          "text-sm px-2 py-0.5",
                                                                           getStatusBadgeColor("notStarted")
                                                                         )}
                                                                       >
@@ -13571,7 +13571,7 @@ export default function UniversitiesPage() {
                                                                         </div>
                                                                       ))
                                                                     ) : (
-                                                                      <span className="text-xs text-muted-foreground">Нет целевых практикантов с ответственными</span>
+                                                                      <span className="text-sm text-muted-foreground">Нет целевых практикантов с ответственными</span>
                                                                     );
                                                                   })()}
                                                                 </div>
@@ -14156,7 +14156,7 @@ export default function UniversitiesPage() {
                                                           <div className="text-sm text-muted-foreground">
                                                             Найдено: <span className="font-semibold text-foreground">{filteredParticipants.length}</span> {filteredParticipants.length === 1 ? 'участник' : filteredParticipants.length > 1 && filteredParticipants.length < 5 ? 'участника' : 'участников'}
                                                             {filteredParticipants.length !== university.caseChampionshipParticipants.length && (
-                                                              <span className="text-xs ml-1">из {university.caseChampionshipParticipants.length}</span>
+                                                              <span className="text-sm ml-1">из {university.caseChampionshipParticipants.length}</span>
                                                             )}
                                                           </div>
                                                           <div className="flex items-center gap-2">
@@ -14753,7 +14753,7 @@ export default function UniversitiesPage() {
                                                           <div className="text-sm text-muted-foreground">
                                                             Найдено: <span className="font-semibold text-foreground">{filteredScholars.length}</span> {filteredScholars.length === 1 ? 'стипендиант' : filteredScholars.length > 1 && filteredScholars.length < 5 ? 'стипендианта' : 'стипендиантов'}
                                                             {filteredScholars.length !== university.namedScholars.length && (
-                                                              <span className="text-xs ml-1">из {university.namedScholars.length}</span>
+                                                              <span className="text-sm ml-1">из {university.namedScholars.length}</span>
                                                             )}
                                                           </div>
                                                           <div className="flex items-center gap-2">
@@ -15075,7 +15075,7 @@ export default function UniversitiesPage() {
                                                                     <TableCell className="px-4">{person.name || "—"}</TableCell>
                                                                     <TableCell className="px-4">
                                                                       {event.cooperationLine && event.cooperationLine.length > 0 ? event.cooperationLine.map((l) => (
-                                                                        <Badge key={l} variant="outline" className={cn("text-xs mr-1", getCooperationLineBadgeColor(l))}>{getCooperationLineLabel(l)}</Badge>
+                                                                        <Badge key={l} variant="outline" className={cn("text-sm mr-1", getCooperationLineBadgeColor(l))}>{getCooperationLineLabel(l)}</Badge>
                                                                       )) : "—"}
                                                                     </TableCell>
                                                                     <TableCell className="px-4">{eventTypeLabels[event.type]}</TableCell>
@@ -16148,7 +16148,7 @@ export default function UniversitiesPage() {
                                         <TabsTrigger value="branches" className="flex items-center gap-2">
                                           Филиалы ВУЗа
                                           {university.branchCurators && university.branchCurators.length > 0 && (
-                                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm">
                                               {university.branchCurators.length}
                                             </Badge>
                                           )}
@@ -16191,7 +16191,7 @@ export default function UniversitiesPage() {
                                                         )}
                                                         title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"}
                                                       />
-                                                      <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>
+                                                      <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>
                                                         {getCooperationLineLabel(record.line)}
                                                       </Badge>
                                                       <div className="flex items-center gap-2">
@@ -16209,13 +16209,13 @@ export default function UniversitiesPage() {
                                                               <div key={personIndex} className="flex items-center gap-2">
                                                                 <Avatar className="h-10 w-10">
                                                                   <AvatarImage src={person.image} alt={person.label} />
-                                                                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                                                                     {person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}
                                                                   </AvatarFallback>
                                                                 </Avatar>
                                                                 <div className="flex flex-col">
                                                                   <span className="text-sm font-medium">{person.label}</span>
-                                                                  <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                                  <span className="text-sm text-muted-foreground">{person.position}</span>
                                                                 </div>
                                                               </div>
                                                             ) : null;
@@ -16243,13 +16243,13 @@ export default function UniversitiesPage() {
                                                               <Users className="h-4 w-4 text-primary" />
                                                               <span className="text-sm font-semibold">Контакты ВУза</span>
                                                               {contacts.length > 0 && (
-                                                                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-medium">{contacts.length}</Badge>
+                                                                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-sm font-medium">{contacts.length}</Badge>
                                                               )}
                                                             </div>
                                                             <Button
                                                               variant="outline"
                                                               size="sm"
-                                                              className="h-7 px-2 text-xs"
+                                                              className="h-7 px-2 text-sm"
                                                               onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleAddContactInMain(university.id, record.id);
@@ -16305,7 +16305,7 @@ export default function UniversitiesPage() {
                                                   </div>
                                                   <div className="flex flex-col items-end gap-2 shrink-0">
                                                     <div className="flex items-center gap-2">
-                                                      <Label htmlFor={`ecosystem-line-active-${record.id}`} className="text-xs text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
+                                                      <Label htmlFor={`ecosystem-line-active-${record.id}`} className="text-sm text-muted-foreground whitespace-nowrap">Работа ведётся</Label>
                                                       <Switch
                                                         id={`ecosystem-line-active-${record.id}`}
                                                         checked={record.isActive !== false}
@@ -16350,16 +16350,16 @@ export default function UniversitiesPage() {
                                                     <div className="flex-1 space-y-1.5">
                                                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                         <div className="space-y-1">
-                                                          <Label htmlFor={`ecosystem-edit-curator-city-${curator.id}`} className="text-xs text-muted-foreground">Город</Label>
+                                                          <Label htmlFor={`ecosystem-edit-curator-city-${curator.id}`} className="text-sm text-muted-foreground">Город</Label>
                                                           <Input id={`ecosystem-edit-curator-city-${curator.id}`} placeholder="Москва" value={editingCurator.city} onChange={(e) => setEditingCurator({ ...editingCurator, city: e.target.value })} className="h-9" />
                                                         </div>
                                                         <div className="space-y-1">
-                                                          <Label htmlFor={`ecosystem-edit-curator-branch-${curator.id}`} className="text-xs text-muted-foreground">Филиал</Label>
+                                                          <Label htmlFor={`ecosystem-edit-curator-branch-${curator.id}`} className="text-sm text-muted-foreground">Филиал</Label>
                                                           <Input id={`ecosystem-edit-curator-branch-${curator.id}`} placeholder="Московский филиал" value={editingCurator.branch} onChange={(e) => setEditingCurator({ ...editingCurator, branch: e.target.value })} className="h-9" />
                                                         </div>
                                                       </div>
                                                       <div className="space-y-2">
-                                                        <Label className="text-xs text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
+                                                        <Label className="text-sm text-muted-foreground">Линии сотрудничества (максимум 3)</Label>
                                                         <div className="space-y-3">
                                                           {editingCurator.cooperationLines.filter((r) => r.line === "ecosystem").map((record, index) => {
                                                             const origIndex = editingCurator.cooperationLines.findIndex((r) => r === record);
@@ -16381,11 +16381,11 @@ export default function UniversitiesPage() {
                                                                 </div>
                                                                 <div className="grid grid-cols-2 gap-2">
                                                                   <div className="space-y-1">
-                                                                    <Label className="text-xs text-muted-foreground">Год начала</Label>
+                                                                    <Label className="text-sm text-muted-foreground">Год начала</Label>
                                                                     <Input type="number" value={record.year} onChange={(e) => { const updated = editingCurator.cooperationLines.map((r, i) => i === origIndex ? { ...r, year: parseInt(e.target.value) || new Date().getFullYear() } : r); setEditingCurator({ ...editingCurator, cooperationLines: updated }); }} placeholder={String(new Date().getFullYear())} className="h-9" />
                                                                   </div>
                                                                   <div className="space-y-1">
-                                                                    <Label className="text-xs text-muted-foreground">Ответственное лицо Банк</Label>
+                                                                    <Label className="text-sm text-muted-foreground">Ответственное лицо Банк</Label>
                                                                     <MultiSelect options={responsiblePersons.map(p => ({ value: p.value, label: p.label }))} selected={record.responsible} onChange={(selected) => { const updated = editingCurator.cooperationLines.map((r, i) => i === origIndex ? { ...r, responsible: selected } : r); setEditingCurator({ ...editingCurator, cooperationLines: updated }); }} placeholder="Выберите ответственное лицо Банк" />
                                                                   </div>
                                                                 </div>
@@ -16424,7 +16424,7 @@ export default function UniversitiesPage() {
                                                                 <Separator orientation="vertical" className="h-6" />
                                                                 <div className="flex items-center gap-2 flex-wrap">
                                                                   {ecosystemLinesInBranch.map((record, idx) => (
-                                                                    <Badge key={record.id || idx} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>{getCooperationLineLabel(record.line)}</Badge>
+                                                                    <Badge key={record.id || idx} variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>{getCooperationLineLabel(record.line)}</Badge>
                                                                   ))}
                                                                 </div>
                                                               </>
@@ -16449,7 +16449,7 @@ export default function UniversitiesPage() {
                                                                 <div className="flex-1 space-y-1.5">
                                                                   <div className="flex items-center gap-2 flex-wrap">
                                                                     <span className={cn("shrink-0 h-2.5 w-2.5 rounded-full", record.isActive !== false ? "bg-green-500 dark:bg-green-400" : "bg-muted-foreground/40")} title={record.isActive !== false ? "Работа с ВУЗом ведётся" : "Работа не ведётся"} />
-                                                                    <Badge variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(record.line))}>{getCooperationLineLabel(record.line)}</Badge>
+                                                                    <Badge variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(record.line))}>{getCooperationLineLabel(record.line)}</Badge>
                                                                     <div className="flex items-center gap-2">
                                                                       <Label className="text-sm text-muted-foreground">Год начала сотрудничества:</Label>
                                                                       <span className="text-base font-medium text-foreground">{record.year}</span>
@@ -16465,11 +16465,11 @@ export default function UniversitiesPage() {
                                                                             <div key={personIndex} className="flex items-center gap-2">
                                                                               <Avatar className="h-10 w-10">
                                                                                 <AvatarImage src={person.image} alt={person.label} />
-                                                                                <AvatarFallback className="bg-primary text-primary-foreground text-xs">{person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}</AvatarFallback>
+                                                                                <AvatarFallback className="bg-primary text-primary-foreground text-sm">{person.label.split(" ").slice(1, 3).map(n => n[0]).join("").toUpperCase()}</AvatarFallback>
                                                                               </Avatar>
                                                                               <div className="flex flex-col">
                                                                                 <span className="text-sm font-medium">{person.label}</span>
-                                                                                <span className="text-xs text-muted-foreground">{person.position}</span>
+                                                                                <span className="text-sm text-muted-foreground">{person.position}</span>
                                                                               </div>
                                                                             </div>
                                                                           ) : null;
@@ -16599,7 +16599,7 @@ export default function UniversitiesPage() {
                                                         <div className="flex items-center justify-between gap-2 flex-wrap">
                                                           <div className="flex items-center gap-2 flex-wrap">
                                                             <Badge variant="outline" className={getEventTypeBadgeClassName(event.type)}>{eventTypeLabels[event.type]}</Badge>
-                                                            {event.cooperationLine && event.cooperationLine.length > 0 && event.cooperationLine.map((line) => (<Badge key={line} variant="outline" className={cn("text-xs", getCooperationLineBadgeColor(line))}>{getCooperationLineLabel(line)}</Badge>))}
+                                                            {event.cooperationLine && event.cooperationLine.length > 0 && event.cooperationLine.map((line) => (<Badge key={line} variant="outline" className={cn("text-sm", getCooperationLineBadgeColor(line))}>{getCooperationLineLabel(line)}</Badge>))}
                                                             <Calendar className="h-4 w-4 text-muted-foreground" />
                                                             <span className="text-sm font-semibold">{formatDate(event.date)} - {formatDate(event.endDate)}</span>
                                                           </div>
@@ -16607,8 +16607,8 @@ export default function UniversitiesPage() {
                                                         </div>
                                                         {event.comments && <div className="flex items-center gap-2"><Label className="text-sm font-semibold">Комментарий:</Label><span className="text-sm text-muted-foreground">{event.comments}</span></div>}
                                                         <div className="pt-2.5 mt-2 border-t space-y-2.5">
-                                                          {event.branch && <Badge variant="secondary" className="text-xs">{event.branch}</Badge>}
-                                                          <div className="flex gap-2 text-sm"><Building2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" /><div><span className="text-muted-foreground">ВУЗ: </span>{event.universityContact && (event.universityContact.name || event.universityContact.position || event.universityContact.phone || event.universityContact.email) ? (<><span className="font-medium">{event.universityContact.name || "—"}</span>{event.universityContact.position && <span className="text-muted-foreground"> ({event.universityContact.position})</span>}{(event.universityContact.phone || event.universityContact.email) && <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-muted-foreground text-xs">{event.universityContact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{event.universityContact.phone}</span>}{event.universityContact.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{event.universityContact.email}</span>}</div>}</>) : university.universityContacts?.length > 0 ? university.universityContacts.map((contact, idx) => (<span key={idx}>{idx > 0 && ", "}<span className="font-medium">{contact.name}</span>{contact.position && <span className="text-muted-foreground"> ({contact.position})</span>}</span>)) : university.universityContact?.name ? (<span><span className="font-medium">{university.universityContact.name}</span>{university.universityContact.position && <span className="text-muted-foreground"> ({university.universityContact.position})</span>}</span>) : <span className="text-muted-foreground">—</span>}</div></div>
+                                                          {event.branch && <Badge variant="secondary" className="text-sm">{event.branch}</Badge>}
+                                                          <div className="flex gap-2 text-sm"><Building2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" /><div><span className="text-muted-foreground">ВУЗ: </span>{event.universityContact && (event.universityContact.name || event.universityContact.position || event.universityContact.phone || event.universityContact.email) ? (<><span className="font-medium">{event.universityContact.name || "—"}</span>{event.universityContact.position && <span className="text-muted-foreground"> ({event.universityContact.position})</span>}{(event.universityContact.phone || event.universityContact.email) && <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-muted-foreground text-sm">{event.universityContact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{event.universityContact.phone}</span>}{event.universityContact.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{event.universityContact.email}</span>}</div>}</>) : university.universityContacts?.length > 0 ? university.universityContacts.map((contact, idx) => (<span key={idx}>{idx > 0 && ", "}<span className="font-medium">{contact.name}</span>{contact.position && <span className="text-muted-foreground"> ({contact.position})</span>}</span>)) : university.universityContact?.name ? (<span><span className="font-medium">{university.universityContact.name}</span>{university.universityContact.position && <span className="text-muted-foreground"> ({university.universityContact.position})</span>}</span>) : <span className="text-muted-foreground">—</span>}</div></div>
                                                           <div className="flex gap-2 text-sm"><UserCheck className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" /><div><span className="text-muted-foreground">Банк: </span>{event.responsiblePerson?.length > 0 ? event.responsiblePerson.map((personId, idx) => { const person = responsiblePersons.find((p) => p.value === personId); return person ? (<span key={idx}>{idx > 0 && ", "}<span className="font-medium">{person.label}</span></span>) : null; }) : <span className="text-muted-foreground">—</span>}</div></div>
                                                           {event.ecosystemData && (
                                                             <div className="pt-2 border-t space-y-2">
@@ -16733,7 +16733,7 @@ export default function UniversitiesPage() {
                                                         </div>
                                                       </div>
                                                       <div className="flex flex-col items-end gap-2 shrink-0">
-                                                        <div className="flex items-center gap-2"><Label htmlFor={`ecosystem-event-feed-switch-${event.id}`} className="text-xs text-muted-foreground cursor-pointer leading-tight block text-right">В ленте<br />мероприятий</Label><Switch id={`ecosystem-event-feed-switch-${event.id}`} checked={event.showInEventsFeed !== false} onCheckedChange={(checked) => handleToggleEventShowInFeed(university.id, event.id, checked)} /></div>
+                                                        <div className="flex items-center gap-2"><Label htmlFor={`ecosystem-event-feed-switch-${event.id}`} className="text-sm text-muted-foreground cursor-pointer leading-tight block text-right">В ленте<br />мероприятий</Label><Switch id={`ecosystem-event-feed-switch-${event.id}`} checked={event.showInEventsFeed !== false} onCheckedChange={(checked) => handleToggleEventShowInFeed(university.id, event.id, checked)} /></div>
                                                         <div className="flex gap-1">
                                                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setIsEcosystemCabinetEventDialog(true); handleEditEvent(university.id, event.id, "ecosystem"); }}><Pencil className="h-3.5 w-3.5" /></Button>
                                                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setEventToDelete({ universityId: university.id, eventId: event.id })}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
@@ -16852,15 +16852,15 @@ export default function UniversitiesPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="internships" className="mt-1 space-y-4 w-full">
+          <TabsContent value="internships" className="mt-1 flex w-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain">
             <InternshipsTab />
           </TabsContent>
 
-          <TabsContent value="reporting" className="mt-1 space-y-4">
+          <TabsContent value="reporting" className="mt-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain">
             <UniversityReporting universities={universities} />
           </TabsContent>
 
-          <TabsContent value="dashboard" className="mt-1 space-y-4">
+          <TabsContent value="dashboard" className="mt-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain">
             <UniversityDashboard universities={universities} />
           </TabsContent>
         </Tabs>
@@ -18217,7 +18217,7 @@ export default function UniversitiesPage() {
                                   </div>
                                 </div>
                               )}
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <User className="h-3 w-3" />
                                 <span>{item.user}</span>
                                 <Clock className="h-3 w-3 ml-2" />
@@ -18661,7 +18661,7 @@ export default function UniversitiesPage() {
                                   </Avatar>
                                   <div className="min-w-0">
                                     <div className="font-medium break-words">{application.studentName}</div>
-                                    <div className="text-xs text-muted-foreground break-words">{application.studentEmail}</div>
+                                    <div className="text-sm text-muted-foreground break-words">{application.studentEmail}</div>
                 </div>
                     </div>
                               </TableCell>
@@ -18799,7 +18799,7 @@ export default function UniversitiesPage() {
                                   </Avatar>
                                   <div className="min-w-0">
                                     <div className="font-medium break-words">{application.studentName}</div>
-                                    <div className="text-xs text-muted-foreground break-words">{application.studentEmail}</div>
+                                    <div className="text-sm text-muted-foreground break-words">{application.studentEmail}</div>
                                   </div>
                                 </div>
                               </TableCell>
@@ -18878,11 +18878,11 @@ export default function UniversitiesPage() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div>
-                        <Label className="text-xs text-muted-foreground">Описание</Label>
+                        <Label className="text-sm text-muted-foreground">Описание</Label>
                         <p className="text-sm">{selectedInternship.description}</p>
                       </div>
                       <div>
-                        <Label className="text-xs text-muted-foreground">Формат</Label>
+                        <Label className="text-sm text-muted-foreground">Формат</Label>
                         <p className="text-sm">
                           {selectedInternship.location === 'remote' ? 'Удаленно' : 
                            selectedInternship.location === 'office' ? 'Офис' : 'Гибридно'}
@@ -18890,13 +18890,13 @@ export default function UniversitiesPage() {
                         </div>
                       {selectedInternship.city && (
                         <div>
-                          <Label className="text-xs text-muted-foreground">Город</Label>
+                          <Label className="text-sm text-muted-foreground">Город</Label>
                           <p className="text-sm">{selectedInternship.city}</p>
                         </div>
                       )}
                       {selectedInternship.salary && (
                         <div>
-                          <Label className="text-xs text-muted-foreground">Зарплата</Label>
+                          <Label className="text-sm text-muted-foreground">Зарплата</Label>
                           <p className="text-sm">{selectedInternship.salary.toLocaleString('ru-RU')} ₽</p>
                         </div>
                       )}
@@ -18938,19 +18938,19 @@ export default function UniversitiesPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs text-muted-foreground">Курс</Label>
+                  <Label className="text-sm text-muted-foreground">Курс</Label>
                   <p className="text-sm font-medium">{selectedInternshipApplication.course} курс</p>
                                   </div>
                 {selectedInternshipApplication.gpa && (
                   <div>
-                    <Label className="text-xs text-muted-foreground">Средний балл</Label>
+                    <Label className="text-sm text-muted-foreground">Средний балл</Label>
                     <p className="text-sm font-medium">{selectedInternshipApplication.gpa}</p>
                   </div>
                 )}
               </div>
               {selectedInternshipApplication.matchScore !== undefined && (
                 <div>
-                  <Label className="text-xs text-muted-foreground">Релевантность</Label>
+                  <Label className="text-sm text-muted-foreground">Релевантность</Label>
                   <div className="flex items-center gap-2 mt-1">
                     <Progress value={selectedInternshipApplication.matchScore} className="flex-1" />
                     <span className="text-sm font-medium">{selectedInternshipApplication.matchScore}%</span>
@@ -18959,7 +18959,7 @@ export default function UniversitiesPage() {
               )}
               {selectedInternshipApplication.motivationLetter && (
                 <div>
-                  <Label className="text-xs text-muted-foreground">Мотивационное письмо</Label>
+                  <Label className="text-sm text-muted-foreground">Мотивационное письмо</Label>
                   <p className="text-sm mt-1 p-3 bg-muted rounded-md">
                     {selectedInternshipApplication.motivationLetter}
                                   </p>
@@ -18967,7 +18967,7 @@ export default function UniversitiesPage() {
               )}
               {selectedInternshipApplication.rejectionReason && (
                 <div>
-                  <Label className="text-xs text-muted-foreground">Причина отклонения</Label>
+                  <Label className="text-sm text-muted-foreground">Причина отклонения</Label>
                   <p className="text-sm mt-1 p-3 bg-red-50 dark:bg-red-900/20 rounded-md text-red-700 dark:text-red-300">
                     {selectedInternshipApplication.rejectionReason}
                   </p>
@@ -18998,25 +18998,25 @@ export default function UniversitiesPage() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-2xl font-bold">{internshipStatistics.totalApplications}</div>
-                    <div className="text-xs text-muted-foreground">Всего заявок</div>
+                    <div className="text-sm text-muted-foreground">Всего заявок</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-2xl font-bold text-green-600">{internshipStatistics.approvedApplications}</div>
-                    <div className="text-xs text-muted-foreground">Одобрено</div>
+                    <div className="text-sm text-muted-foreground">Одобрено</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-2xl font-bold text-blue-600">{internshipStatistics.confirmedApplications}</div>
-                    <div className="text-xs text-muted-foreground">Подтверждено</div>
+                    <div className="text-sm text-muted-foreground">Подтверждено</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-2xl font-bold">{internshipStatistics.averageMatchScore}%</div>
-                    <div className="text-xs text-muted-foreground">Средняя релевантность</div>
+                    <div className="text-sm text-muted-foreground">Средняя релевантность</div>
                   </CardContent>
                 </Card>
               </div>
