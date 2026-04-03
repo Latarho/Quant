@@ -258,9 +258,24 @@ export function ProforientationApplicationDetailBody({
           {hasResult && a.result ? (
             <>
               <p className="text-sm text-muted-foreground">
-                Завершено:{" "}
+                Завершено в системе:{" "}
                 {formatDateTimeShortRu(a.result.completedAt)}
               </p>
+              {a.result.externalReport ? (
+                <div className="rounded-lg border border-border/70 bg-muted/20 p-4 text-sm shadow-sm dark:bg-muted/10">
+                  <p className="font-semibold text-foreground">Отчёт внешней системы тестирования</p>
+                  <dl className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,9rem)_1fr] sm:gap-x-4">
+                    <dt className="text-muted-foreground">Название теста</dt>
+                    <dd className="font-medium">{a.result.externalReport.productLabel}</dd>
+                    <dt className="text-muted-foreground">Дата и время теста</dt>
+                    <dd className="font-medium">{formatDateTimeShortRu(a.result.externalReport.testedAt)}</dd>
+                    <dt className="text-muted-foreground">Длительность</dt>
+                    <dd className="font-medium">{a.result.externalReport.durationLabel}</dd>
+                    <dt className="text-muted-foreground">Номер сеанса</dt>
+                    <dd className="font-mono text-sm font-medium">{a.result.externalReport.sessionId}</dd>
+                  </dl>
+                </div>
+              ) : null}
               {a.result.scores ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {(

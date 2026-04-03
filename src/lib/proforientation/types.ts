@@ -27,11 +27,25 @@ export interface UniversityRecommendation {
   cyberRelatedInterns?: number;
 }
 
+/** Метаданные внешнего отчёта (например «Профориентатор»), если тест проходил вне платформы */
+export interface ProforientationExternalReportMeta {
+  /** Название теста / версия ПО */
+  productLabel: string;
+  /** Номер сеанса в системе тестирования */
+  sessionId: string;
+  /** Длительность прохождения (как в отчёте) */
+  durationLabel: string;
+  /** Дата и время тестирования (ISO 8601) */
+  testedAt: string;
+}
+
 export interface ProforientationResult {
   completedAt: string;
   scores: OrientationScores;
   summary: string;
   recommendations: UniversityRecommendation[];
+  /** Привязка к PDF/отчёту сторонней системы */
+  externalReport?: ProforientationExternalReportMeta;
 }
 
 /** Этап прохождения теста на профориентацию (отдельно от статуса заявки) */

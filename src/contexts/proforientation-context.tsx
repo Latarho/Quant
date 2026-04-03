@@ -17,13 +17,19 @@ import type {
 import { DEFAULT_ORIENTATION_TEST_RESULTS_PDF } from "@/lib/proforientation/types";
 import { buildRecommendations } from "@/lib/proforientation/recommendations";
 import {
+  DEMO_SEED_APPLICATION_IDS,
   getSeedProforientationApplications,
+  PROFORIENTATION_SEED_CONTENT_VERSION,
   shouldReplaceWithFullDemoSeed,
 } from "@/lib/proforientation/mock-applications";
 
-const STORAGE_KEY = "proforientation-applications-v10";
+const STORAGE_KEY = "proforientation-applications-v12";
+/** Версия содержимого демо-сида (см. PROFORIENTATION_SEED_CONTENT_VERSION) */
+const SEED_VERSION_KEY = "proforientation-seed-content-version";
 
 const LEGACY_STORAGE_KEYS = [
+  "proforientation-applications-v11",
+  "proforientation-applications-v10",
   "proforientation-applications-v8",
   "proforientation-applications-v7",
   "proforientation-applications-v6",
@@ -85,6 +91,17 @@ function coerceRow(raw: unknown): ProforientationApplication | null {
   };
 }
 
+function markSeedVersionCurrent(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(SEED_VERSION_KEY, String(PROFORIENTATION_SEED_CONTENT_VERSION));
+}
+
+function takeFreshSeed(): ProforientationApplication[] {
+  const fresh = getSeedProforientationApplications();
+  markSeedVersionCurrent();
+  return fresh;
+}
+
 function loadFromStorage(): ProforientationApplication[] {
   if (typeof window === "undefined") return [];
   try {
@@ -99,27 +116,43 @@ function loadFromStorage(): ProforientationApplication[] {
         }
       }
     }
-    if (!raw) return getSeedProforientationApplications();
+    if (!raw) return takeFreshSeed();
     const parsed = JSON.parse(raw) as unknown[];
-    if (!Array.isArray(parsed)) return getSeedProforientationApplications();
+    if (!Array.isArray(parsed)) return takeFreshSeed();
     const rows = dropBlockedParticipantApplications(
       parsed.map(coerceRow).filter((x): x is ProforientationApplication => x !== null)
     );
     /** Пустой [] в storage (часто из‑за первого persist до hydrate) — подставляем демо-заявки */
     if (rows.length === 0 && parsed.length === 0) {
-      return getSeedProforientationApplications();
+      return takeFreshSeed();
     }
     /** Все элементы распарсились в null — битый JSON */
     if (rows.length === 0 && parsed.length > 0) {
-      return getSeedProforientationApplications();
+      return takeFreshSeed();
     }
     /** Осталась только часть демо-заявок (например один объект в массиве) — восстанавливаем полный сид */
     if (shouldReplaceWithFullDemoSeed(rows)) {
-      return getSeedProforientationApplications();
+      const fresh = getSeedProforientationApplications();
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+      markSeedVersionCurrent();
+      return fresh;
+    }
+    /** В хранилище только демо-заявки, но сид устарел относительно версии в коде — подменяем целиком */
+    const onlyDemoIds =
+      rows.length > 0 && rows.every((a) => DEMO_SEED_APPLICATION_IDS.has(a.id));
+    const storedVersion = window.localStorage.getItem(SEED_VERSION_KEY);
+    if (
+      onlyDemoIds &&
+      storedVersion !== String(PROFORIENTATION_SEED_CONTENT_VERSION)
+    ) {
+      const fresh = getSeedProforientationApplications();
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+      markSeedVersionCurrent();
+      return fresh;
     }
     return rows;
   } catch {
-    return getSeedProforientationApplications();
+    return takeFreshSeed();
   }
 }
 

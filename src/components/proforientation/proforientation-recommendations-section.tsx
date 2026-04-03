@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { INTEREST_DIRECTIONS, type ProforientationResult, type UniversityRecommendation } from "@/lib/proforientation/types";
 import { getCyberActivityInsight } from "@/lib/proforientation/university-activity";
+import { formatDateTimeShortRu } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import {
   ArrowUpRight,
@@ -145,6 +146,14 @@ export function ProforientationRecommendationsSection({
                 {interestLabels}
               </p>
             ) : null}
+            {result.externalReport ? (
+              <p className="rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-foreground">
+                <span className="font-medium">Связь с PDF-отчётом: </span>
+                баллы профиля (0–100) приведены в соответствие с тестом «{result.externalReport.productLabel}» (
+                {formatDateTimeShortRu(result.externalReport.testedAt)}, сеанс {result.externalReport.sessionId}).
+                Блок ниже дополняет таблицы профессий и направлений из отчёта оценкой по данным о стажировках в банке.
+              </p>
+            ) : null}
             {result.scores ? (
               <p className="text-muted-foreground">
                 <span className="font-medium text-foreground">Связь с тестом: </span>
@@ -249,7 +258,9 @@ export function ProforientationRecommendationsSection({
                 <div className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 dark:bg-muted/10">
                   <BarChart3 className="size-4 shrink-0 text-primary" aria-hidden />
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Доля ИБ</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Доля ИБ и кибер
+                    </p>
                     <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
                       {rec.cyberSharePercent != null ? `${rec.cyberSharePercent}%` : "—"}
                     </p>
@@ -294,7 +305,7 @@ export function ProforientationRecommendationsSection({
                 <TableHead className="w-24 text-right text-sm font-semibold">Индекс</TableHead>
                 <TableHead className="w-20 text-right text-sm font-semibold">В банке</TableHead>
                 <TableHead className="w-20 text-right text-sm font-semibold">ИБ/кибер</TableHead>
-                <TableHead className="w-20 text-right text-sm font-semibold">Доля ИБ</TableHead>
+                <TableHead className="min-w-[7.5rem] text-right text-sm font-semibold">Доля ИБ и кибер</TableHead>
                 <TableHead className="min-w-[220px] text-sm font-semibold">Кратко</TableHead>
               </TableRow>
             </TableHeader>
