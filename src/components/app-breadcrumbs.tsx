@@ -17,6 +17,7 @@ const ROOT_LABEL = "Платформа по работе с ВУЗами";
 const SEGMENT_LABELS: Record<string, string> = {
   universities: ROOT_LABEL,
   internship: "Стажировки",
+  proforientation: "Профориентация",
 };
 
 const TAB_LABELS: Record<string, string> = {
@@ -40,7 +41,15 @@ export function AppBreadcrumbs() {
 
   const items: { href: string | null; label: string }[] = [];
 
-  if (segments[0] === "universities") {
+  if (segments[0] === "proforientation") {
+    items.push({ href: "/universities", label: SEGMENT_LABELS.universities ?? ROOT_LABEL });
+    if (segments[1]) {
+      items.push({ href: "/proforientation", label: SEGMENT_LABELS.proforientation });
+      items.push({ href: null, label: customLabel ?? "Заявка" });
+    } else {
+      items.push({ href: null, label: SEGMENT_LABELS.proforientation });
+    }
+  } else if (segments[0] === "universities") {
     if (segments[1] === "internship" && segments[2]) {
       items.push({ href: "/universities", label: SEGMENT_LABELS.universities ?? ROOT_LABEL });
       items.push({ href: "/universities?tab=internships", label: SEGMENT_LABELS.internship });

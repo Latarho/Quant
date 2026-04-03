@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { GraduationCap, Briefcase, FileText, BarChart3, ChevronDown, ChevronRight } from "lucide-react";
+import { GraduationCap, Briefcase, FileText, BarChart3, ChevronDown, ChevronRight, Compass } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
   Sidebar,
@@ -46,6 +46,7 @@ export function AppSidebar() {
   const activeLine = searchParams.get("line");
 
   const isOnUniversitiesTab = pathname === "/universities" && currentTab === "universities";
+  const isProforientation = pathname === "/proforientation";
   const [isUniversitiesOpen, setIsUniversitiesOpen] = React.useState(isOnUniversitiesTab && !!activeLine);
 
   React.useEffect(() => {
@@ -139,6 +140,22 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Сотрудникам</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isProforientation} tooltip="Профориентация">
+                  <Link href="/proforientation">
+                    <Compass className="size-4 shrink-0" />
+                    <span>Профориентация</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

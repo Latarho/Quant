@@ -58,6 +58,22 @@ export function formatDateOrDefault(dateString: string | undefined, defaultValue
 }
 
 /**
+ * Дата и время в стиле ru (short date + short time), как toLocaleString с dateStyle/timeStyle.
+ * Фиксированный timeZone — одинаковый результат на сервере (Node) и в браузере, без ошибок гидрации.
+ */
+export function formatDateTimeShortRu(iso: string): string {
+  try {
+    return new Intl.DateTimeFormat("ru-RU", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: "Europe/Moscow",
+    }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
+
+/**
  * Форматирует дату из строки ISO в формат дд.мм.гггг с обработкой часового пояса
  * @param dateString Дата в формате YYYY-MM-DD
  * @returns Дата в формате дд.мм.гггг

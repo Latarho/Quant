@@ -162,6 +162,8 @@ export function getStatusBadgeColor(status: string): string {
     'invited': 'invited',
     'in-progress': 'inProgress',
     'in_progress': 'inProgress',
+    /** Профориентация: заявка только создана */
+    'created': 'planned',
     'sent': 'sent',
     'failed': 'failed',
   };

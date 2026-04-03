@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, Fragment, useRef } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -97,7 +98,13 @@ const getStudentStatusColor = (status: string) => {
   return getStatusBadgeColor(status);
 };
 
-export default function UniversitiesPage() {
+const UniversitiesPageNoSSR = dynamic(() => Promise.resolve(UniversitiesPage), {
+  ssr: false,
+});
+
+export default UniversitiesPageNoSSR;
+
+function UniversitiesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
