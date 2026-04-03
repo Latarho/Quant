@@ -94,7 +94,9 @@ export function ProforientationApplicationDetailBody({
           </dl>
         </div>
         <div>
-          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Ребёнок</p>
+          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            Участник тестирования
+          </p>
           <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-[minmax(0,140px)_1fr] sm:gap-x-4">
             <dt className="text-sm text-muted-foreground">ФИО</dt>
             <dd className="text-sm font-medium">{a.childFullName}</dd>
@@ -111,7 +113,7 @@ export function ProforientationApplicationDetailBody({
               a.interestDirections.map((id) => {
                 const label = INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
                 return (
-                  <Badge key={id} variant="outline" className="font-normal text-xs">
+                  <Badge key={id} variant="outline" className="font-normal text-sm">
                     {label}
                   </Badge>
                 );
@@ -153,11 +155,11 @@ export function ProforientationApplicationDetailBody({
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
             <Badge
               variant={orientationTestBadgeVariant(orientationTest.status)}
-              className="h-5 shrink-0 rounded-md px-1.5 text-[11px] font-semibold leading-none"
+              className="shrink-0 rounded-md px-2 text-sm font-semibold leading-tight"
             >
               {ORIENTATION_TEST_BADGE_LABEL[orientationTest.status]}
             </Badge>
-            <span className="min-w-0 text-xs leading-snug text-muted-foreground sm:text-sm">
+            <span className="min-w-0 text-sm leading-snug text-muted-foreground">
               {ORIENTATION_TEST_DESCRIPTION[orientationTest.status]}
             </span>
           </div>

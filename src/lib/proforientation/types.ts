@@ -1,4 +1,4 @@
-/** Заявка на профориентацию (ребёнок сотрудника банка) */
+/** Заявка на профориентацию (участник тестирования — ребёнок сотрудника банка) */
 /** Жизненный цикл заявки: создана → в процессе → завершена */
 export type ProforientationStatus = "created" | "in_progress" | "completed";
 
@@ -95,7 +95,7 @@ export interface ProforientationApplication {
   employeeDepartment: string;
   employeeEmail: string;
   employeePhone: string;
-  /** Ребёнок */
+  /** Участник тестирования */
   childFullName: string;
   childBirthDate: string;
   childSchoolGrade: string;

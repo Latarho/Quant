@@ -6,6 +6,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type {
@@ -15,9 +16,20 @@ import type {
 } from "@/lib/proforientation/types";
 import { DEFAULT_ORIENTATION_TEST_RESULTS_PDF } from "@/lib/proforientation/types";
 import { buildRecommendations } from "@/lib/proforientation/recommendations";
-import { getSeedProforientationApplications } from "@/lib/proforientation/mock-applications";
+import {
+  getSeedProforientationApplications,
+  shouldReplaceWithFullDemoSeed,
+} from "@/lib/proforientation/mock-applications";
 
-const STORAGE_KEY = "proforientation-applications-v6";
+const STORAGE_KEY = "proforientation-applications-v9";
+
+const LEGACY_STORAGE_KEYS = [
+  "proforientation-applications-v8",
+  "proforientation-applications-v7",
+  "proforientation-applications-v6",
+  "proforientation-applications-v5",
+  "proforientation-applications-v1",
+] as const;
 
 function normalizeStatus(raw: unknown): ProforientationStatus {
   if (raw === "created" || raw === "in_progress" || raw === "completed") return raw;
@@ -71,18 +83,34 @@ function loadFromStorage(): ProforientationApplication[] {
   try {
     let raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      const legacy = window.localStorage.getItem("proforientation-applications-v1");
-      if (legacy) {
-        raw = legacy;
-        window.localStorage.setItem(STORAGE_KEY, legacy);
+      for (const key of LEGACY_STORAGE_KEYS) {
+        const legacy = window.localStorage.getItem(key);
+        if (legacy) {
+          raw = legacy;
+          window.localStorage.setItem(STORAGE_KEY, legacy);
+          break;
+        }
       }
     }
     if (!raw) return getSeedProforientationApplications();
     const parsed = JSON.parse(raw) as unknown[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(coerceRow).filter((x): x is ProforientationApplication => x !== null);
+    if (!Array.isArray(parsed)) return getSeedProforientationApplications();
+    const rows = parsed.map(coerceRow).filter((x): x is ProforientationApplication => x !== null);
+    /** Пустой [] в storage (часто из‑за первого persist до hydrate) — подставляем демо-заявки */
+    if (rows.length === 0 && parsed.length === 0) {
+      return getSeedProforientationApplications();
+    }
+    /** Все элементы распарсились в null — битый JSON */
+    if (rows.length === 0 && parsed.length > 0) {
+      return getSeedProforientationApplications();
+    }
+    /** Осталась только часть демо-заявок (например один объект в массиве) — восстанавливаем полный сид */
+    if (shouldReplaceWithFullDemoSeed(rows)) {
+      return getSeedProforientationApplications();
+    }
+    return rows;
   } catch {
-    return [];
+    return getSeedProforientationApplications();
   }
 }
 
@@ -101,6 +129,8 @@ const ProforientationContext = createContext<ProforientationContextValue | null>
 
 export function ProforientationProvider({ children }: { children: React.ReactNode }) {
   const [applications, setApplications] = useState<ProforientationApplication[]>([]);
+  /** Не пишем в localStorage на первом прогоне эффекта с пустым [] — иначе затираем сид до loadFromStorage */
+  const persistReadyRef = useRef(false);
 
   useEffect(() => {
     setApplications(loadFromStorage());
@@ -108,6 +138,10 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!persistReadyRef.current) {
+      persistReadyRef.current = true;
+      return;
+    }
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
   }, [applications]);
 

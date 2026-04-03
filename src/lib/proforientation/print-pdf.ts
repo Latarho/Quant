@@ -36,7 +36,7 @@ export function openResultsPrintWindow(app: ProforientationApplication): void {
 <body>
   <h1>Результаты профессиональной ориентации</h1>
   <div class="meta">
-    Ребёнок: <strong>${app.childFullName}</strong><br/>
+    Участник тестирования: <strong>${app.childFullName}</strong><br/>
     Заявка № ${app.id.slice(0, 8)}… · дата завершения: ${formatDateTimeShortRu(r.completedAt)}
   </div>
   <h2>Профиль (баллы 0–100)</h2>

@@ -2,7 +2,7 @@ import type { OrientationScores, UniversityRecommendation } from "./types";
 import { getUniversityInternActivity } from "./university-activity";
 
 /**
- * Простая модель соответствия профиля ребёнка и ВУЗа по данным платформы.
+ * Простая модель соответствия профиля участника тестирования и ВУЗа по данным платформы.
  */
 export function buildRecommendations(scores: OrientationScores): UniversityRecommendation[] {
   const activity = getUniversityInternActivity();

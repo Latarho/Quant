@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,8 +26,20 @@ import { openResultsPrintWindow } from "@/lib/proforientation/print-pdf";
 import { getCurrentBankEmployee } from "@/lib/auth/current-user";
 import { formatDateOrDefault, formatDateTimeShortRu } from "@/lib/date-utils";
 import { ApplicationStatusBadge } from "@/components/proforientation/proforientation-status-badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowRight, Calendar, ClipboardList, FileDown, Plus, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function employeeInitials(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    const a = parts[0][0];
+    const b = parts[1][0];
+    if (a && b) return (a + b).toUpperCase();
+  }
+  const one = parts[0] ?? "";
+  return one.slice(0, 2).toUpperCase() || "?";
+}
 
 type ApplicationFormState = {
   employeeFullName: string;
@@ -114,8 +126,8 @@ export function ProforientationView() {
   };
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-6">
-      <Tabs defaultValue="applications" className="flex w-full min-w-0 flex-col gap-4">
+    <div className="flex w-full min-w-0 flex-col gap-4">
+      <Tabs defaultValue="applications" className="flex w-full min-w-0 flex-col gap-3">
         <TabsList variant="grid2">
           <TabsTrigger value="applications" className="gap-2">
             <ClipboardList className="size-4" />
@@ -124,8 +136,8 @@ export function ProforientationView() {
           <TabsTrigger value="drp">Администрирование профориентации</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="applications" className="mt-4 w-full min-w-0 space-y-6 data-[state=inactive]:hidden">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <TabsContent value="applications" className="mt-3 w-full min-w-0 space-y-4 data-[state=inactive]:hidden">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold">Заявки на профориентацию</h2>
               <p className="text-sm text-muted-foreground">
@@ -147,105 +159,100 @@ export function ProforientationView() {
                 </div>
                 <div>
                   <p className="font-medium">Заявок пока нет</p>
-                  <p className="text-sm text-muted-foreground">Создайте первую заявку на профориентацию для ребёнка</p>
+                  <p className="text-sm text-muted-foreground">
+                    Создайте первую заявку на профориентацию для участника тестирования
+                  </p>
                 </div>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
               {sortedApplications.map((a) => (
                 <Card
                   key={a.id}
                   className={cn(
-                    "flex h-full flex-col overflow-hidden transition-shadow",
+                    /* сброс дефолтов Card: gap-6 py-6 дают лишнюю высоту */
+                    "gap-0 py-0 flex h-full flex-col overflow-hidden transition-shadow",
                     a.status === "completed" && "border-primary/30 shadow-sm"
                   )}
                 >
-                  <CardHeader className="space-y-2 p-4 pb-3">
+                  <CardHeader className="!gap-1.5 !px-3.5 !pb-2 !pt-2.5">
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="min-w-0 flex-1 text-base leading-snug">{a.childFullName}</CardTitle>
-                      <ApplicationStatusBadge status={a.status} />
-                    </div>
-                    <div className="space-y-1.5 text-sm">
-                      <p>
-                        <span className="font-medium text-foreground">{a.employeeFullName}</span>
-                        {a.employeeDepartment ? (
-                          <span className="text-muted-foreground"> · {a.employeeDepartment}</span>
-                        ) : null}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                        <Calendar className="size-3.5 shrink-0" aria-hidden />
-                        <span>Подана {formatDateTimeShortRu(a.createdAt)}</span>
+                      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                        <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                          <Calendar className="size-3.5 shrink-0" aria-hidden />
+                          <span>{formatDateTimeShortRu(a.createdAt)}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-sm font-semibold">Создатель заявки:</span>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-10 w-10 shrink-0">
+                              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                                {employeeInitials(a.employeeFullName)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex flex-col">
+                              <span className="text-sm font-medium text-foreground">{a.employeeFullName}</span>
+                              {a.employeeDepartment ? (
+                                <span className="text-sm text-muted-foreground">{a.employeeDepartment}</span>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
                       </div>
+                      <ApplicationStatusBadge status={a.status} />
                     </div>
                   </CardHeader>
                   <Separator />
-                  <CardContent className="flex flex-1 flex-col gap-3 p-4 pt-3">
-                    <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ребёнок</p>
-                      <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
-                        <div className="min-w-0 sm:col-span-2">
-                          <dt className="text-xs text-muted-foreground">Дата рождения</dt>
-                          <dd className="mt-0.5 font-medium">
+                  <CardContent className="flex flex-1 flex-col gap-1.5 !px-3.5 !pb-3 !pt-0.5">
+                    <div className="rounded-md border border-border/80 bg-muted/30 p-2">
+                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                        Участник тестирования
+                      </p>
+                      <p className="mt-1.5 min-w-0 text-sm font-semibold leading-snug text-foreground">
+                        {a.childFullName}
+                      </p>
+                      <div className="mt-1.5 space-y-1 text-sm">
+                        <p className="min-w-0 leading-snug">
+                          <span className="text-muted-foreground">Дата рождения: </span>
+                          <span className="font-medium text-foreground">
                             {formatDateOrDefault(a.childBirthDate)}
-                          </dd>
-                        </div>
-                        <div className="min-w-0 sm:col-span-2">
-                          <dt className="text-xs text-muted-foreground">Класс / курс</dt>
-                          <dd className="mt-0.5 font-medium">{a.childSchoolGrade || "—"}</dd>
-                        </div>
-                      </dl>
+                          </span>
+                        </p>
+                        <p className="min-w-0 leading-snug">
+                          <span className="text-muted-foreground">Класс / курс: </span>
+                          <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
+                        </p>
+                      </div>
                     </div>
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
                         Направления интереса
                       </p>
                       {a.interestDirections.length > 0 ? (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
+                        <div className="mt-1.5 flex flex-wrap gap-1">
                           {a.interestDirections.map((id) => {
                             const label =
                               INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
                             return (
-                              <Badge key={id} variant="secondary" className="text-xs font-normal">
+                              <Badge key={id} variant="secondary" className="text-sm font-normal">
                                 {label}
                               </Badge>
                             );
                           })}
                         </div>
                       ) : (
-                        <p className="mt-2 text-sm text-muted-foreground">Не указаны</p>
+                        <p className="mt-1.5 text-sm text-muted-foreground">Не указаны</p>
                       )}
                     </div>
                     {a.comment ? (
-                      <div className="rounded-md border border-dashed border-border/60 bg-muted/20 p-3">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Комментарий</p>
-                        <p className="mt-1.5 line-clamp-3 text-sm text-muted-foreground">{a.comment}</p>
-                      </div>
-                    ) : null}
-                    {a.result ? (
-                      <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Результаты тестирования
-                        </p>
-                        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                          {(
-                            [
-                              ["Аналитика", a.result.scores.analytical],
-                              ["Техника / ИТ", a.result.scores.technical],
-                              ["Коммуникации", a.result.scores.social],
-                              ["Творчество", a.result.scores.creative],
-                            ] as const
-                          ).map(([label, v]) => (
-                            <div key={label} className="min-w-0 text-center sm:text-left">
-                              <div className="text-lg font-semibold tabular-nums text-foreground">{v}</div>
-                              <div className="text-xs text-muted-foreground">{label}</div>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Комментарий</p>
+                        <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{a.comment}</p>
                       </div>
                     ) : null}
                   </CardContent>
-                  <CardFooter className="mt-auto shrink-0 border-t px-4 pb-4 pt-3 flex flex-wrap items-center justify-end gap-2">
+                  <CardFooter className="mt-auto shrink-0 border-t !px-3.5 !pb-2 !pt-2 flex flex-wrap items-center justify-end gap-1.5">
                     {a.status === "completed" && a.result ? (
                       <Button
                         type="button"
@@ -295,33 +302,64 @@ export function ProforientationView() {
                 <Card key={a.id} className="flex h-full flex-col overflow-hidden">
                   <CardHeader className="space-y-2 p-4 pb-3">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <CardTitle className="text-base leading-snug">{a.childFullName}</CardTitle>
-                        <p className="mt-1.5 text-sm text-muted-foreground">
-                          <span className="font-medium text-foreground">{a.employeeFullName}</span>
-                          {a.employeeDepartment ? ` · ${a.employeeDepartment}` : ""}
-                        </p>
+                      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                        <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                          <Calendar className="size-3.5 shrink-0" aria-hidden />
+                          <span>{formatDateTimeShortRu(a.createdAt)}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-sm font-semibold">Создатель заявки:</span>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-10 w-10 shrink-0">
+                              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                                {employeeInitials(a.employeeFullName)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex flex-col">
+                              <span className="text-sm font-medium text-foreground">{a.employeeFullName}</span>
+                              {a.employeeDepartment ? (
+                                <span className="text-sm text-muted-foreground">{a.employeeDepartment}</span>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       <ApplicationStatusBadge status={a.status} />
-                    </div>
-                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                      <Calendar className="size-3.5 shrink-0" aria-hidden />
-                      <span>Подана {formatDateTimeShortRu(a.createdAt)}</span>
                     </div>
                   </CardHeader>
                   <Separator />
                   <CardContent className="flex flex-1 flex-col gap-3 p-4 pt-3 text-sm">
                     <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Контакт сотрудника</p>
+                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                        Участник тестирования
+                      </p>
+                      <p className="mt-2 min-w-0 text-base font-semibold leading-snug text-foreground">
+                        {a.childFullName}
+                      </p>
+                      <dl className="mt-2 space-y-1.5">
+                        <div className="min-w-0 leading-snug">
+                          <span className="text-muted-foreground">Дата рождения: </span>
+                          <span className="font-medium text-foreground">
+                            {formatDateOrDefault(a.childBirthDate)}
+                          </span>
+                        </div>
+                        <div className="min-w-0 leading-snug">
+                          <span className="text-muted-foreground">Класс / курс: </span>
+                          <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
+                        </div>
+                      </dl>
+                    </div>
+                    <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
+                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Контакт сотрудника</p>
                       <dl className="mt-2 space-y-2">
                         <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-                          <dt className="shrink-0 text-xs text-muted-foreground">Корпоративная почта</dt>
+                          <dt className="shrink-0 text-sm text-muted-foreground">Корпоративная почта</dt>
                           <dd className="min-w-0 break-all text-right font-medium sm:text-right">{a.employeeEmail}</dd>
                         </div>
                       </dl>
                     </div>
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
                         Направления интереса
                       </p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
@@ -329,7 +367,7 @@ export function ProforientationView() {
                           const label =
                             INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
                           return (
-                            <Badge key={id} variant="secondary" className="text-xs font-normal">
+                            <Badge key={id} variant="secondary" className="text-sm font-normal">
                               {label}
                             </Badge>
                           );
@@ -390,8 +428,8 @@ export function ProforientationView() {
           <DialogHeader>
             <DialogTitle>Новая заявка на профориентацию</DialogTitle>
             <DialogDescription>
-              Данные сотрудника подставляются из профиля текущего пользователя. Укажите сведения о ребёнке и отправьте
-              заявку — она поступит в ДРП для записи на процедуру.
+              Данные сотрудника подставляются из профиля текущего пользователя. Укажите сведения об участнике
+              тестирования и отправьте заявку — она поступит в ДРП для записи на процедуру.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmitNew} className="flex flex-col gap-4">
@@ -436,11 +474,11 @@ export function ProforientationView() {
                 </div>
               </div>
               <div className="space-y-2 border-t pt-4">
-                <span className="text-sm font-medium">Ребёнок</span>
+                <span className="text-sm font-medium">Участник тестирования</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="po-child">ФИО ребёнка</Label>
+                  <Label htmlFor="po-child">ФИО участника</Label>
                   <Input
                     id="po-child"
                     required

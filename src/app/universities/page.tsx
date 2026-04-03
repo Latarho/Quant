@@ -3423,7 +3423,7 @@ function UniversitiesPage() {
                               <TooltipTrigger asChild>
                                 <div className="bg-background/80 rounded-md px-3 py-1 text-center cursor-help">
                                   <div className="text-base font-bold text-foreground leading-tight">{university.allEmployees || 0}</div>
-                                  <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Сотрудников</div>
+                                  <div className="text-sm text-muted-foreground uppercase tracking-wide">Сотрудников</div>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent>
@@ -3436,7 +3436,7 @@ function UniversitiesPage() {
                                   <div className="text-base font-bold text-blue-600 dark:text-blue-400 leading-tight">
                                     {university.internList?.filter(i => i.status === "active").length || 0}
                                   </div>
-                                  <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Стажеров</div>
+                                  <div className="text-sm text-muted-foreground uppercase tracking-wide">Стажеров</div>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent>
@@ -3449,7 +3449,7 @@ function UniversitiesPage() {
                                   <div className="text-base font-bold text-purple-600 dark:text-purple-400 leading-tight">
                                     {university.practitionerList?.length || 0}
                                   </div>
-                                  <div className="text-[9px] text-muted-foreground uppercase tracking-wide">Практикантов</div>
+                                  <div className="text-sm text-muted-foreground uppercase tracking-wide">Практикантов</div>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent>
