@@ -21,7 +21,7 @@ import {
   shouldReplaceWithFullDemoSeed,
 } from "@/lib/proforientation/mock-applications";
 
-const STORAGE_KEY = "proforientation-applications-v9";
+const STORAGE_KEY = "proforientation-applications-v10";
 
 const LEGACY_STORAGE_KEYS = [
   "proforientation-applications-v8",
@@ -62,6 +62,13 @@ function normalizeOrientationTest(
   };
 }
 
+/** Удаляет заявки с недопустимым ФИО участника тестирования (локальные данные / импорт). */
+function dropBlockedParticipantApplications(
+  rows: ProforientationApplication[]
+): ProforientationApplication[] {
+  return rows.filter((a) => !/путин/i.test(a.childFullName ?? ""));
+}
+
 function coerceRow(raw: unknown): ProforientationApplication | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
@@ -95,7 +102,9 @@ function loadFromStorage(): ProforientationApplication[] {
     if (!raw) return getSeedProforientationApplications();
     const parsed = JSON.parse(raw) as unknown[];
     if (!Array.isArray(parsed)) return getSeedProforientationApplications();
-    const rows = parsed.map(coerceRow).filter((x): x is ProforientationApplication => x !== null);
+    const rows = dropBlockedParticipantApplications(
+      parsed.map(coerceRow).filter((x): x is ProforientationApplication => x !== null)
+    );
     /** Пустой [] в storage (часто из‑за первого persist до hydrate) — подставляем демо-заявки */
     if (rows.length === 0 && parsed.length === 0) {
       return getSeedProforientationApplications();
@@ -147,6 +156,9 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
 
   const submitApplication = useCallback(
     (data: Omit<ProforientationApplication, "id" | "createdAt" | "updatedAt" | "status">) => {
+      if (/путин/i.test(data.childFullName.trim())) {
+        throw new Error("Нельзя создать заявку с таким ФИО участника тестирования.");
+      }
       const now = new Date().toISOString();
       const id = newId();
       const row: ProforientationApplication = {
@@ -166,15 +178,17 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
   const updateStatus = useCallback(
     (id: string, status: ProforientationStatus, patch?: Partial<ProforientationApplication>) => {
       setApplications((prev) =>
-        prev.map((a) =>
-          a.id === id
-            ? {
-                ...a,
-                ...patch,
-                status,
-                updatedAt: new Date().toISOString(),
-              }
-            : a
+        dropBlockedParticipantApplications(
+          prev.map((a) =>
+            a.id === id
+              ? {
+                  ...a,
+                  ...patch,
+                  status,
+                  updatedAt: new Date().toISOString(),
+                }
+              : a
+          )
         )
       );
     },
@@ -185,25 +199,27 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
     const recommendations = buildRecommendations(scores);
     const completedAt = new Date().toISOString();
     setApplications((prev) =>
-      prev.map((a) =>
-        a.id === id
-          ? {
-              ...a,
-              status: "completed",
-              updatedAt: completedAt,
-              result: {
-                completedAt,
-                scores,
-                summary,
-                recommendations,
-              },
-              orientationTest: {
-                status: "results_ready",
-                testUrl: a.orientationTest?.testUrl,
-                resultsPdfUrl: a.orientationTest?.resultsPdfUrl ?? DEFAULT_ORIENTATION_TEST_RESULTS_PDF,
-              },
-            }
-          : a
+      dropBlockedParticipantApplications(
+        prev.map((a) =>
+          a.id === id
+            ? {
+                ...a,
+                status: "completed",
+                updatedAt: completedAt,
+                result: {
+                  completedAt,
+                  scores,
+                  summary,
+                  recommendations,
+                },
+                orientationTest: {
+                  status: "results_ready",
+                  testUrl: a.orientationTest?.testUrl,
+                  resultsPdfUrl: a.orientationTest?.resultsPdfUrl ?? DEFAULT_ORIENTATION_TEST_RESULTS_PDF,
+                },
+              }
+            : a
+        )
       )
     );
   }, []);

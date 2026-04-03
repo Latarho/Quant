@@ -105,6 +105,8 @@ export interface ProforientationApplication {
   /** Заполняет ДРП */
   drpScheduledDate?: string;
   drpComment?: string;
+  /** Ответственный сотрудник ДРП (после перевода заявки в работу) */
+  drpResponsibleFullName?: string;
   /** Прохождение теста на профориентацию: ссылка, PDF, этап */
   orientationTest?: OrientationTestState;
   result?: ProforientationResult;

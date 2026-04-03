@@ -183,28 +183,26 @@ export function ProforientationView() {
                           <Calendar className="size-3.5 shrink-0" aria-hidden />
                           <span>{formatDateTimeShortRu(a.createdAt)}</span>
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-sm font-semibold">Создатель заявки:</span>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-10 w-10 shrink-0">
-                              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                                {employeeInitials(a.employeeFullName)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex flex-col">
-                              <span className="text-sm font-medium text-foreground">{a.employeeFullName}</span>
-                              {a.employeeDepartment ? (
-                                <span className="text-sm text-muted-foreground">{a.employeeDepartment}</span>
-                              ) : null}
-                            </div>
-                          </div>
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="shrink-0 text-sm font-semibold">Создатель заявки:</span>
+                          <Avatar className="h-10 w-10 shrink-0">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                              {employeeInitials(a.employeeFullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="min-w-0 text-sm leading-snug">
+                            <span className="font-medium text-foreground">{a.employeeFullName}</span>
+                            {a.employeeDepartment ? (
+                              <span className="text-muted-foreground"> · {a.employeeDepartment}</span>
+                            ) : null}
+                          </span>
                         </div>
                       </div>
                       <ApplicationStatusBadge status={a.status} />
                     </div>
                   </CardHeader>
                   <Separator />
-                  <CardContent className="flex flex-1 flex-col gap-1.5 !px-3.5 !pb-3 !pt-0.5">
+                  <CardContent className="flex flex-1 flex-col gap-1.5 !px-3.5 !pb-3 !pt-4">
                     <div className="rounded-md border border-border/80 bg-muted/30 p-2">
                       <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
                         Участник тестирования
@@ -249,6 +247,23 @@ export function ProforientationView() {
                       <div className="rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
                         <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Комментарий</p>
                         <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{a.comment}</p>
+                      </div>
+                    ) : null}
+                    {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
+                      <div className="rounded-md border border-border/80 bg-muted/30 p-2">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                          Ответственный сотрудник ДРП
+                        </p>
+                        <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                          <Avatar className="h-10 w-10 shrink-0">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                              {employeeInitials(a.drpResponsibleFullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="min-w-0 text-sm font-medium text-foreground">
+                            {a.drpResponsibleFullName}
+                          </span>
+                        </div>
                       </div>
                     ) : null}
                   </CardContent>
@@ -307,28 +322,26 @@ export function ProforientationView() {
                           <Calendar className="size-3.5 shrink-0" aria-hidden />
                           <span>{formatDateTimeShortRu(a.createdAt)}</span>
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-sm font-semibold">Создатель заявки:</span>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-10 w-10 shrink-0">
-                              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                                {employeeInitials(a.employeeFullName)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex flex-col">
-                              <span className="text-sm font-medium text-foreground">{a.employeeFullName}</span>
-                              {a.employeeDepartment ? (
-                                <span className="text-sm text-muted-foreground">{a.employeeDepartment}</span>
-                              ) : null}
-                            </div>
-                          </div>
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="shrink-0 text-sm font-semibold">Создатель заявки:</span>
+                          <Avatar className="h-10 w-10 shrink-0">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                              {employeeInitials(a.employeeFullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="min-w-0 text-sm leading-snug">
+                            <span className="font-medium text-foreground">{a.employeeFullName}</span>
+                            {a.employeeDepartment ? (
+                              <span className="text-muted-foreground"> · {a.employeeDepartment}</span>
+                            ) : null}
+                          </span>
                         </div>
                       </div>
                       <ApplicationStatusBadge status={a.status} />
                     </div>
                   </CardHeader>
                   <Separator />
-                  <CardContent className="flex flex-1 flex-col gap-3 p-4 pt-3 text-sm">
+                  <CardContent className="flex flex-1 flex-col gap-3 p-4 pt-4 text-sm">
                     <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
                       <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
                         Участник тестирования
@@ -374,6 +387,31 @@ export function ProforientationView() {
                         })}
                       </div>
                     </div>
+                    {a.comment ? (
+                      <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 p-3">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Комментарий</p>
+                        <p className="mt-2 line-clamp-6 text-sm text-muted-foreground whitespace-pre-wrap">
+                          {a.comment}
+                        </p>
+                      </div>
+                    ) : null}
+                    {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
+                      <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                          Ответственный сотрудник ДРП
+                        </p>
+                        <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                          <Avatar className="h-10 w-10 shrink-0">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                              {employeeInitials(a.drpResponsibleFullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="min-w-0 text-sm font-medium text-foreground">
+                            {a.drpResponsibleFullName}
+                          </span>
+                        </div>
+                      </div>
+                    ) : null}
                   </CardContent>
                   <CardFooter className="mt-auto flex shrink-0 flex-col gap-2 border-t px-4 pb-4 pt-4">
                     <div className="flex flex-wrap gap-2">
@@ -385,6 +423,7 @@ export function ProforientationView() {
                           onClick={() =>
                             updateStatus(a.id, "in_progress", {
                               drpScheduledDate: new Date().toISOString().slice(0, 10),
+                              drpResponsibleFullName: getCurrentBankEmployee().fullName,
                             })
                           }
                         >

@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -21,18 +22,31 @@ import type { OrientationTestWorkflowStatus, ProforientationApplication } from "
 import { ChevronDown, ExternalLink, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDateOrDefault, formatDateTimeShortRu } from "@/lib/date-utils";
+import { BADGE_COLORS } from "@/lib/badge-colors";
 
-function orientationTestBadgeVariant(
-  status: OrientationTestWorkflowStatus
-): "default" | "secondary" | "outline" {
+function drpResponsibleInitials(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    const a = parts[0][0];
+    const b = parts[1][0];
+    if (a && b) return (a + b).toUpperCase();
+  }
+  return (parts[0] ?? "").slice(0, 2).toUpperCase() || "?";
+}
+
+/** Единый вид тегов с системой: outline + семантические цвета из BADGE_COLORS */
+function orientationTestStatusBadgeClass(status: OrientationTestWorkflowStatus): string {
   switch (status) {
+    case "pending_link":
+      return BADGE_COLORS.planned;
     case "awaiting_pass":
-      return "default";
+      return BADGE_COLORS.inProgress;
     case "awaiting_results":
+      return BADGE_COLORS.pending;
     case "results_ready":
-      return "secondary";
+      return BADGE_COLORS.completed;
     default:
-      return "outline";
+      return BADGE_COLORS.notStarted;
   }
 }
 
@@ -129,6 +143,21 @@ export function ProforientationApplicationDetailBody({
             <p className="mt-3 text-sm text-muted-foreground whitespace-pre-wrap">{a.comment}</p>
           </div>
         ) : null}
+        {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
+          <div>
+            <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              Ответственный сотрудник ДРП
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                  {drpResponsibleInitials(a.drpResponsibleFullName)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium text-foreground">{a.drpResponsibleFullName}</span>
+            </div>
+          </div>
+        ) : null}
         {(a.drpScheduledDate || a.drpComment) && (
           <div>
             <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Данные ДРП</p>
@@ -154,8 +183,11 @@ export function ProforientationApplicationDetailBody({
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
             <Badge
-              variant={orientationTestBadgeVariant(orientationTest.status)}
-              className="shrink-0 rounded-md px-2 text-sm font-semibold leading-tight"
+              variant="outline"
+              className={cn(
+                "shrink-0 text-sm font-medium",
+                orientationTestStatusBadgeClass(orientationTest.status)
+              )}
             >
               {ORIENTATION_TEST_BADGE_LABEL[orientationTest.status]}
             </Badge>
@@ -233,24 +265,26 @@ export function ProforientationApplicationDetailBody({
 
       <CollapseSection title="Рекомендации" defaultOpen={hasRecommendations}>
         {hasResult && a.result && hasRecommendations ? (
-          <div className="rounded-lg border overflow-x-auto">
-            <Table>
+          <div className="border rounded-lg overflow-x-auto overflow-y-hidden">
+            <Table className="min-w-full">
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
                   <TableHead className="text-sm font-semibold">ВУЗ</TableHead>
-                  <TableHead className="text-right text-sm font-semibold w-20">Совпадение</TableHead>
+                  <TableHead className="w-20 text-right text-sm font-semibold">Совпадение</TableHead>
                   <TableHead className="text-sm font-semibold">Обоснование</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {a.result.recommendations.map((rec) => (
-                  <TableRow key={rec.universityId}>
-                    <TableCell>
+                  <TableRow key={rec.universityId} className="hover:bg-muted/50">
+                    <TableCell className="px-4 whitespace-normal">
                       <div className="text-sm font-medium">{rec.universityShortName}</div>
                       <div className="text-sm text-muted-foreground">{rec.universityName}</div>
                     </TableCell>
-                    <TableCell className="text-right text-sm font-medium tabular-nums">{rec.fitScore}</TableCell>
-                    <TableCell className="text-sm">{rec.reason}</TableCell>
+                    <TableCell className="px-4 whitespace-normal text-right text-sm font-medium tabular-nums">
+                      {rec.fitScore}
+                    </TableCell>
+                    <TableCell className="px-4 whitespace-normal text-sm">{rec.reason}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

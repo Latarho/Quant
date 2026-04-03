@@ -58,7 +58,10 @@ export default function ProforientationApplicationPage() {
                 <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 {submittedAt}
               </span>
-              <ApplicationStatusBadge status={application.status} tone="yellow" />
+              <ApplicationStatusBadge
+                status={application.status}
+                tone={application.status === "in_progress" ? "yellow" : "default"}
+              />
             </div>
             <h1 className="text-2xl font-bold tracking-tight">Заявка на профориентацию</h1>
           </div>
