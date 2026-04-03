@@ -250,20 +250,16 @@ export function ProforientationView() {
                       </div>
                     ) : null}
                     {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
-                      <div className="rounded-md border border-border/80 bg-muted/30 p-2">
-                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                          Ответственный сотрудник ДРП
-                        </p>
-                        <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                          <Avatar className="h-10 w-10 shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                              {employeeInitials(a.drpResponsibleFullName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="min-w-0 text-sm font-medium text-foreground">
-                            {a.drpResponsibleFullName}
-                          </span>
-                        </div>
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="shrink-0 text-sm font-semibold">Ответственный сотрудник ДРП:</span>
+                        <Avatar className="h-10 w-10 shrink-0">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                            {employeeInitials(a.drpResponsibleFullName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="min-w-0 text-sm leading-snug">
+                          <span className="font-medium text-foreground">{a.drpResponsibleFullName}</span>
+                        </span>
                       </div>
                     ) : null}
                   </CardContent>
@@ -396,20 +392,16 @@ export function ProforientationView() {
                       </div>
                     ) : null}
                     {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
-                      <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
-                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                          Ответственный сотрудник ДРП
-                        </p>
-                        <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                          <Avatar className="h-10 w-10 shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                              {employeeInitials(a.drpResponsibleFullName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="min-w-0 text-sm font-medium text-foreground">
-                            {a.drpResponsibleFullName}
-                          </span>
-                        </div>
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="shrink-0 text-sm font-semibold">Ответственный сотрудник ДРП:</span>
+                        <Avatar className="h-10 w-10 shrink-0">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                            {employeeInitials(a.drpResponsibleFullName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="min-w-0 text-sm leading-snug">
+                          <span className="font-medium text-foreground">{a.drpResponsibleFullName}</span>
+                        </span>
                       </div>
                     ) : null}
                   </CardContent>

@@ -19,12 +19,13 @@ import {
   resolveOrientationTestState,
 } from "@/lib/proforientation/types";
 import type { OrientationTestWorkflowStatus, ProforientationApplication } from "@/lib/proforientation/types";
-import { ChevronDown, ExternalLink, FileText } from "lucide-react";
+import { ChevronDown, ExternalLink, FileText, GraduationCap, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDateOrDefault, formatDateTimeShortRu } from "@/lib/date-utils";
 import { BADGE_COLORS } from "@/lib/badge-colors";
+import { Separator } from "@/components/ui/separator";
 
-function drpResponsibleInitials(fullName: string): string {
+function personInitials(fullName: string): string {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     const a = parts[0][0];
@@ -92,91 +93,124 @@ export function ProforientationApplicationDetailBody({
   return (
     <div className="w-full space-y-6">
       <CollapseSection title="Информация о заявке" defaultOpen>
-        <div>
-          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Сотрудник банка</p>
-          <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-[minmax(0,140px)_1fr] sm:gap-x-4">
-            <dt className="text-sm text-muted-foreground">ФИО</dt>
-            <dd className="text-sm font-medium">{a.employeeFullName}</dd>
-            <dt className="text-sm text-muted-foreground">Табельный номер</dt>
-            <dd className="text-sm font-medium">{a.employeeTabNumber || "—"}</dd>
-            <dt className="text-sm text-muted-foreground">Подразделение</dt>
-            <dd className="text-sm font-medium">{a.employeeDepartment || "—"}</dd>
-            <dt className="text-sm text-muted-foreground">Почта</dt>
-            <dd className="break-all text-sm font-medium">{a.employeeEmail}</dd>
-            <dt className="text-sm text-muted-foreground">Телефон</dt>
-            <dd className="text-sm font-medium">{a.employeePhone || "—"}</dd>
-          </dl>
-        </div>
-        <div>
-          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            Участник тестирования
-          </p>
-          <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-[minmax(0,140px)_1fr] sm:gap-x-4">
-            <dt className="text-sm text-muted-foreground">ФИО</dt>
-            <dd className="text-sm font-medium">{a.childFullName}</dd>
-            <dt className="text-sm text-muted-foreground">Дата рождения</dt>
-            <dd className="text-sm font-medium">{formatDateOrDefault(a.childBirthDate)}</dd>
-            <dt className="text-sm text-muted-foreground">Класс / курс</dt>
-            <dd className="text-sm font-medium">{a.childSchoolGrade || "—"}</dd>
-          </dl>
-        </div>
-        <div>
-          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Направления интереса</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {a.interestDirections.length > 0 ? (
-              a.interestDirections.map((id) => {
-                const label = INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
-                return (
-                  <Badge key={id} variant="outline" className="font-normal text-sm">
-                    {label}
-                  </Badge>
-                );
-              })
-            ) : (
-              <span className="text-sm text-muted-foreground">Не указаны</span>
-            )}
+        <div className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <section
+              className={cn(
+                "flex flex-col rounded-xl border border-border/70 bg-muted/20 p-4 shadow-sm",
+                "dark:bg-muted/10"
+              )}
+            >
+              <div className="mb-3 flex items-center gap-2 text-muted-foreground">
+                <UserRound className="size-4 shrink-0" aria-hidden />
+                <span className="text-xs font-semibold uppercase tracking-wide">Сотрудник банка</span>
+              </div>
+              <div className="flex min-w-0 gap-3">
+                <Avatar className="h-12 w-12 shrink-0">
+                  <AvatarFallback className="bg-primary text-base font-medium text-primary-foreground">
+                    {personInitials(a.employeeFullName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-semibold leading-snug text-foreground">{a.employeeFullName}</p>
+                  {a.employeeDepartment ? (
+                    <p className="mt-0.5 text-sm text-muted-foreground">{a.employeeDepartment}</p>
+                  ) : null}
+                </div>
+              </div>
+              <Separator className="my-4" />
+              <dl className="grid gap-x-3 gap-y-2.5 text-sm sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4">
+                <dt className="text-muted-foreground">Почта</dt>
+                <dd className="break-all font-medium">{a.employeeEmail}</dd>
+                <dt className="text-muted-foreground">Телефон</dt>
+                <dd className="font-medium">{a.employeePhone || "—"}</dd>
+              </dl>
+            </section>
+
+            <section
+              className={cn(
+                "flex flex-col rounded-xl border border-border/70 bg-muted/20 p-4 shadow-sm",
+                "dark:bg-muted/10"
+              )}
+            >
+              <div className="mb-3 flex items-center gap-2 text-muted-foreground">
+                <GraduationCap className="size-4 shrink-0" aria-hidden />
+                <span className="text-xs font-semibold uppercase tracking-wide">Участник тестирования</span>
+              </div>
+              <p className="text-base font-semibold leading-snug text-foreground">{a.childFullName}</p>
+              <Separator className="my-4" />
+              <dl className="grid gap-x-3 gap-y-2.5 text-sm sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4">
+                <dt className="text-muted-foreground">Дата рождения</dt>
+                <dd className="font-medium">{formatDateOrDefault(a.childBirthDate)}</dd>
+                <dt className="text-muted-foreground">Класс / курс</dt>
+                <dd className="font-medium">{a.childSchoolGrade || "—"}</dd>
+              </dl>
+            </section>
           </div>
-        </div>
-        {a.comment ? (
-          <div>
-            <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Комментарий</p>
-            <p className="mt-3 text-sm text-muted-foreground whitespace-pre-wrap">{a.comment}</p>
-          </div>
-        ) : null}
-        {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
-          <div>
-            <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              Ответственный сотрудник ДРП
+
+          <section className="rounded-xl border border-border/70 bg-muted/20 p-4 shadow-sm dark:bg-muted/10">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Направления интереса
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Avatar className="h-10 w-10 shrink-0">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                  {drpResponsibleInitials(a.drpResponsibleFullName)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium text-foreground">{a.drpResponsibleFullName}</span>
+            <div className="flex flex-wrap gap-1.5">
+              {a.interestDirections.length > 0 ? (
+                a.interestDirections.map((id) => {
+                  const label = INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
+                  return (
+                    <Badge key={id} variant="secondary" className="text-sm font-normal">
+                      {label}
+                    </Badge>
+                  );
+                })
+              ) : (
+                <span className="text-sm text-muted-foreground">Не указаны</span>
+              )}
             </div>
-          </div>
-        ) : null}
-        {(a.drpScheduledDate || a.drpComment) && (
-          <div>
-            <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Данные ДРП</p>
-            <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-[minmax(0,140px)_1fr] sm:gap-x-4">
-              {a.drpScheduledDate ? (
-                <>
-                  <dt className="text-sm text-muted-foreground">Дата записи</dt>
-                  <dd className="text-sm font-medium">{formatDateOrDefault(a.drpScheduledDate)}</dd>
-                </>
-              ) : null}
-              {a.drpComment ? (
-                <>
-                  <dt className="text-sm text-muted-foreground">Комментарий ДРП</dt>
-                  <dd className="whitespace-pre-wrap text-sm font-medium">{a.drpComment}</dd>
-                </>
-              ) : null}
-            </dl>
-          </div>
-        )}
+          </section>
+
+          {a.comment ? (
+            <section className="rounded-xl border border-dashed border-border/80 bg-muted/15 p-4 dark:bg-muted/5">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Комментарий</p>
+              <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{a.comment}</p>
+            </section>
+          ) : null}
+
+          {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
+            <section className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3 shadow-sm dark:bg-muted/10">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
+                <span className="shrink-0 text-sm font-semibold">Ответственный сотрудник ДРП:</span>
+                <Avatar className="h-9 w-9 shrink-0">
+                  <AvatarFallback className="bg-primary text-sm font-medium text-primary-foreground">
+                    {personInitials(a.drpResponsibleFullName)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="min-w-0 text-sm leading-snug">
+                  <span className="font-medium text-foreground">{a.drpResponsibleFullName}</span>
+                </span>
+              </div>
+            </section>
+          ) : null}
+
+          {(a.drpScheduledDate || a.drpComment) && (
+            <section className="rounded-xl border border-border/70 bg-muted/20 p-4 shadow-sm dark:bg-muted/10">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Данные ДРП</p>
+              <dl className="grid gap-x-3 gap-y-3 text-sm sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4">
+                {a.drpScheduledDate ? (
+                  <>
+                    <dt className="text-muted-foreground">Дата записи</dt>
+                    <dd className="font-medium">{formatDateOrDefault(a.drpScheduledDate)}</dd>
+                  </>
+                ) : null}
+                {a.drpComment ? (
+                  <>
+                    <dt className="self-start text-muted-foreground">Комментарий ДРП</dt>
+                    <dd className="whitespace-pre-wrap font-medium leading-relaxed">{a.drpComment}</dd>
+                  </>
+                ) : null}
+              </dl>
+            </section>
+          )}
+        </div>
       </CollapseSection>
 
       <CollapseSection title="Тесты на профориентацию" defaultOpen>
