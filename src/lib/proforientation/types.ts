@@ -21,6 +21,10 @@ export interface UniversityRecommendation {
   reason: string;
   /** Доля стажёров по направлению «кибер/ИБ» из этого ВУЗа среди всех учтённых */
   cyberSharePercent?: number;
+  /** Стажёров из ВУЗа с отметкой стажировки в банке (данные справочника) */
+  totalInternsWithBank?: number;
+  /** Из них по эвристике ИБ / кибер / смежные ИТ-направления */
+  cyberRelatedInterns?: number;
 }
 
 export interface ProforientationResult {

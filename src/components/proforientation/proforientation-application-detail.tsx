@@ -1,15 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ProforientationRecommendationsSection } from "@/components/proforientation/proforientation-recommendations-section";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -84,11 +77,15 @@ export function ProforientationApplicationDetailBody({
   application: ProforientationApplication;
 }) {
   const hasResult = Boolean(a.result);
-  const hasRecommendations = Boolean(a.result?.recommendations.length);
   const orientationTest = resolveOrientationTestState(a);
   const showTestLink = orientationTest.status === "awaiting_pass" && Boolean(orientationTest.testUrl);
   const showResultsPdf =
     orientationTest.status === "results_ready" && Boolean(orientationTest.resultsPdfUrl);
+
+  const hasDrpPerson =
+    (a.status === "in_progress" || a.status === "completed") && Boolean(a.drpResponsibleFullName);
+  const hasDrpData = Boolean(a.drpScheduledDate || a.drpComment);
+  const showDrpBlock = hasDrpPerson || hasDrpData;
 
   return (
     <div className="w-full space-y-6">
@@ -175,41 +172,45 @@ export function ProforientationApplicationDetailBody({
             </section>
           ) : null}
 
-          {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
-            <section className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3 shadow-sm dark:bg-muted/10">
-              <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
-                <span className="shrink-0 text-sm font-semibold">Ответственный сотрудник ДРП:</span>
-                <Avatar className="h-9 w-9 shrink-0">
-                  <AvatarFallback className="bg-primary text-sm font-medium text-primary-foreground">
-                    {personInitials(a.drpResponsibleFullName)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="min-w-0 text-sm leading-snug">
-                  <span className="font-medium text-foreground">{a.drpResponsibleFullName}</span>
-                </span>
-              </div>
+          {showDrpBlock ? (
+            <section className="rounded-xl border border-border/70 bg-muted/20 p-4 shadow-sm dark:bg-muted/10">
+              {hasDrpPerson && a.drpResponsibleFullName ? (
+                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
+                  <span className="shrink-0 text-sm font-semibold">Ответственный сотрудник ДРП:</span>
+                  <Avatar className="h-9 w-9 shrink-0">
+                    <AvatarFallback className="bg-primary text-sm font-medium text-primary-foreground">
+                      {personInitials(a.drpResponsibleFullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="min-w-0 text-sm leading-snug">
+                    <span className="font-medium text-foreground">{a.drpResponsibleFullName}</span>
+                  </span>
+                </div>
+              ) : null}
+              {hasDrpPerson && hasDrpData ? <Separator className="my-4" /> : null}
+              {hasDrpData ? (
+                <>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Данные ДРП
+                  </p>
+                  <dl className="grid gap-x-3 gap-y-3 text-sm sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4">
+                    {a.drpScheduledDate ? (
+                      <>
+                        <dt className="text-muted-foreground">Дата записи</dt>
+                        <dd className="font-medium">{formatDateOrDefault(a.drpScheduledDate)}</dd>
+                      </>
+                    ) : null}
+                    {a.drpComment ? (
+                      <>
+                        <dt className="self-start text-muted-foreground">Комментарий ДРП</dt>
+                        <dd className="whitespace-pre-wrap font-medium leading-relaxed">{a.drpComment}</dd>
+                      </>
+                    ) : null}
+                  </dl>
+                </>
+              ) : null}
             </section>
           ) : null}
-
-          {(a.drpScheduledDate || a.drpComment) && (
-            <section className="rounded-xl border border-border/70 bg-muted/20 p-4 shadow-sm dark:bg-muted/10">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Данные ДРП</p>
-              <dl className="grid gap-x-3 gap-y-3 text-sm sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4">
-                {a.drpScheduledDate ? (
-                  <>
-                    <dt className="text-muted-foreground">Дата записи</dt>
-                    <dd className="font-medium">{formatDateOrDefault(a.drpScheduledDate)}</dd>
-                  </>
-                ) : null}
-                {a.drpComment ? (
-                  <>
-                    <dt className="self-start text-muted-foreground">Комментарий ДРП</dt>
-                    <dd className="whitespace-pre-wrap font-medium leading-relaxed">{a.drpComment}</dd>
-                  </>
-                ) : null}
-              </dl>
-            </section>
-          )}
         </div>
       </CollapseSection>
 
@@ -297,38 +298,8 @@ export function ProforientationApplicationDetailBody({
         </div>
       </CollapseSection>
 
-      <CollapseSection title="Рекомендации" defaultOpen={hasRecommendations}>
-        {hasResult && a.result && hasRecommendations ? (
-          <div className="border rounded-lg overflow-x-auto overflow-y-hidden">
-            <Table className="min-w-full">
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="text-sm font-semibold">ВУЗ</TableHead>
-                  <TableHead className="w-20 text-right text-sm font-semibold">Совпадение</TableHead>
-                  <TableHead className="text-sm font-semibold">Обоснование</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {a.result.recommendations.map((rec) => (
-                  <TableRow key={rec.universityId} className="hover:bg-muted/50">
-                    <TableCell className="px-4 whitespace-normal">
-                      <div className="text-sm font-medium">{rec.universityShortName}</div>
-                      <div className="text-sm text-muted-foreground">{rec.universityName}</div>
-                    </TableCell>
-                    <TableCell className="px-4 whitespace-normal text-right text-sm font-medium tabular-nums">
-                      {rec.fitScore}
-                    </TableCell>
-                    <TableCell className="px-4 whitespace-normal text-sm">{rec.reason}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Рекомендации появятся после завершения процедуры и расчёта результатов.
-          </p>
-        )}
+      <CollapseSection title="Рекомендации" defaultOpen={hasResult}>
+        <ProforientationRecommendationsSection result={a.result} interestDirectionIds={a.interestDirections} />
       </CollapseSection>
     </div>
   );

@@ -1,5 +1,18 @@
 import type { University, Intern, Practitioner } from "@/types/universities";
 
+/**
+ * Детерминированный RNG для генерации моков при загрузке модуля.
+ * Иначе Math.random() даёт разные списки на сервере (SSR) и в браузере → ошибка гидрации React.
+ */
+function mulberry32(seed: number) {
+  return function () {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // Структура подразделений
 interface Department {
   id: string;
@@ -712,6 +725,9 @@ const mockUniversities: University[] = [
     averageInternsPerYear: 35,
     interns: 100,
     internList: (() => {
+      const rng = mulberry32(0x48e1f9c2);
+      /** Фиксированная «сегодняшняя» дата для ветвлений в моке (не new Date() — иначе SSR и клиент могут разойтись). */
+      const mockToday = new Date("2026-04-03T12:00:00.000Z");
       const departments = [
         "Департамент автоматизации внутренних сервисов",
         "Управление развития общекорпоративных систем",
@@ -779,16 +795,16 @@ const mockUniversities: University[] = [
       practiceEmployees.forEach((emp, index) => {
         const hireDateObj = new Date(emp.hireDate);
         const status: "active" | "dismissed" = "active";
-        const internshipInBank = Math.random() < 0.6;
+        const internshipInBank = rng() < 0.6;
         let internshipStartDate: string | undefined;
         let internshipEndDate: string | undefined;
         
         if (internshipInBank) {
           const internshipStart = new Date(hireDateObj);
-          internshipStart.setMonth(internshipStart.getMonth() - Math.floor(Math.random() * 6) - 1);
+          internshipStart.setMonth(internshipStart.getMonth() - Math.floor(rng() * 6) - 1);
           internshipStartDate = internshipStart.toISOString().split('T')[0];
           const internshipEnd = new Date(internshipStart);
-          internshipEnd.setMonth(internshipEnd.getMonth() + Math.floor(Math.random() * 3) + 2);
+          internshipEnd.setMonth(internshipEnd.getMonth() + Math.floor(rng() * 3) + 2);
           internshipEndDate = internshipEnd.toISOString().split('T')[0];
         }
         
@@ -811,51 +827,51 @@ const mockUniversities: University[] = [
       const endDate = new Date("2024-12-31");
       
       for (let i = 1; i <= 87; i++) { // Уменьшил с 100 до 87, чтобы всего было 100 (13 + 87)
-        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-        const middleName = middleNames[Math.floor(Math.random() * middleNames.length)];
+        const firstName = firstNames[Math.floor(rng() * firstNames.length)];
+        const lastName = lastNames[Math.floor(rng() * lastNames.length)];
+        const middleName = middleNames[Math.floor(rng() * middleNames.length)];
         const fullName = `${lastName} ${firstName} ${middleName}`;
         
-        const age = 20 + Math.floor(Math.random() * 11); // 20-30 лет
-        const position = positions[Math.floor(Math.random() * positions.length)];
-        const department = departments[Math.floor(Math.random() * departments.length)];
+        const age = 20 + Math.floor(rng() * 11); // 20-30 лет
+        const position = positions[Math.floor(rng() * positions.length)];
+        const department = departments[Math.floor(rng() * departments.length)];
         
         // Случайная дата приема между 2022 и 2024
         const hireDateObj = new Date(
-          startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime())
+          startDate.getTime() + rng() * (endDate.getTime() - startDate.getTime())
         );
         const hireDate = hireDateObj.toISOString().split('T')[0];
         
         // 85% активных, 15% уволенных
-        const status: "active" | "dismissed" = Math.random() < 0.15 ? "dismissed" : "active";
+        const status: "active" | "dismissed" = rng() < 0.15 ? "dismissed" : "active";
         
         let dismissalDate: string | undefined;
         if (status === "dismissed") {
           const dismissalDateObj = new Date(hireDateObj);
-          dismissalDateObj.setMonth(dismissalDateObj.getMonth() + Math.floor(Math.random() * 12) + 1);
-          if (dismissalDateObj > new Date()) {
+          dismissalDateObj.setMonth(dismissalDateObj.getMonth() + Math.floor(rng() * 12) + 1);
+          if (dismissalDateObj > mockToday) {
             dismissalDateObj.setMonth(dismissalDateObj.getMonth() - 6);
           }
           dismissalDate = dismissalDateObj.toISOString().split('T')[0];
         }
         
         // 60% имеют стажировку в банке
-        const internshipInBank = Math.random() < 0.6;
+        const internshipInBank = rng() < 0.6;
         let internshipStartDate: string | undefined;
         let internshipEndDate: string | undefined;
         
         if (internshipInBank) {
           const internshipStart = new Date(hireDateObj);
-          internshipStart.setMonth(internshipStart.getMonth() - Math.floor(Math.random() * 6) - 1);
+          internshipStart.setMonth(internshipStart.getMonth() - Math.floor(rng() * 6) - 1);
           internshipStartDate = internshipStart.toISOString().split('T')[0];
           
           const internshipEnd = new Date(internshipStart);
-          internshipEnd.setMonth(internshipEnd.getMonth() + Math.floor(Math.random() * 3) + 2);
+          internshipEnd.setMonth(internshipEnd.getMonth() + Math.floor(rng() * 3) + 2);
           internshipEndDate = internshipEnd.toISOString().split('T')[0];
         }
         
         // 50% имеют практику в банке
-        const practiceInBank = Math.random() < 0.5;
+        const practiceInBank = rng() < 0.5;
         
         interns.push({
           id: `intern-hse-${i}`,

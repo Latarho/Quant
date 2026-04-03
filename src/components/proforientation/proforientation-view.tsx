@@ -22,12 +22,11 @@ import {
 import { useProforientation } from "@/contexts/proforientation-context";
 import { INTEREST_DIRECTIONS } from "@/lib/proforientation/types";
 import type { OrientationScores, ProforientationApplication } from "@/lib/proforientation/types";
-import { openResultsPrintWindow } from "@/lib/proforientation/print-pdf";
 import { getCurrentBankEmployee } from "@/lib/auth/current-user";
 import { formatDateOrDefault, formatDateTimeShortRu } from "@/lib/date-utils";
 import { ApplicationStatusBadge } from "@/components/proforientation/proforientation-status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowRight, Calendar, ClipboardList, FileDown, Plus, UserCircle } from "lucide-react";
+import { ArrowRight, Calendar, ClipboardList, Plus, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function employeeInitials(fullName: string): string {
@@ -264,18 +263,6 @@ export function ProforientationView() {
                     ) : null}
                   </CardContent>
                   <CardFooter className="mt-auto shrink-0 border-t !px-3.5 !pb-2 !pt-2 flex flex-wrap items-center justify-end gap-1.5">
-                    {a.status === "completed" && a.result ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        onClick={() => openResultsPrintWindow(a)}
-                      >
-                        <FileDown className="size-4" />
-                        Открыть PDF (печать)
-                      </Button>
-                    ) : null}
                     <Button
                       type="button"
                       variant="ghost"

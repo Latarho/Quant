@@ -40,6 +40,8 @@ export function buildRecommendations(scores: OrientationScores): UniversityRecom
       fitScore: Math.round(fitScore * 10) / 10,
       reason,
       cyberSharePercent: row.cyberShareAmongUniversityInterns,
+      totalInternsWithBank: row.totalInternsWithBank,
+      cyberRelatedInterns: row.cyberRelatedInterns,
     };
   });
 
