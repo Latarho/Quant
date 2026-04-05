@@ -23,10 +23,11 @@ import { useProforientation } from "@/contexts/proforientation-context";
 import { INTEREST_DIRECTIONS } from "@/lib/proforientation/types";
 import type { OrientationScores, ProforientationApplication } from "@/lib/proforientation/types";
 import { getCurrentBankEmployee } from "@/lib/auth/current-user";
-import { formatDateOrDefault, formatDateTimeShortRu } from "@/lib/date-utils";
+import { formatDateDDMMYYYYRu, formatDateOrDefault } from "@/lib/date-utils";
 import { ApplicationStatusBadge } from "@/components/proforientation/proforientation-status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowRight, Calendar, ClipboardList, Plus, UserCircle } from "lucide-react";
+import { ArrowRight, CircleHelp, ClipboardList, Plus, UserCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 function employeeInitials(fullName: string): string {
@@ -44,6 +45,7 @@ type ApplicationFormState = {
   employeeFullName: string;
   employeeTabNumber: string;
   employeeDepartment: string;
+  employeePosition: string;
   employeeEmail: string;
   employeePhone: string;
   childFullName: string;
@@ -59,6 +61,7 @@ function buildApplicationFormFromCurrentUser(): ApplicationFormState {
     employeeFullName: u.fullName,
     employeeTabNumber: u.tabNumber,
     employeeDepartment: u.department,
+    employeePosition: u.position,
     employeeEmail: u.email,
     employeePhone: u.phone,
     childFullName: "",
@@ -77,6 +80,16 @@ export function ProforientationView() {
     () => [...applications].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [applications]
   );
+
+  /** Порядковый номер заявки (№1 — самая ранняя по дате создания), одинаковый во всех списках */
+  const applicationNumberById = useMemo(() => {
+    const byCreated = [...applications].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+    const map = new Map<string, number>();
+    byCreated.forEach((app, i) => map.set(app.id, i + 1));
+    return map;
+  }, [applications]);
 
   /** Заявки для администрирования: не завершённые */
   const adminQueue = useMemo(
@@ -138,11 +151,24 @@ export function ProforientationView() {
         <TabsContent value="applications" className="mt-3 w-full min-w-0 space-y-4 data-[state=inactive]:hidden">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold">Заявки на профориентацию</h2>
-              <p className="text-sm text-muted-foreground">
-                Статусы и сведения по заявкам меняются по мере прохождения этапов в ДРП. Новую заявку можно подать через
-                кнопку «Создать заявку».
-              </p>
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-lg font-semibold">Заявки на профориентацию</h2>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex shrink-0 rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label="Справка по разделу заявок"
+                    >
+                      <CircleHelp className="size-4" aria-hidden />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="start" sideOffset={6} className="max-w-sm text-left text-pretty">
+                    Статусы и сведения по заявкам меняются по мере прохождения этапов в ДРП. Новую заявку можно подать через
+                    кнопку «Создать заявку».
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
             <Button type="button" className="gap-2 shrink-0" onClick={openNewDialog}>
               <Plus className="size-4" />
@@ -178,22 +204,24 @@ export function ProforientationView() {
                   <CardHeader className="!gap-1.5 !px-3.5 !pb-2 !pt-2.5">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                        <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-                          <Calendar className="size-3.5 shrink-0" aria-hidden />
-                          <span>{formatDateTimeShortRu(a.createdAt)}</span>
-                        </div>
-                        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="shrink-0 text-sm font-semibold">Создатель заявки:</span>
-                          <Avatar className="h-10 w-10 shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                              {employeeInitials(a.employeeFullName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="min-w-0 text-sm leading-snug">
-                            <span className="font-medium text-foreground">{a.employeeFullName}</span>
-                            {a.employeeDepartment ? (
-                              <span className="text-muted-foreground"> · {a.employeeDepartment}</span>
-                            ) : null}
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-base text-muted-foreground">
+                          <span>
+                            номер{" "}
+                            <span
+                              className="font-semibold tabular-nums text-foreground"
+                              title={`Внутренний идентификатор: ${a.id}`}
+                            >
+                              {applicationNumberById.get(a.id) ?? "—"}
+                            </span>
+                          </span>
+                          <span className="text-muted-foreground/40" aria-hidden>
+                            ·
+                          </span>
+                          <span>
+                            дата{" "}
+                            <span className="font-medium text-foreground">
+                              {formatDateDDMMYYYYRu(a.createdAt)}
+                            </span>
                           </span>
                         </div>
                       </div>
@@ -203,23 +231,41 @@ export function ProforientationView() {
                   <Separator />
                   <CardContent className="flex flex-1 flex-col gap-1.5 !px-3.5 !pb-3 !pt-4">
                     <div className="rounded-md border border-border/80 bg-muted/30 p-2">
-                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                        Участник тестирования
-                      </p>
-                      <p className="mt-1.5 min-w-0 text-sm font-semibold leading-snug text-foreground">
-                        {a.childFullName}
-                      </p>
-                      <div className="mt-1.5 space-y-1 text-sm">
-                        <p className="min-w-0 leading-snug">
-                          <span className="text-muted-foreground">Дата рождения: </span>
-                          <span className="font-medium text-foreground">
-                            {formatDateOrDefault(a.childBirthDate)}
-                          </span>
+                      <div className="min-w-0 space-y-1.5">
+                        <span className="block text-sm font-semibold">Создатель заявки:</span>
+                        <div className="flex min-w-0 items-start gap-2">
+                          <Avatar className="h-10 w-10 shrink-0">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                              {employeeInitials(a.employeeFullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex flex-col gap-0">
+                            <span className="text-sm font-medium leading-snug text-foreground">{a.employeeFullName}</span>
+                            {a.employeePosition.trim() ? (
+                              <span className="text-sm text-muted-foreground">{a.employeePosition}</span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-2 border-t border-border/60 pt-2">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                          Участник тестирования
                         </p>
-                        <p className="min-w-0 leading-snug">
-                          <span className="text-muted-foreground">Класс / курс: </span>
-                          <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
+                        <p className="mt-1.5 min-w-0 text-sm font-semibold leading-snug text-foreground">
+                          {a.childFullName}
                         </p>
+                        <div className="mt-1.5 space-y-1 text-sm">
+                          <p className="min-w-0 leading-snug">
+                            <span className="text-muted-foreground">Дата рождения: </span>
+                            <span className="font-medium text-foreground">
+                              {formatDateOrDefault(a.childBirthDate)}
+                            </span>
+                          </p>
+                          <p className="min-w-0 leading-snug">
+                            <span className="text-muted-foreground">Класс / курс: </span>
+                            <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <div>
@@ -301,22 +347,24 @@ export function ProforientationView() {
                   <CardHeader className="space-y-2 p-4 pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                        <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-                          <Calendar className="size-3.5 shrink-0" aria-hidden />
-                          <span>{formatDateTimeShortRu(a.createdAt)}</span>
-                        </div>
-                        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="shrink-0 text-sm font-semibold">Создатель заявки:</span>
-                          <Avatar className="h-10 w-10 shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                              {employeeInitials(a.employeeFullName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="min-w-0 text-sm leading-snug">
-                            <span className="font-medium text-foreground">{a.employeeFullName}</span>
-                            {a.employeeDepartment ? (
-                              <span className="text-muted-foreground"> · {a.employeeDepartment}</span>
-                            ) : null}
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-base text-muted-foreground">
+                          <span>
+                            номер{" "}
+                            <span
+                              className="font-semibold tabular-nums text-foreground"
+                              title={`Внутренний идентификатор: ${a.id}`}
+                            >
+                              {applicationNumberById.get(a.id) ?? "—"}
+                            </span>
+                          </span>
+                          <span className="text-muted-foreground/40" aria-hidden>
+                            ·
+                          </span>
+                          <span>
+                            дата{" "}
+                            <span className="font-medium text-foreground">
+                              {formatDateDDMMYYYYRu(a.createdAt)}
+                            </span>
                           </span>
                         </div>
                       </div>
@@ -326,24 +374,42 @@ export function ProforientationView() {
                   <Separator />
                   <CardContent className="flex flex-1 flex-col gap-3 p-4 pt-4 text-sm">
                     <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
-                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                        Участник тестирования
-                      </p>
-                      <p className="mt-2 min-w-0 text-base font-semibold leading-snug text-foreground">
-                        {a.childFullName}
-                      </p>
-                      <dl className="mt-2 space-y-1.5">
-                        <div className="min-w-0 leading-snug">
-                          <span className="text-muted-foreground">Дата рождения: </span>
-                          <span className="font-medium text-foreground">
-                            {formatDateOrDefault(a.childBirthDate)}
-                          </span>
+                      <div className="min-w-0 space-y-1.5">
+                        <span className="block text-sm font-semibold">Создатель заявки:</span>
+                        <div className="flex min-w-0 items-start gap-2">
+                          <Avatar className="h-10 w-10 shrink-0">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                              {employeeInitials(a.employeeFullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex flex-col gap-0">
+                            <span className="text-sm font-medium leading-snug text-foreground">{a.employeeFullName}</span>
+                            {a.employeePosition.trim() ? (
+                              <span className="text-sm text-muted-foreground">{a.employeePosition}</span>
+                            ) : null}
+                          </div>
                         </div>
-                        <div className="min-w-0 leading-snug">
-                          <span className="text-muted-foreground">Класс / курс: </span>
-                          <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
-                        </div>
-                      </dl>
+                      </div>
+                      <div className="mt-3 border-t border-border/60 pt-3">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                          Участник тестирования
+                        </p>
+                        <p className="mt-2 min-w-0 text-base font-semibold leading-snug text-foreground">
+                          {a.childFullName}
+                        </p>
+                        <dl className="mt-2 space-y-1.5">
+                          <div className="min-w-0 leading-snug">
+                            <span className="text-muted-foreground">Дата рождения: </span>
+                            <span className="font-medium text-foreground">
+                              {formatDateOrDefault(a.childBirthDate)}
+                            </span>
+                          </div>
+                          <div className="min-w-0 leading-snug">
+                            <span className="text-muted-foreground">Класс / курс: </span>
+                            <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
+                          </div>
+                        </dl>
+                      </div>
                     </div>
                     <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
                       <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Контакт сотрудника</p>
@@ -473,6 +539,10 @@ export function ProforientationView() {
                   <Label htmlFor="po-dept">Подразделение / блок</Label>
                   <Input id="po-dept" readOnly value={form.employeeDepartment} className="bg-muted/50" />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="po-position">Должность</Label>
+                <Input id="po-position" readOnly value={form.employeePosition} className="bg-muted/50" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

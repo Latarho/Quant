@@ -7,7 +7,7 @@ const TEST_URL = "https://example.com/proforientation-test";
  * Увеличивайте при каждом изменении демо-данных в `getSeedProforientationApplications`.
  * Контекст сравнивает значение с localStorage и подменяет устаревший сид (только если в хранилище только демо-заявки).
  */
-export const PROFORIENTATION_SEED_CONTENT_VERSION = 2;
+export const PROFORIENTATION_SEED_CONTENT_VERSION = 3;
 
 /** Id всех демо-заявок из сида (для восстановления неполного набора из storage). */
 export const DEMO_SEED_APPLICATION_IDS = new Set([
@@ -68,6 +68,7 @@ export function getSeedProforientationApplications(): ProforientationApplication
     employeeFullName: "Иванов Иван Иванович",
     employeeTabNumber: "784512",
     employeeDepartment: "Департамент персонала",
+    employeePosition: "Ведущий специалист отдела развития персонала",
     employeeEmail: "ivanov.ii@gazprombank.ru",
     employeePhone: "+7 (495) 123-45-67",
     childFullName: "Иванова Мария Ивановна",
@@ -108,6 +109,7 @@ export function getSeedProforientationApplications(): ProforientationApplication
     employeeFullName: "Петрова Анна Сергеевна",
     employeeTabNumber: "891234",
     employeeDepartment: "Департамент корпоративного бизнеса",
+    employeePosition: "Старший менеджер по работе с корпоративными клиентами",
     employeeEmail: "petrova.as@gazprombank.ru",
     employeePhone: "+7 (495) 234-56-78",
     childFullName: "Петров Илья Андреевич",
@@ -134,6 +136,7 @@ export function getSeedProforientationApplications(): ProforientationApplication
     employeeFullName: "Смирнов Дмитрий Олегович",
     employeeTabNumber: "562341",
     employeeDepartment: "Департамент рисков",
+    employeePosition: "Руководитель группы кредитных рисков",
     employeeEmail: "smirnov.do@gazprombank.ru",
     employeePhone: "+7 (495) 345-67-89",
     childFullName: "Смирнова Елена Дмитриевна",
@@ -159,6 +162,7 @@ export function getSeedProforientationApplications(): ProforientationApplication
     employeeFullName: "Козлов Михаил Петрович",
     employeeTabNumber: "445566",
     employeeDepartment: "Департамент ИТ",
+    employeePosition: "Ведущий инженер отдела разработки",
     employeeEmail: "kozlov.mp@gazprombank.ru",
     employeePhone: "+7 (495) 456-78-90",
     childFullName: "Козлов Артём Михайлович",

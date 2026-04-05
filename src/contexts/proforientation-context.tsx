@@ -87,6 +87,7 @@ function coerceRow(raw: unknown): ProforientationApplication | null {
     status: normalizeStatus(r.status),
     interestDirections: Array.isArray(r.interestDirections) ? (r.interestDirections as string[]) : [],
     comment: typeof r.comment === "string" ? r.comment : "",
+    employeePosition: typeof r.employeePosition === "string" ? r.employeePosition : "",
     orientationTest,
   };
 }

@@ -74,6 +74,22 @@ export function formatDateTimeShortRu(iso: string): string {
 }
 
 /**
+ * Дата из ISO в формате дд.мм.гггг, без времени (Москва — как у formatDateTimeShortRu).
+ */
+export function formatDateDDMMYYYYRu(iso: string): string {
+  try {
+    return new Intl.DateTimeFormat("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone: "Europe/Moscow",
+    }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
+
+/**
  * Форматирует дату из строки ISO в формат дд.мм.гггг с обработкой часового пояса
  * @param dateString Дата в формате YYYY-MM-DD
  * @returns Дата в формате дд.мм.гггг

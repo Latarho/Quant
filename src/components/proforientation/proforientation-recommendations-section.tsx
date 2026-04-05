@@ -184,7 +184,7 @@ export function ProforientationRecommendationsSection({
               className="rounded-lg border border-border/60 bg-card/50 px-3 py-2 text-center shadow-sm"
             >
               <div className="text-lg font-semibold tabular-nums text-foreground">{v}</div>
-              <div className="text-xs text-muted-foreground">{label}</div>
+              <div className="text-sm text-muted-foreground">{label}</div>
             </div>
           ))}
         </div>
@@ -220,7 +220,7 @@ export function ProforientationRecommendationsSection({
                   </div>
                 </div>
                 <div className="w-full shrink-0 sm:max-w-[220px]">
-                  <div className="mb-1.5 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                  <div className="mb-1.5 flex items-center justify-between gap-2 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <LineChart className="size-3.5 shrink-0" aria-hidden />
                       Индекс совпадения
@@ -228,7 +228,7 @@ export function ProforientationRecommendationsSection({
                     <span className="font-semibold tabular-nums text-foreground">{rec.fitScore}</span>
                   </div>
                   <Progress value={fit} className="h-2" />
-                  <p className="mt-1 text-[11px] text-muted-foreground">Условная шкала до 100 по модели платформы</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Условная шкала до 100 по модели платформы</p>
                 </div>
               </div>
 
@@ -238,40 +238,40 @@ export function ProforientationRecommendationsSection({
                 <div className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 dark:bg-muted/10">
                   <Users className="size-4 shrink-0 text-primary" aria-hidden />
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">В банке (всего)</p>
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">В банке (всего)</p>
                     <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
                       {rec.totalInternsWithBank ?? "—"}
                     </p>
-                    <p className="text-xs text-muted-foreground">Стажёров из вуза в данных справочника</p>
+                    <p className="text-sm text-muted-foreground">Стажёров из вуза в данных справочника</p>
                   </div>
                 </div>
                 <div className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 dark:bg-muted/10">
                   <Shield className="size-4 shrink-0 text-primary" aria-hidden />
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">ИБ / кибер / ИТ</p>
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">ИБ / кибер / ИТ</p>
                     <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
                       {rec.cyberRelatedInterns ?? "—"}
                     </p>
-                    <p className="text-xs text-muted-foreground">По эвристике должности и подразделения</p>
+                    <p className="text-sm text-muted-foreground">По эвристике должности и подразделения</p>
                   </div>
                 </div>
                 <div className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 dark:bg-muted/10">
                   <BarChart3 className="size-4 shrink-0 text-primary" aria-hidden />
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
                       Доля ИБ и кибер
                     </p>
                     <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
                       {rec.cyberSharePercent != null ? `${rec.cyberSharePercent}%` : "—"}
                     </p>
-                    <p className="text-xs text-muted-foreground">Среди стажёров этого вуза в банке</p>
+                    <p className="text-sm text-muted-foreground">Среди стажёров этого вуза в банке</p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-3 px-4 pb-4">
                 <div className="rounded-lg border border-border/60 bg-muted/15 p-3 dark:bg-muted/5">
-                  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                     <BookOpen className="size-3.5 shrink-0" aria-hidden />
                     Обоснование
                   </p>
@@ -317,7 +317,7 @@ export function ProforientationRecommendationsSection({
                   </TableCell>
                   <TableCell className="whitespace-normal">
                     <div className="text-sm font-medium">{rec.universityShortName}</div>
-                    <div className="text-xs text-muted-foreground">{rec.universityName}</div>
+                    <div className="text-sm text-muted-foreground">{rec.universityName}</div>
                   </TableCell>
                   <TableCell className="text-right text-sm font-semibold tabular-nums">{rec.fitScore}</TableCell>
                   <TableCell className="text-right text-sm tabular-nums">{rec.totalInternsWithBank ?? "—"}</TableCell>
@@ -335,7 +335,7 @@ export function ProforientationRecommendationsSection({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border/70 bg-muted/10 px-3 py-2.5 text-xs text-muted-foreground dark:bg-muted/5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border/70 bg-muted/10 px-3 py-2.5 text-sm text-muted-foreground dark:bg-muted/5">
         <span>Данные о стажировках — срез справочника; при изменении карточек вузов пересчёт может обновиться.</span>
         <Link
           href="/universities"

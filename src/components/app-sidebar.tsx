@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { GraduationCap, Briefcase, FileText, BarChart3, ChevronDown, ChevronRight, Compass } from "lucide-react";
+import { GraduationCap, Briefcase, FileText, BarChart3, ChevronDown, ChevronRight } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
   Sidebar,
@@ -151,7 +151,6 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isProforientation} tooltip="Профориентация">
                   <Link href="/proforientation">
-                    <Compass className="size-4 shrink-0" />
                     <span>Профориентация</span>
                   </Link>
                 </SidebarMenuButton>

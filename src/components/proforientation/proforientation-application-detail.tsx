@@ -100,7 +100,7 @@ export function ProforientationApplicationDetailBody({
             >
               <div className="mb-3 flex items-center gap-2 text-muted-foreground">
                 <UserRound className="size-4 shrink-0" aria-hidden />
-                <span className="text-xs font-semibold uppercase tracking-wide">Сотрудник банка</span>
+                <span className="text-sm font-semibold uppercase tracking-wide">Сотрудник банка</span>
               </div>
               <div className="flex min-w-0 gap-3">
                 <Avatar className="h-12 w-12 shrink-0">
@@ -110,13 +110,15 @@ export function ProforientationApplicationDetailBody({
                 </Avatar>
                 <div className="min-w-0 flex-1">
                   <p className="text-base font-semibold leading-snug text-foreground">{a.employeeFullName}</p>
-                  {a.employeeDepartment ? (
-                    <p className="mt-0.5 text-sm text-muted-foreground">{a.employeeDepartment}</p>
+                  {a.employeePosition.trim() ? (
+                    <p className="mt-0.5 text-sm text-muted-foreground">{a.employeePosition}</p>
                   ) : null}
                 </div>
               </div>
               <Separator className="my-4" />
               <dl className="grid gap-x-3 gap-y-2.5 text-sm sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4">
+                <dt className="text-muted-foreground">Подразделение</dt>
+                <dd className="font-medium">{a.employeeDepartment.trim() || "—"}</dd>
                 <dt className="text-muted-foreground">Почта</dt>
                 <dd className="break-all font-medium">{a.employeeEmail}</dd>
                 <dt className="text-muted-foreground">Телефон</dt>
@@ -132,7 +134,7 @@ export function ProforientationApplicationDetailBody({
             >
               <div className="mb-3 flex items-center gap-2 text-muted-foreground">
                 <GraduationCap className="size-4 shrink-0" aria-hidden />
-                <span className="text-xs font-semibold uppercase tracking-wide">Участник тестирования</span>
+                <span className="text-sm font-semibold uppercase tracking-wide">Участник тестирования</span>
               </div>
               <p className="text-base font-semibold leading-snug text-foreground">{a.childFullName}</p>
               <Separator className="my-4" />
@@ -146,7 +148,7 @@ export function ProforientationApplicationDetailBody({
           </div>
 
           <section className="rounded-xl border border-border/70 bg-muted/20 p-4 shadow-sm dark:bg-muted/10">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Направления интереса
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -167,7 +169,7 @@ export function ProforientationApplicationDetailBody({
 
           {a.comment ? (
             <section className="rounded-xl border border-dashed border-border/80 bg-muted/15 p-4 dark:bg-muted/5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Комментарий</p>
+              <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Комментарий</p>
               <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{a.comment}</p>
             </section>
           ) : null}
@@ -190,7 +192,7 @@ export function ProforientationApplicationDetailBody({
               {hasDrpPerson && hasDrpData ? <Separator className="my-4" /> : null}
               {hasDrpData ? (
                 <>
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                     Данные ДРП
                   </p>
                   <dl className="grid gap-x-3 gap-y-3 text-sm sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4">

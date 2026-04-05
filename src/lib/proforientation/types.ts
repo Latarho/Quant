@@ -111,6 +111,8 @@ export interface ProforientationApplication {
   employeeFullName: string;
   employeeTabNumber: string;
   employeeDepartment: string;
+  /** Должность сотрудника (отображается под ФИО, как в справочнике вузов — ответственные лица) */
+  employeePosition: string;
   employeeEmail: string;
   employeePhone: string;
   /** Участник тестирования */
