@@ -12,10 +12,10 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: "w-fit",
-        grid2: "grid w-full grid-cols-2",
-        grid3: "grid w-full grid-cols-3",
-        grid4: "grid w-full grid-cols-4",
-        grid5: "grid w-full grid-cols-5",
+        grid2: "grid w-full grid-cols-2 items-stretch",
+        grid3: "grid w-full grid-cols-3 items-stretch",
+        grid4: "grid w-full grid-cols-4 items-stretch",
+        grid5: "grid w-full grid-cols-5 items-stretch",
         inline: "inline-flex !h-8 !p-0.5 flex-1 gap-1",
       },
     },

@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { INTEREST_DIRECTIONS, type ProforientationResult, type UniversityRecommendation } from "@/lib/proforientation/types";
-import { getCyberActivityInsight } from "@/lib/proforientation/university-activity";
+import { getInternActivityInsight } from "@/lib/proforientation/university-activity";
 import { formatDateTimeShortRu } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import {
@@ -24,7 +24,7 @@ import {
   Info,
   LineChart,
   Scale,
-  Shield,
+  Briefcase,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -41,7 +41,7 @@ function recommendationPracticalTip(rec: UniversityRecommendation, rank: number)
     return "Первый в списке даёт наибольший расчётный индекс по текущей модели и данным платформы. Имеет смысл сверить программы и сроки приёма с планами семьи и с профильными ЕГЭ.";
   }
   if ((rec.cyberSharePercent ?? 0) >= 25 && (rec.cyberRelatedInterns ?? 0) > 0) {
-    return "Высокая доля стажёров из этого вуза в направлениях ИБ и смежных ИТ — дополнительный сигнал при интересе к кибербезопасности и инженерным трекам.";
+    return "Высокая доля стажировок, отмеченных в справочнике как профильные по должности и подразделению — дополнительный ориентир; в банке бывают и другие виды практики.";
   }
   if ((rec.totalInternsWithBank ?? 0) >= 5) {
     return "Стабильный поток стажёров в банк обычно сочетается с налаженной работой с работодателями — удобно ориентироваться на практику и знакомство с отраслью.";
@@ -50,15 +50,14 @@ function recommendationPracticalTip(rec: UniversityRecommendation, rank: number)
 }
 
 function scoreProfileHint(scores: ProforientationResult["scores"]): string {
-  const t = (scores.technical + scores.analytical) / 2;
   const max = Math.max(scores.analytical, scores.technical, scores.social, scores.creative);
   if (max === scores.technical || max === scores.analytical) {
-    return "По результатам теста выражены аналитика и/или техника — в модели рекомендаций этим шкалам задан больший вес.";
+    return "В тесте сильнее аналитика и техника — в модели им выше вес.";
   }
   if (max === scores.social) {
-    return "По результатам теста выражены коммуникации — в модели учитывается и «объём» стажировок вуза в банке.";
+    return "В тесте сильнее коммуникации — дополнительно учитывается объём стажировок вуза в банке.";
   }
-  return "Профиль по тесту относительно сбалансирован; рекомендации учитывают все четыре шкалы и данные о стажировках.";
+  return "Профиль по тесту близок к сбалансированному; учитываются все шкалы и стажировки.";
 }
 
 export function ProforientationRecommendationsSection({
@@ -68,7 +67,7 @@ export function ProforientationRecommendationsSection({
   result: ProforientationResult | undefined;
   interestDirectionIds: string[];
 }) {
-  const platformInsight = getCyberActivityInsight();
+  const platformInsight = getInternActivityInsight();
   const interestLabels =
     interestDirectionIds.length > 0
       ? interestDirectionIds
@@ -114,54 +113,87 @@ export function ProforientationRecommendationsSection({
 
   return (
     <div className="space-y-6">
+      {/* Сводная таблица */}
+      <div>
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <Scale className="size-4 text-muted-foreground" aria-hidden />
+          <p className="text-sm font-semibold text-foreground">Сводное сравнение</p>
+        </div>
+        <div className="overflow-x-auto rounded-xl border border-border/80">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50 hover:bg-muted/50">
+                <TableHead className="w-10 text-center text-sm font-semibold">#</TableHead>
+                <TableHead className="min-w-[140px] text-sm font-semibold">Вуз</TableHead>
+                <TableHead className="w-24 text-right text-sm font-semibold">Индекс</TableHead>
+                <TableHead className="w-20 text-right text-sm font-semibold">В банке</TableHead>
+                <TableHead className="w-[5.5rem] text-right text-sm font-semibold">Профиль, шт.</TableHead>
+                <TableHead className="min-w-[7.5rem] text-right text-sm font-semibold">Доля профильных</TableHead>
+                <TableHead className="min-w-[220px] text-sm font-semibold">Опыт взаимодействия ГПБ</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {list.map((rec, i) => (
+                <TableRow key={rec.universityId} className="hover:bg-muted/40">
+                  <TableCell className="text-center text-sm font-medium tabular-nums text-muted-foreground">
+                    {i + 1}
+                  </TableCell>
+                  <TableCell className="whitespace-normal">
+                    <div className="text-sm font-medium">{rec.universityShortName}</div>
+                    <div className="text-sm text-muted-foreground">{rec.universityName}</div>
+                  </TableCell>
+                  <TableCell className="text-right text-sm font-semibold tabular-nums">{rec.fitScore}</TableCell>
+                  <TableCell className="text-right text-sm tabular-nums">{rec.totalInternsWithBank ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm tabular-nums">{rec.cyberRelatedInterns ?? "—"}</TableCell>
+                  <TableCell className="text-right text-sm tabular-nums">
+                    {rec.cyberSharePercent != null ? `${rec.cyberSharePercent}%` : "—"}
+                  </TableCell>
+                  <TableCell className="max-w-md whitespace-normal text-sm text-muted-foreground">
+                    {rec.reason.length > 160 ? `${rec.reason.slice(0, 157)}…` : rec.reason}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
       {/* Методология и контекст */}
       <div className="rounded-xl border border-border/70 bg-muted/25 p-4 shadow-sm dark:bg-muted/10">
         <div className="flex items-start gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Info className="size-4" aria-hidden />
           </div>
-          <div className="min-w-0 space-y-3 text-sm leading-relaxed">
+          <div className="min-w-0 space-y-2 text-sm leading-snug">
             <p className="font-semibold text-foreground">Как сформированы рекомендации</p>
-            <ul className="list-inside list-disc space-y-1.5 text-muted-foreground marker:text-primary/80">
-              <li>
-                Индекс совпадения считается по результатам теста (четыре шкалы) и по агрегированным данным справочника
-                о стажировках в банке по каждому вузу.
-              </li>
-              <li>
-                В модели больший вес получают технический и аналитический профиль, затем доля «кибер/ИБ» среди
-                стажёров вуза и устойчивость потока.
-              </li>
-              <li>
-                Показываются до пяти вузов с наибольшим индексом; порядок — расчётный, а не официальный рейтинг
-                вуза или программы.
-              </li>
-              <li>
-                Блок носит информационный характер: окончательный выбор учитывает экзамены, бюджет, переезд и правила
-                приёма конкретного года.
-              </li>
-            </ul>
+            <p className="text-muted-foreground">
+              Индекс сочетает четыре шкалы теста и свод по стажировкам в банке из справочника по каждому вузу. Сильнее
+              влияют техника и аналитика, затем доля стажировок, отмеченных как профильные (должность и подразделение),
+              и объём потока. До пяти вузов с наибольшим индексом — расчётный порядок, не официальный рейтинг. Сведения
+              ориентировочные: выбор семьи учитывает приём, экзамены, бюджет и переезд.
+            </p>
             {interestLabels ? (
-              <p className="rounded-lg border border-border/60 bg-background/80 px-3 py-2 text-foreground">
-                <span className="font-medium">Заявленные интересы: </span>
+              <p className="rounded-md border border-border/60 bg-background/80 px-2.5 py-1.5 text-foreground">
+                <span className="font-medium">Интересы в заявке: </span>
                 {interestLabels}
               </p>
             ) : null}
             {result.externalReport ? (
-              <p className="rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-foreground">
-                <span className="font-medium">Связь с PDF-отчётом: </span>
-                баллы профиля (0–100) приведены в соответствие с тестом «{result.externalReport.productLabel}» (
-                {formatDateTimeShortRu(result.externalReport.testedAt)}, сеанс {result.externalReport.sessionId}).
-                Блок ниже дополняет таблицы профессий и направлений из отчёта оценкой по данным о стажировках в банке.
+              <p className="rounded-md border border-primary/25 bg-primary/5 px-2.5 py-1.5 text-foreground">
+                <span className="font-medium">PDF-отчёт: </span>
+                баллы 0–100 согласованы с «{result.externalReport.productLabel}» (
+                {formatDateTimeShortRu(result.externalReport.testedAt)}, сеанс {result.externalReport.sessionId}
+                ). Таблица и карточки дополняют отчёт оценкой по стажировкам в банке.
               </p>
             ) : null}
             {result.scores ? (
               <p className="text-muted-foreground">
-                <span className="font-medium text-foreground">Связь с тестом: </span>
+                <span className="font-medium text-foreground">Тест: </span>
                 {scoreProfileHint(result.scores)}
               </p>
             ) : null}
             <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">По данным платформы: </span>
+              <span className="font-medium text-foreground">Справочник: </span>
               {platformInsight}
             </p>
           </div>
@@ -246,25 +278,27 @@ export function ProforientationRecommendationsSection({
                   </div>
                 </div>
                 <div className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 dark:bg-muted/10">
-                  <Shield className="size-4 shrink-0 text-primary" aria-hidden />
+                  <Briefcase className="size-4 shrink-0 text-primary" aria-hidden />
                   <div>
-                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">ИБ / кибер / ИТ</p>
+                    <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                      Профильные, шт.
+                    </p>
                     <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
                       {rec.cyberRelatedInterns ?? "—"}
                     </p>
-                    <p className="text-sm text-muted-foreground">По эвристике должности и подразделения</p>
+                    <p className="text-sm text-muted-foreground">По разметке должности и подразделения в справочнике</p>
                   </div>
                 </div>
                 <div className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 dark:bg-muted/10">
                   <BarChart3 className="size-4 shrink-0 text-primary" aria-hidden />
                   <div>
                     <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                      Доля ИБ и кибер
+                      Доля профильных
                     </p>
                     <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
                       {rec.cyberSharePercent != null ? `${rec.cyberSharePercent}%` : "—"}
                     </p>
-                    <p className="text-sm text-muted-foreground">Среди стажёров этого вуза в банке</p>
+                    <p className="text-sm text-muted-foreground">Среди учтённых стажировок в банке по вузу</p>
                   </div>
                 </div>
               </div>
@@ -288,62 +322,6 @@ export function ProforientationRecommendationsSection({
             </article>
           );
         })}
-      </div>
-
-      {/* Сводная таблица */}
-      <div>
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Scale className="size-4 text-muted-foreground" aria-hidden />
-          <p className="text-sm font-semibold text-foreground">Сводное сравнение</p>
-        </div>
-        <div className="overflow-x-auto rounded-xl border border-border/80">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="w-10 text-center text-sm font-semibold">#</TableHead>
-                <TableHead className="min-w-[140px] text-sm font-semibold">Вуз</TableHead>
-                <TableHead className="w-24 text-right text-sm font-semibold">Индекс</TableHead>
-                <TableHead className="w-20 text-right text-sm font-semibold">В банке</TableHead>
-                <TableHead className="w-20 text-right text-sm font-semibold">ИБ/кибер</TableHead>
-                <TableHead className="min-w-[7.5rem] text-right text-sm font-semibold">Доля ИБ и кибер</TableHead>
-                <TableHead className="min-w-[220px] text-sm font-semibold">Кратко</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {list.map((rec, i) => (
-                <TableRow key={rec.universityId} className="hover:bg-muted/40">
-                  <TableCell className="text-center text-sm font-medium tabular-nums text-muted-foreground">
-                    {i + 1}
-                  </TableCell>
-                  <TableCell className="whitespace-normal">
-                    <div className="text-sm font-medium">{rec.universityShortName}</div>
-                    <div className="text-sm text-muted-foreground">{rec.universityName}</div>
-                  </TableCell>
-                  <TableCell className="text-right text-sm font-semibold tabular-nums">{rec.fitScore}</TableCell>
-                  <TableCell className="text-right text-sm tabular-nums">{rec.totalInternsWithBank ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm tabular-nums">{rec.cyberRelatedInterns ?? "—"}</TableCell>
-                  <TableCell className="text-right text-sm tabular-nums">
-                    {rec.cyberSharePercent != null ? `${rec.cyberSharePercent}%` : "—"}
-                  </TableCell>
-                  <TableCell className="max-w-md whitespace-normal text-sm text-muted-foreground">
-                    {rec.reason.length > 160 ? `${rec.reason.slice(0, 157)}…` : rec.reason}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border/70 bg-muted/10 px-3 py-2.5 text-sm text-muted-foreground dark:bg-muted/5">
-        <span>Данные о стажировках — срез справочника; при изменении карточек вузов пересчёт может обновиться.</span>
-        <Link
-          href="/universities"
-          className="inline-flex shrink-0 items-center gap-1 font-medium text-primary underline-offset-4 hover:underline"
-        >
-          Справочник ВУЗов
-          <ArrowUpRight className="size-3 shrink-0" />
-        </Link>
       </div>
     </div>
   );

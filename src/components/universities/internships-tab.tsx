@@ -126,7 +126,7 @@ export function InternshipsTab() {
     <>
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
         <div className="space-y-4 mb-4">
-          <TabsList variant="grid2" className="min-w-[min(100%,24rem)] w-full">
+          <TabsList variant="grid2" className="min-h-9 h-9 min-w-[min(100%,24rem)] w-full">
             {INTERNSHIP_TABS.map(({ value, label }) => {
               const count = value === "internships"
                 ? internships.filter((i) => PROGRAM_TYPES.includes(i.title as (typeof PROGRAM_TYPES)[number])).length

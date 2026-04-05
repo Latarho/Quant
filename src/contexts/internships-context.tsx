@@ -19,10 +19,18 @@ interface InternshipsContextValue {
 
 const InternshipsContext = createContext<InternshipsContextValue | null>(null);
 
-function createInternshipFromData(data: NewInternshipData, id: string): Internship {
-  const now = new Date();
-  const startDate = new Date(data.startDate);
-  const endDate = new Date(data.endDate);
+function createInternshipFromData(
+  data: NewInternshipData,
+  id: string,
+  /** Фиксированные метки для сида — одинаковые при SSR и гидрации (не `new Date()`). */
+  seedTimestamps?: { createdAt: Date; updatedAt: Date }
+): Internship {
+  const now = seedTimestamps?.createdAt ?? new Date();
+  const updatedAt = seedTimestamps?.updatedAt ?? now;
+  const parseDayOrIso = (s: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(s.trim()) ? new Date(`${s.trim()}T12:00:00.000Z`) : new Date(s);
+  const startDate = parseDayOrIso(data.startDate);
+  const endDate = parseDayOrIso(data.endDate);
   return {
     id,
     partnershipId: "",
@@ -44,7 +52,7 @@ function createInternshipFromData(data: NewInternshipData, id: string): Internsh
     location: "office",
     direction: data.direction,
     createdAt: now,
-    updatedAt: now,
+    updatedAt,
     createdBy: "",
   };
 }
@@ -53,8 +61,19 @@ const STATUSES: InternshipStatus[] = ["in_progress", "completed"];
 
 const MONTH_NAMES: string[] = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
 
+function isoDateUTC(year: number, monthIndex0: number, day: number): string {
+  const d = new Date(Date.UTC(year, monthIndex0, day));
+  return d.toISOString().split("T")[0]!;
+}
+
 function getInitialInternships(): Internship[] {
   const list: Internship[] = [];
+  let seedSeq = 0;
+  const seedCreatedUpdated = () => {
+    const createdAt = new Date(Date.UTC(2025, 0, 1, 8, 0, seedSeq));
+    seedSeq += 1;
+    return { createdAt, updatedAt: createdAt };
+  };
   const types = ["GPB.Level Up", "GPB.Experience", "GPB.IT Factory"];
   const counts = [10, 6, 5]; // Level Up 10, Experience 6, IT Factory 5
   types.forEach((title, typeIndex) => {
@@ -63,19 +82,20 @@ function getInitialInternships(): Internship[] {
       const year = 2025;
       const startMonth = 1 + (i % 6);
       const endMonth = startMonth + 2;
-      const startDate = new Date(year, startMonth - 1, 15);
-      const endDate = new Date(year, endMonth - 1, 20);
+      const startDateStr = isoDateUTC(year, startMonth - 1, 15);
+      const endDateStr = isoDateUTC(year, endMonth - 1, 20);
       const status = STATUSES[i % STATUSES.length];
       const name = title === "GPB.Level Up" && i === 0 ? "Data Science" : `${MONTH_NAMES[startMonth - 1]} — ${MONTH_NAMES[endMonth - 1]} ${year}`;
       const internship = createInternshipFromData(
         {
           type: title,
           name,
-          startDate: startDate.toISOString().split("T")[0],
-          endDate: endDate.toISOString().split("T")[0],
+          startDate: startDateStr,
+          endDate: endDateStr,
           status,
         },
-        `seed-${title.replace(/\s/g, "-").toLowerCase()}-${i + 1}`
+        `seed-${title.replace(/\s/g, "-").toLowerCase()}-${i + 1}`,
+        seedCreatedUpdated()
       );
       list.push(internship);
     }
@@ -86,17 +106,18 @@ function getInitialInternships(): Internship[] {
     const year = 2025;
     const startMonth = 3 + i;
     const endMonth = startMonth + 2;
-    const startDate = new Date(year, startMonth - 1, 1);
-    const endDate = new Date(year, endMonth - 1, 28);
+    const startDateStr = isoDateUTC(year, startMonth - 1, 1);
+    const endDateStr = isoDateUTC(year, endMonth - 1, 28);
     const internship = createInternshipFromData(
       {
         type: mgimoTitle,
         name: `${MONTH_NAMES[startMonth - 1]} — ${MONTH_NAMES[endMonth - 1]} ${year}`,
-        startDate: startDate.toISOString().split("T")[0],
-        endDate: endDate.toISOString().split("T")[0],
+        startDate: startDateStr,
+        endDate: endDateStr,
         status: STATUSES[i % STATUSES.length],
       },
-      `seed-mgimo-${i + 1}`
+      `seed-mgimo-${i + 1}`,
+      seedCreatedUpdated()
     );
     list.push(internship);
   }

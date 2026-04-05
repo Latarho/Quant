@@ -24,9 +24,6 @@ export function buildRecommendations(scores: OrientationScores): UniversityRecom
     let reason = "";
     if (techWeight >= 0.45) {
       reason = `Сильный технический и аналитический профиль; в банке стабильно берут стажёров из «${row.shortName}» (${row.totalInternsWithBank} чел. со стажировкой).`;
-      if (row.cyberRelatedInterns > 0) {
-        reason += ` По профилю ИБ/кибер — ${row.cyberRelatedInterns} стажёра(ов) из этого ВУЗа.`;
-      }
     } else if (socialWeight >= 0.55) {
       reason = `Выражены коммуникативные компетенции; «${row.shortName}» даёт заметный поток стажёров в банк (${row.totalInternsWithBank} чел.).`;
     } else {

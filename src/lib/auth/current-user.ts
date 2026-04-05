@@ -13,11 +13,11 @@ export interface BankEmployeeProfile {
 }
 
 const MOCK_CURRENT_EMPLOYEE: BankEmployeeProfile = {
-  fullName: "Иванов Иван Иванович",
+  fullName: "Помыткин Сергей Олегович",
   tabNumber: "784512",
   department: "Департамент персонала",
   position: "Ведущий специалист отдела развития персонала",
-  email: "ivanov.ii@gazprombank.ru",
+  email: "pomytkin.so@gazprombank.ru",
   phone: "+7 (495) 123-45-67",
 };
 

@@ -7,7 +7,7 @@ const TEST_URL = "https://example.com/proforientation-test";
  * Увеличивайте при каждом изменении демо-данных в `getSeedProforientationApplications`.
  * Контекст сравнивает значение с localStorage и подменяет устаревший сид (только если в хранилище только демо-заявки).
  */
-export const PROFORIENTATION_SEED_CONTENT_VERSION = 3;
+export const PROFORIENTATION_SEED_CONTENT_VERSION = 9;
 
 /** Id всех демо-заявок из сида (для восстановления неполного набора из storage). */
 export const DEMO_SEED_APPLICATION_IDS = new Set([
@@ -23,9 +23,43 @@ export function shouldReplaceWithFullDemoSeed(rows: ProforientationApplication[]
   return rows.every((r) => DEMO_SEED_APPLICATION_IDS.has(r.id));
 }
 
+/** ФИО → должность для демо-персонажей и подстановки в старых записях localStorage. */
+const DEMO_FULLNAME_TO_POSITION: Record<string, string> = {
+  "Помыткин Сергей Олегович": "Ведущий специалист отдела развития персонала",
+  "Иванов Иван Иванович": "Ведущий специалист отдела развития персонала",
+  "Петрова Анна Сергеевна": "Старший менеджер по работе с корпоративными клиентами",
+  "Смирнов Дмитрий Олегович": "Руководитель группы кредитных рисков",
+  "Козлов Михаил Петрович": "Ведущий инженер отдела разработки",
+  "Волкова Анна Петровна": "Ведущий специалист департамента развития персонала",
+};
+
+/**
+ * Подставляет должности создателя и ответственного ДРП, если в данных они пустые,
+ * но ФИО совпадает с демо-справочником (актуально для старых JSON в localStorage).
+ */
+export function fillDemoPositions(a: ProforientationApplication): ProforientationApplication {
+  const posFor = (fullName: string) => DEMO_FULLNAME_TO_POSITION[fullName.trim()];
+
+  let next = a;
+
+  if (!a.employeePosition?.trim()) {
+    const p = posFor(a.employeeFullName);
+    if (p) next = { ...next, employeePosition: p };
+  }
+
+  const drpName = a.drpResponsibleFullName?.trim();
+  if (drpName && !a.drpResponsiblePosition?.trim()) {
+    const p = posFor(drpName);
+    if (p) next = { ...next, drpResponsiblePosition: p };
+  }
+
+  return next;
+}
+
 /**
  * Демо-заявки с разными статусами и этапами теста (при пустом localStorage).
  * Единая опорная линия: внешний тест «Профориентатор 8.2.1m», ключевая дата прохождения 15.03.2026.
+ * У каждого создателя заявки задано `employeePosition` — строка под ФИО в карточках и в деталях.
  */
 export function getSeedProforientationApplications(): ProforientationApplication[] {
   /**
@@ -65,11 +99,11 @@ export function getSeedProforientationApplications(): ProforientationApplication
     createdAt: "2026-03-10T08:00:00.000Z",
     updatedAt: "2026-04-02T14:30:00.000Z",
     status: "completed",
-    employeeFullName: "Иванов Иван Иванович",
+    employeeFullName: "Помыткин Сергей Олегович",
     employeeTabNumber: "784512",
     employeeDepartment: "Департамент персонала",
     employeePosition: "Ведущий специалист отдела развития персонала",
-    employeeEmail: "ivanov.ii@gazprombank.ru",
+    employeeEmail: "pomytkin.so@gazprombank.ru",
     employeePhone: "+7 (495) 123-45-67",
     childFullName: "Иванова Мария Ивановна",
     childBirthDate: "2010-08-22",
@@ -77,10 +111,14 @@ export function getSeedProforientationApplications(): ProforientationApplication
     interestDirections: ["it", "math", "mgmt"],
     comment:
       "Олимпиады по информатике и математике; лидерство в проектной группе. Профиль согласован с отчётом «Профориентатор 8.2.1m» от 15.03.2026 (сеанс 00303058).",
-    drpScheduledDate: "2026-03-14",
-    drpComment:
-      "Запись на тест подтверждена; сеанс 00303058, 15.03.2026, 41 мин — данные перенесены в заключение.",
+    drpWorkflowStep: "drp_consultation",
+    drpWorkflowStepDates: {
+      application_submitted: "2026-03-10",
+      third_party_testing: "2026-03-15",
+      drp_consultation: "2026-04-02",
+    },
     drpResponsibleFullName: "Волкова Анна Петровна",
+    drpResponsiblePosition: "Ведущий специалист департамента развития персонала",
     orientationTest: {
       status: "results_ready",
       testUrl: TEST_URL,
@@ -106,21 +144,24 @@ export function getSeedProforientationApplications(): ProforientationApplication
     createdAt: "2026-03-11T09:00:00.000Z",
     updatedAt: "2026-03-13T16:00:00.000Z",
     status: "in_progress",
-    employeeFullName: "Петрова Анна Сергеевна",
-    employeeTabNumber: "891234",
-    employeeDepartment: "Департамент корпоративного бизнеса",
-    employeePosition: "Старший менеджер по работе с корпоративными клиентами",
-    employeeEmail: "petrova.as@gazprombank.ru",
-    employeePhone: "+7 (495) 234-56-78",
+    employeeFullName: "Помыткин Сергей Олегович",
+    employeeTabNumber: "784512",
+    employeeDepartment: "Департамент персонала",
+    employeePosition: "Ведущий специалист отдела развития персонала",
+    employeeEmail: "pomytkin.so@gazprombank.ru",
+    employeePhone: "+7 (495) 123-45-67",
     childFullName: "Петров Илья Андреевич",
     childBirthDate: "2012-04-10",
     childSchoolGrade: "8 класс",
     interestDirections: ["it", "math", "mgmt"],
     comment: `${profileCommentShort} Готовится к прохождению «Профориентатор» по выданной ссылке.`,
-    drpScheduledDate: "2026-03-12",
-    drpComment:
-      "Ссылка на тест «Профориентатор 8.2.1m» отправлена на почту; рекомендуем завершить до записи на очередной поток (ориентир — как у эталонного сеанса 15.03.2026).",
+    drpWorkflowStep: "third_party_testing",
+    drpWorkflowStepDates: {
+      application_submitted: "2026-03-11",
+      third_party_testing: "2026-03-13",
+    },
     drpResponsibleFullName: "Волкова Анна Петровна",
+    drpResponsiblePosition: "Ведущий специалист департамента развития персонала",
     orientationTest: {
       status: "awaiting_pass",
       testUrl: TEST_URL,
@@ -133,21 +174,24 @@ export function getSeedProforientationApplications(): ProforientationApplication
     createdAt: "2026-03-12T10:00:00.000Z",
     updatedAt: "2026-03-16T11:00:00.000Z",
     status: "in_progress",
-    employeeFullName: "Смирнов Дмитрий Олегович",
-    employeeTabNumber: "562341",
-    employeeDepartment: "Департамент рисков",
-    employeePosition: "Руководитель группы кредитных рисков",
-    employeeEmail: "smirnov.do@gazprombank.ru",
-    employeePhone: "+7 (495) 345-67-89",
+    employeeFullName: "Помыткин Сергей Олегович",
+    employeeTabNumber: "784512",
+    employeeDepartment: "Департамент персонала",
+    employeePosition: "Ведущий специалист отдела развития персонала",
+    employeeEmail: "pomytkin.so@gazprombank.ru",
+    employeePhone: "+7 (495) 123-45-67",
     childFullName: "Смирнова Елена Дмитриевна",
     childBirthDate: "2011-11-03",
     childSchoolGrade: "9 класс",
     interestDirections: ["it", "math", "finance"],
     comment: `${profileCommentShort} Тестирование в центре завершено, ждём PDF для сопоставления с платформой.`,
-    drpScheduledDate: "2026-03-14",
-    drpComment:
-      "Участник прошёл тест «Профориентатор» 15.03.2026; ожидается файл отчёта от внешней системы для переноса баллов и заключения (как в демо-заявке с сеансом 00303058).",
+    drpWorkflowStep: "third_party_testing",
+    drpWorkflowStepDates: {
+      application_submitted: "2026-03-12",
+      third_party_testing: "2026-03-15",
+    },
     drpResponsibleFullName: "Волкова Анна Петровна",
+    drpResponsiblePosition: "Ведущий специалист департамента развития персонала",
     orientationTest: {
       status: "awaiting_results",
     },
@@ -159,18 +203,22 @@ export function getSeedProforientationApplications(): ProforientationApplication
     createdAt: "2026-03-05T10:00:00.000Z",
     updatedAt: "2026-03-05T10:00:00.000Z",
     status: "created",
-    employeeFullName: "Козлов Михаил Петрович",
-    employeeTabNumber: "445566",
-    employeeDepartment: "Департамент ИТ",
-    employeePosition: "Ведущий инженер отдела разработки",
-    employeeEmail: "kozlov.mp@gazprombank.ru",
-    employeePhone: "+7 (495) 456-78-90",
+    employeeFullName: "Помыткин Сергей Олегович",
+    employeeTabNumber: "784512",
+    employeeDepartment: "Департамент персонала",
+    employeePosition: "Ведущий специалист отдела развития персонала",
+    employeeEmail: "pomytkin.so@gazprombank.ru",
+    employeePhone: "+7 (495) 123-45-67",
     childFullName: "Козлов Артём Михайлович",
     childBirthDate: "2013-02-14",
     childSchoolGrade: "7 класс",
     interestDirections: ["it", "math", "mgmt"],
     comment:
       "Робототехника, базовое программирование. Ожидаем запись на тест «Профориентатор» по тому же профилю, что в отчёте (IT, инженерия, сильная логика и коммуникации).",
+    drpWorkflowStep: "application_submitted",
+    drpWorkflowStepDates: {
+      application_submitted: "2026-03-05",
+    },
     orientationTest: {
       status: "pending_link",
     },

@@ -25,15 +25,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  DRP_WORKFLOW_STEP_LABEL,
+  DRP_WORKFLOW_STEP_ORDER,
   INTEREST_DIRECTIONS,
   ORIENTATION_TEST_BADGE_LABEL,
-  ORIENTATION_TEST_DESCRIPTION,
+  resolveDrpWorkflowStep,
   resolveOrientationTestState,
 } from "@/lib/proforientation/types";
-import type { OrientationScores, OrientationTestWorkflowStatus, ProforientationApplication } from "@/lib/proforientation/types";
-import { ChevronDown, ExternalLink, FileText, Pencil } from "lucide-react";
+import type {
+  DrpWorkflowStep,
+  DrpWorkflowStepDates,
+  OrientationScores,
+  OrientationTestWorkflowStatus,
+  ProforientationApplication,
+} from "@/lib/proforientation/types";
+import { Check, ChevronDown, ExternalLink, FileText, Pencil, ScrollText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDateOrDefault, formatDateTimeShortRu } from "@/lib/date-utils";
 import { BADGE_COLORS } from "@/lib/badge-colors";
@@ -45,6 +54,86 @@ const TEST_WORKFLOW_OPTIONS: { value: OrientationTestWorkflowStatus; label: stri
   { value: "awaiting_results", label: ORIENTATION_TEST_BADGE_LABEL.awaiting_results },
   { value: "results_ready", label: ORIENTATION_TEST_BADGE_LABEL.results_ready },
 ];
+
+const DRP_WORKFLOW_SELECT_OPTIONS: { value: DrpWorkflowStep; label: string }[] = DRP_WORKFLOW_STEP_ORDER.map(
+  (id) => ({ value: id, label: DRP_WORKFLOW_STEP_LABEL[id] })
+);
+
+function drpStepDatesFormFromStored(
+  stored: ProforientationApplication["drpWorkflowStepDates"]
+): Record<DrpWorkflowStep, string> {
+  return {
+    application_submitted: stored?.application_submitted ?? "",
+    third_party_testing: stored?.third_party_testing ?? "",
+    drp_consultation: stored?.drp_consultation ?? "",
+  };
+}
+
+function drpStepDatesToPayload(form: Record<DrpWorkflowStep, string>): DrpWorkflowStepDates | undefined {
+  const out: DrpWorkflowStepDates = {};
+  for (const step of DRP_WORKFLOW_STEP_ORDER) {
+    const t = form[step].trim();
+    if (t) out[step] = t;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+function DrpWorkflowStepper({
+  currentStep,
+  stepDates,
+}: {
+  currentStep: DrpWorkflowStep;
+  stepDates: ProforientationApplication["drpWorkflowStepDates"];
+}) {
+  const currentIndex = DRP_WORKFLOW_STEP_ORDER.indexOf(currentStep);
+  return (
+    <ol className="mt-3 list-none space-y-0" aria-label="Этапы статуса проведения профориентации">
+      {DRP_WORKFLOW_STEP_ORDER.map((step, i) => {
+        const done = i < currentIndex;
+        const active = i === currentIndex;
+        const last = i === DRP_WORKFLOW_STEP_ORDER.length - 1;
+        const stepDate = stepDates?.[step];
+        return (
+          <li key={step} className="flex gap-3">
+            <div className="flex flex-col items-center">
+              <span
+                className={cn(
+                  "flex size-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors",
+                  done && "border-primary bg-primary text-primary-foreground",
+                  active && !done && "border-primary bg-background text-primary ring-2 ring-primary/25",
+                  !done && !active && "border-muted-foreground/35 bg-muted/30 text-muted-foreground"
+                )}
+              >
+                {done ? <Check className="size-4" strokeWidth={2.5} aria-hidden /> : <span aria-hidden>{i + 1}</span>}
+              </span>
+              {!last ? (
+                <span
+                  className={cn("mt-1 min-h-[1.25rem] w-0.5 flex-1 rounded-full", done ? "bg-primary" : "bg-border")}
+                  aria-hidden
+                />
+              ) : null}
+            </div>
+            <div className={cn("min-w-0 pb-5 last:pb-0", last && "pb-0")}>
+              <p
+                className={cn(
+                  "text-sm leading-snug",
+                  active && "font-semibold text-foreground",
+                  !active && done && "text-foreground",
+                  !active && !done && "text-muted-foreground"
+                )}
+              >
+                {DRP_WORKFLOW_STEP_LABEL[step]}
+              </p>
+              <p className="mt-0.5 text-sm tabular-nums text-muted-foreground">
+                {formatDateOrDefault(stepDate, "—")}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 function personInitials(fullName: string): string {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -141,7 +230,7 @@ export function ProforientationApplicationDetailBody({
   const showResultsPdf =
     orientationTest.status === "results_ready" && Boolean(orientationTest.resultsPdfUrl);
 
-  const hasDrpData = Boolean(a.drpScheduledDate || a.drpComment);
+  const drpStep = resolveDrpWorkflowStep(a);
 
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoChildName, setInfoChildName] = useState(a.childFullName);
@@ -149,8 +238,10 @@ export function ProforientationApplicationDetailBody({
   const [infoGrade, setInfoGrade] = useState(a.childSchoolGrade);
   const [infoInterests, setInfoInterests] = useState<string[]>(a.interestDirections);
   const [infoComment, setInfoComment] = useState(a.comment);
-  const [infoDrpDate, setInfoDrpDate] = useState(a.drpScheduledDate ?? "");
-  const [infoDrpComment, setInfoDrpComment] = useState(a.drpComment ?? "");
+  const [infoDrpStep, setInfoDrpStep] = useState<DrpWorkflowStep>(() => resolveDrpWorkflowStep(a));
+  const [infoDrpStepDates, setInfoDrpStepDates] = useState<Record<DrpWorkflowStep, string>>(() =>
+    drpStepDatesFormFromStored(a.drpWorkflowStepDates)
+  );
 
   const openInfoDialog = useCallback(() => {
     setInfoChildName(a.childFullName);
@@ -158,8 +249,8 @@ export function ProforientationApplicationDetailBody({
     setInfoGrade(a.childSchoolGrade);
     setInfoInterests([...a.interestDirections]);
     setInfoComment(a.comment);
-    setInfoDrpDate(a.drpScheduledDate ?? "");
-    setInfoDrpComment(a.drpComment ?? "");
+    setInfoDrpStep(resolveDrpWorkflowStep(a));
+    setInfoDrpStepDates(drpStepDatesFormFromStored(a.drpWorkflowStepDates));
     setInfoOpen(true);
   }, [a]);
 
@@ -176,8 +267,8 @@ export function ProforientationApplicationDetailBody({
       childSchoolGrade: infoGrade,
       interestDirections: [...infoInterests],
       comment: infoComment,
-      drpScheduledDate: infoDrpDate.trim() || undefined,
-      drpComment: infoDrpComment.trim() || undefined,
+      drpWorkflowStep: infoDrpStep,
+      drpWorkflowStepDates: drpStepDatesToPayload(infoDrpStepDates),
     });
     setInfoOpen(false);
   };
@@ -324,25 +415,12 @@ export function ProforientationApplicationDetailBody({
             </div>
           ) : null}
 
-          {hasDrpData ? (
-            <div className="rounded-md border border-border/80 bg-muted/30 p-3">
-              <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Данные ДРП</p>
-              <dl className="mt-2 grid gap-x-3 gap-y-2 text-sm sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4">
-                {a.drpScheduledDate ? (
-                  <>
-                    <dt className="text-muted-foreground">Дата записи</dt>
-                    <dd className="font-medium">{formatDateOrDefault(a.drpScheduledDate)}</dd>
-                  </>
-                ) : null}
-                {a.drpComment ? (
-                  <>
-                    <dt className="self-start text-muted-foreground">Комментарий ДРП</dt>
-                    <dd className="whitespace-pre-wrap font-medium leading-relaxed">{a.drpComment}</dd>
-                  </>
-                ) : null}
-              </dl>
-            </div>
-          ) : null}
+          <div className="rounded-md border border-border/80 bg-muted/30 p-3">
+            <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+              Статус проведения профориентации
+            </p>
+            <DrpWorkflowStepper currentStep={drpStep} stepDates={a.drpWorkflowStepDates} />
+          </div>
         </div>
       </CollapseSection>
 
@@ -351,101 +429,178 @@ export function ProforientationApplicationDetailBody({
         defaultOpen
         headerAction={<BlockEditButton onClick={openTestsDialog} />}
       >
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-            <Badge
-              variant="outline"
-              className={cn(
-                "shrink-0 text-sm font-medium",
-                orientationTestStatusBadgeClass(orientationTest.status)
-              )}
-            >
-              {ORIENTATION_TEST_BADGE_LABEL[orientationTest.status]}
-            </Badge>
-            <span className="min-w-0 text-sm leading-snug text-muted-foreground">
-              {ORIENTATION_TEST_DESCRIPTION[orientationTest.status]}
-            </span>
+        <div className="space-y-6">
+          {/* 1. Этап тестирования */}
+          <div className="rounded-xl border border-border/80 bg-muted/25 p-5 shadow-sm dark:bg-muted/10">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                Этап тестирования
+              </h3>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "h-7 shrink-0 px-2.5 text-sm font-medium",
+                  orientationTestStatusBadgeClass(orientationTest.status)
+                )}
+              >
+                {ORIENTATION_TEST_BADGE_LABEL[orientationTest.status]}
+              </Badge>
+            </div>
           </div>
 
-          {showTestLink && orientationTest.testUrl ? (
-            <a
-              href={orientationTest.testUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-fit max-w-full items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
-            >
-              <ExternalLink className="size-3.5 shrink-0" />
-              Пройти тест
-            </a>
-          ) : null}
-
-          {showResultsPdf && orientationTest.resultsPdfUrl ? (
-            <a
-              href={orientationTest.resultsPdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-fit max-w-full items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
-            >
-              <FileText className="size-3.5 shrink-0" />
-              PDF с результатами теста
-            </a>
-          ) : null}
-
-          {hasResult && a.result ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                Завершено в системе:{" "}
-                {formatDateTimeShortRu(a.result.completedAt)}
-              </p>
-              {a.result.externalReport ? (
-                <div className="rounded-lg border border-border/70 bg-muted/20 p-4 text-sm shadow-sm dark:bg-muted/10">
-                  <p className="font-semibold text-foreground">Отчёт внешней системы тестирования</p>
-                  <dl className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,9rem)_1fr] sm:gap-x-4">
-                    <dt className="text-muted-foreground">Название теста</dt>
-                    <dd className="font-medium">{a.result.externalReport.productLabel}</dd>
-                    <dt className="text-muted-foreground">Дата и время теста</dt>
-                    <dd className="font-medium">{formatDateTimeShortRu(a.result.externalReport.testedAt)}</dd>
-                    <dt className="text-muted-foreground">Длительность</dt>
-                    <dd className="font-medium">{a.result.externalReport.durationLabel}</dd>
-                    <dt className="text-muted-foreground">Номер сеанса</dt>
-                    <dd className="font-mono text-sm font-medium">{a.result.externalReport.sessionId}</dd>
+          {/* 2. Провайдер, ссылки и материалы (в т.ч. зафиксировано в системе), профиль */}
+          <div className="rounded-xl border border-border/80 bg-muted/25 p-5 shadow-sm dark:bg-muted/10">
+            <div className="space-y-5">
+              {hasResult && a.result ? (
+                <div>
+                  <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                    Информация о провайдере
+                  </h3>
+                  <dl className="mt-2 grid gap-1 text-sm sm:grid-cols-[minmax(0,5.5rem)_1fr] sm:gap-x-3 sm:gap-y-1">
+                    <dt className="text-muted-foreground">Название</dt>
+                    <dd className="font-medium text-foreground">
+                      {a.result.externalReport?.productLabel?.trim() || "—"}
+                    </dd>
                   </dl>
                 </div>
               ) : null}
-              {a.result.scores ? (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  {(
-                    [
-                      ["Аналитика", a.result.scores.analytical],
-                      ["Техника / ИТ", a.result.scores.technical],
-                      ["Коммуникации", a.result.scores.social],
-                      ["Творчество", a.result.scores.creative],
-                    ] as const
-                  ).map(([label, v]) => (
-                    <div
-                      key={label}
-                      className="rounded-lg border bg-muted/30 p-4 text-center dark:bg-muted/20"
-                    >
-                      <div className="text-2xl font-semibold tabular-nums text-foreground">{v}</div>
-                      <div className="mt-1 text-sm text-muted-foreground">{label}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Баллы по профилю пока не сохранены.</p>
-              )}
-              {a.result.summary ? (
+
+              {hasResult && a.result ? <Separator className="bg-border/60" /> : null}
+
+              {(showTestLink && orientationTest.testUrl) ||
+              (showResultsPdf && orientationTest.resultsPdfUrl) ||
+              hasResult ? (
                 <div>
-                  <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">Заключение</p>
-                  <p className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground">{a.result.summary}</p>
+                  <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                    Ссылки и материалы
+                  </h3>
+                  <dl className="mt-3 space-y-3 text-sm">
+                    {showTestLink && orientationTest.testUrl ? (
+                      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                        <dt className="shrink-0 font-medium text-foreground">Прохождение теста</dt>
+                        <dd className="min-w-0 sm:text-right">
+                          <a
+                            href={orientationTest.testUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex max-w-full items-center gap-1.5 break-all font-medium text-primary underline-offset-4 hover:underline"
+                          >
+                            <ExternalLink className="size-3.5 shrink-0" aria-hidden />
+                            Открыть ссылку
+                          </a>
+                        </dd>
+                      </div>
+                    ) : null}
+                    {showResultsPdf && orientationTest.resultsPdfUrl ? (
+                      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                        <dt className="shrink-0 font-medium text-foreground">Результаты в PDF</dt>
+                        <dd className="min-w-0 sm:text-right">
+                          <a
+                            href={orientationTest.resultsPdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex max-w-full items-center gap-1.5 break-all font-medium text-primary underline-offset-4 hover:underline"
+                          >
+                            <FileText className="size-3.5 shrink-0" aria-hidden />
+                            Открыть PDF
+                          </a>
+                        </dd>
+                      </div>
+                    ) : null}
+                    {hasResult && a.result ? (
+                      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                        <dt className="shrink-0 font-medium text-foreground">Зафиксировано в системе</dt>
+                        <dd className="min-w-0 text-right text-sm font-medium tabular-nums text-foreground">
+                          {formatDateTimeShortRu(a.result.completedAt)}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
                 </div>
               ) : null}
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Результаты тестирования появятся после прохождения теста и обработки данных ДРП.
-            </p>
-          )}
+
+              {hasResult && a.result ? (
+                <>
+                  <Separator className="bg-border/60" />
+                  <div>
+                    <h4 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                      Профиль по шкалам (0–100)
+                    </h4>
+                    {a.result.scores ? (
+                      <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                        {(
+                          [
+                            ["Аналитика", a.result.scores.analytical],
+                            ["Техника / ИТ", a.result.scores.technical],
+                            ["Коммуникации", a.result.scores.social],
+                            ["Творчество", a.result.scores.creative],
+                          ] as const
+                        ).map(([label, v]) => (
+                          <div
+                            key={label}
+                            className="rounded-lg border border-border/60 bg-background/60 p-4 text-center dark:bg-background/40"
+                          >
+                            <div className="text-2xl font-semibold tabular-nums text-foreground">{v}</div>
+                            <div className="mt-1 text-sm leading-snug text-muted-foreground">{label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm text-muted-foreground">Баллы по профилю пока не сохранены.</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {(showTestLink && orientationTest.testUrl) || (showResultsPdf && orientationTest.resultsPdfUrl) ? (
+                    <Separator className="bg-border/60" />
+                  ) : null}
+                  <p className="text-center text-sm leading-relaxed text-muted-foreground">
+                    Результаты тестирования появятся после прохождения теста и обработки данных ДРП.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* 3. Заключение */}
+          {hasResult && a.result ? (
+            <div className="rounded-xl border border-border/80 bg-muted/25 p-0 shadow-sm dark:bg-muted/10">
+              <div className="flex items-start gap-3 border-b border-border/60 px-5 py-4">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <ScrollText className="size-4" aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold text-foreground">Заключение</h3>
+                </div>
+              </div>
+              <div className="px-5 pb-5 pt-4">
+                {a.result.summary?.trim() ? (
+                  <div
+                    className="max-h-[min(32rem,70vh)] overflow-y-auto rounded-lg border border-border/70 bg-background/90 px-4 py-4 shadow-sm dark:bg-background/50"
+                    role="region"
+                    aria-label="Текст заключения"
+                  >
+                    <div className="space-y-4 border-l-2 border-primary/25 pl-4">
+                      {a.result.summary
+                        .split(/\n\s*\n/)
+                        .map((block) => block.trim())
+                        .filter(Boolean)
+                        .map((block, i) => (
+                          <p key={i} className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+                            {block}
+                          </p>
+                        ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-border/70 bg-muted/20 px-4 py-8 text-center dark:bg-muted/10">
+                    <p className="text-sm text-muted-foreground">Не указано</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
         </div>
       </CollapseSection>
 
@@ -468,7 +623,7 @@ export function ProforientationApplicationDetailBody({
           <DialogHeader>
             <DialogTitle>Редактировать информацию</DialogTitle>
             <DialogDescription>
-              Участник тестирования, направления интереса, комментарий и данные записи ДРП.
+              Участник тестирования, направления интереса, комментарий, этап и даты ДРП.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -519,22 +674,45 @@ export function ProforientationApplicationDetailBody({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-po-drp-date">Дата записи (ДРП)</Label>
-              <Input
-                id="edit-po-drp-date"
-                type="date"
-                value={infoDrpDate}
-                onChange={(e) => setInfoDrpDate(e.target.value)}
-              />
+              <Label>Этап процесса ДРП</Label>
+              <Select value={infoDrpStep} onValueChange={(v) => setInfoDrpStep(v as DrpWorkflowStep)}>
+                <SelectTrigger id="edit-po-drp-step">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DRP_WORKFLOW_SELECT_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-po-drp-comment">Комментарий ДРП</Label>
-              <Textarea
-                id="edit-po-drp-comment"
-                value={infoDrpComment}
-                onChange={(e) => setInfoDrpComment(e.target.value)}
-                rows={3}
-              />
+            <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3 dark:bg-muted/10">
+              <p className="text-sm font-medium text-foreground">Даты этапов ДРП</p>
+              <p className="text-sm text-muted-foreground">
+                Укажите дату для каждого шага; в карточке показывается формат дд.мм.гггг.
+              </p>
+              <div className="space-y-3">
+                {DRP_WORKFLOW_STEP_ORDER.map((step) => (
+                  <div key={step} className="space-y-1.5">
+                    <Label
+                      htmlFor={`edit-po-drp-step-date-${step}`}
+                      className="text-sm font-normal leading-snug text-muted-foreground"
+                    >
+                      {DRP_WORKFLOW_STEP_LABEL[step]}
+                    </Label>
+                    <Input
+                      id={`edit-po-drp-step-date-${step}`}
+                      type="date"
+                      value={infoDrpStepDates[step]}
+                      onChange={(e) =>
+                        setInfoDrpStepDates((prev) => ({ ...prev, [step]: e.target.value }))
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>

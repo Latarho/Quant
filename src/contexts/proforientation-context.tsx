@@ -9,15 +9,18 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type {
-  OrientationScores,
-  ProforientationApplication,
-  ProforientationStatus,
+import {
+  DRP_WORKFLOW_STEP_ORDER,
+  DEFAULT_ORIENTATION_TEST_RESULTS_PDF,
+  type OrientationScores,
+  type ProforientationApplication,
+  type ProforientationStatus,
+  type OrientationTestWorkflowStatus,
 } from "@/lib/proforientation/types";
-import { DEFAULT_ORIENTATION_TEST_RESULTS_PDF } from "@/lib/proforientation/types";
 import { buildRecommendations } from "@/lib/proforientation/recommendations";
 import {
   DEMO_SEED_APPLICATION_IDS,
+  fillDemoPositions,
   getSeedProforientationApplications,
   PROFORIENTATION_SEED_CONTENT_VERSION,
   shouldReplaceWithFullDemoSeed,
@@ -51,6 +54,34 @@ function newId(): string {
   return `po-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function normalizeDrpWorkflowStep(
+  raw: unknown
+): ProforientationApplication["drpWorkflowStep"] {
+  if (
+    raw === "application_submitted" ||
+    raw === "third_party_testing" ||
+    raw === "drp_consultation"
+  ) {
+    return raw;
+  }
+  return undefined;
+}
+
+function normalizeDrpWorkflowStepDates(
+  raw: unknown
+): ProforientationApplication["drpWorkflowStepDates"] {
+  if (!raw || typeof raw !== "object") return undefined;
+  const o = raw as Record<string, unknown>;
+  const out: NonNullable<ProforientationApplication["drpWorkflowStepDates"]> = {};
+  for (const step of DRP_WORKFLOW_STEP_ORDER) {
+    const v = o[step];
+    if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.trim())) {
+      out[step] = v.trim();
+    }
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
 function normalizeOrientationTest(
   raw: unknown
 ): ProforientationApplication["orientationTest"] {
@@ -82,19 +113,72 @@ function coerceRow(raw: unknown): ProforientationApplication | null {
   const base = raw as ProforientationApplication;
   const orientationTest =
     r.orientationTest === undefined ? base.orientationTest : normalizeOrientationTest(r.orientationTest) ?? undefined;
-  return {
+  return fillDemoPositions({
     ...base,
     status: normalizeStatus(r.status),
     interestDirections: Array.isArray(r.interestDirections) ? (r.interestDirections as string[]) : [],
     comment: typeof r.comment === "string" ? r.comment : "",
     employeePosition: typeof r.employeePosition === "string" ? r.employeePosition : "",
+    drpResponsiblePosition:
+      typeof r.drpResponsiblePosition === "string" ? r.drpResponsiblePosition : undefined,
+    drpWorkflowStep:
+      r.drpWorkflowStep !== undefined
+        ? normalizeDrpWorkflowStep(r.drpWorkflowStep)
+        : normalizeDrpWorkflowStep(base.drpWorkflowStep),
+    drpWorkflowStepDates:
+      r.drpWorkflowStepDates !== undefined
+        ? normalizeDrpWorkflowStepDates(r.drpWorkflowStepDates)
+        : normalizeDrpWorkflowStepDates(base.drpWorkflowStepDates),
     orientationTest,
-  };
+  });
 }
 
 function markSeedVersionCurrent(): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(SEED_VERSION_KEY, String(PROFORIENTATION_SEED_CONTENT_VERSION));
+}
+
+function applyProforientationPatch(
+  prev: ProforientationApplication,
+  patch: Partial<ProforientationApplication>
+): ProforientationApplication {
+  const now = new Date().toISOString();
+  const { orientationTest: otPatch, result: resPatch, drpWorkflowStepDates: datesPatch, ...rest } = patch;
+
+  let next: ProforientationApplication = {
+    ...prev,
+    ...rest,
+    updatedAt: now,
+  };
+
+  if (datesPatch !== undefined) {
+    next.drpWorkflowStepDates = normalizeDrpWorkflowStepDates(datesPatch);
+  }
+
+  if (otPatch !== undefined) {
+    const base = prev.orientationTest ?? { status: "pending_link" as OrientationTestWorkflowStatus };
+    next.orientationTest = {
+      status: (otPatch.status ?? base.status) as OrientationTestWorkflowStatus,
+      testUrl: otPatch.testUrl !== undefined ? otPatch.testUrl : base.testUrl,
+      resultsPdfUrl: otPatch.resultsPdfUrl !== undefined ? otPatch.resultsPdfUrl : base.resultsPdfUrl,
+    };
+  }
+
+  if (resPatch !== undefined && prev.result) {
+    const scores = resPatch.scores ?? prev.result.scores;
+    next.result = {
+      ...prev.result,
+      ...resPatch,
+      scores,
+      recommendations:
+        resPatch.scores !== undefined
+          ? buildRecommendations(scores)
+          : resPatch.recommendations ?? prev.result.recommendations,
+      completedAt: resPatch.completedAt ?? prev.result.completedAt,
+    };
+  }
+
+  return fillDemoPositions(next);
 }
 
 function takeFreshSeed(): ProforientationApplication[] {
@@ -161,6 +245,8 @@ interface ProforientationContextValue {
   applications: ProforientationApplication[];
   submitApplication: (data: Omit<ProforientationApplication, "id" | "createdAt" | "updatedAt" | "status">) => string;
   updateStatus: (id: string, status: ProforientationStatus, patch?: Partial<ProforientationApplication>) => void;
+  /** Частичное обновление заявки (глубокое слияние orientationTest и result при необходимости) */
+  updateApplication: (id: string, patch: Partial<ProforientationApplication>) => void;
   setResult: (
     id: string,
     scores: OrientationScores,
@@ -195,14 +281,14 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
       }
       const now = new Date().toISOString();
       const id = newId();
-      const row: ProforientationApplication = {
+      const row: ProforientationApplication = fillDemoPositions({
         ...data,
         id,
         status: "created",
         createdAt: now,
         updatedAt: now,
         orientationTest: data.orientationTest ?? { status: "pending_link" },
-      };
+      });
       setApplications((prev) => [row, ...prev]);
       return id;
     },
@@ -215,12 +301,12 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
         dropBlockedParticipantApplications(
           prev.map((a) =>
             a.id === id
-              ? {
+              ? fillDemoPositions({
                   ...a,
                   ...patch,
                   status,
                   updatedAt: new Date().toISOString(),
-                }
+                })
               : a
           )
         )
@@ -229,6 +315,20 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
     []
   );
 
+  const updateApplication = useCallback((id: string, patch: Partial<ProforientationApplication>) => {
+    setApplications((prev) =>
+      dropBlockedParticipantApplications(
+        prev.map((a) => {
+          if (a.id !== id) return a;
+          if (patch.childFullName !== undefined && /путин/i.test(String(patch.childFullName).trim())) {
+            return a;
+          }
+          return applyProforientationPatch(a, patch);
+        })
+      )
+    );
+  }, []);
+
   const setResult = useCallback((id: string, scores: OrientationScores, summary: string) => {
     const recommendations = buildRecommendations(scores);
     const completedAt = new Date().toISOString();
@@ -236,7 +336,7 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
       dropBlockedParticipantApplications(
         prev.map((a) =>
           a.id === id
-            ? {
+            ? fillDemoPositions({
                 ...a,
                 status: "completed",
                 updatedAt: completedAt,
@@ -251,7 +351,7 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
                   testUrl: a.orientationTest?.testUrl,
                   resultsPdfUrl: a.orientationTest?.resultsPdfUrl ?? DEFAULT_ORIENTATION_TEST_RESULTS_PDF,
                 },
-              }
+              })
             : a
         )
       )
@@ -263,9 +363,10 @@ export function ProforientationProvider({ children }: { children: React.ReactNod
       applications,
       submitApplication,
       updateStatus,
+      updateApplication,
       setResult,
     }),
-    [applications, submitApplication, updateStatus, setResult]
+    [applications, submitApplication, updateStatus, updateApplication, setResult]
   );
 
   return (

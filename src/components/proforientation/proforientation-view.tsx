@@ -19,14 +19,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { useProforientation } from "@/contexts/proforientation-context";
 import { INTEREST_DIRECTIONS } from "@/lib/proforientation/types";
-import type { OrientationScores, ProforientationApplication } from "@/lib/proforientation/types";
+import type { OrientationScores, ProforientationStatus } from "@/lib/proforientation/types";
 import { getCurrentBankEmployee } from "@/lib/auth/current-user";
 import { formatDateDDMMYYYYRu, formatDateOrDefault } from "@/lib/date-utils";
-import { ApplicationStatusBadge } from "@/components/proforientation/proforientation-status-badge";
+import { ApplicationStatusBadge, STATUS_LABEL } from "@/components/proforientation/proforientation-status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowRight, CircleHelp, ClipboardList, Plus, UserCircle } from "lucide-react";
+import { ArrowRight, CalendarDays, CircleHelp, Filter, Plus, SortAsc, SortDesc, UserCircle, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +62,12 @@ type ApplicationFormState = {
   interestDirections: string[];
   comment: string;
 };
+
+type ApplicationsSortBy = "createdAt" | "childFullName" | "employeeFullName";
+
+const PROFORIENTATION_STATUS_OPTIONS: { value: ProforientationStatus; label: string }[] = (
+  ["created", "in_progress", "completed"] as const
+).map((value) => ({ value, label: STATUS_LABEL[value] }));
 
 function buildApplicationFormFromCurrentUser(): ApplicationFormState {
   const u = getCurrentBankEmployee();
@@ -97,6 +111,44 @@ export function ProforientationView() {
     [sortedApplications]
   );
 
+  const [applicationsFiltersOpen, setApplicationsFiltersOpen] = useState(false);
+  const [appFilterStatuses, setAppFilterStatuses] = useState<ProforientationStatus[]>([]);
+  const [appFilterInterestIds, setAppFilterInterestIds] = useState<string[]>([]);
+  const [appSortBy, setAppSortBy] = useState<ApplicationsSortBy>("createdAt");
+  const [appSortOrder, setAppSortOrder] = useState<"asc" | "desc">("desc");
+
+  const filteredApplications = useMemo(() => {
+    const list = sortedApplications.filter((a) => {
+      if (appFilterStatuses.length > 0 && !appFilterStatuses.includes(a.status)) return false;
+      if (
+        appFilterInterestIds.length > 0 &&
+        !appFilterInterestIds.some((id) => a.interestDirections.includes(id))
+      ) {
+        return false;
+      }
+      return true;
+    });
+    const mult = appSortOrder === "asc" ? 1 : -1;
+    return [...list].sort((a, b) => {
+      if (appSortBy === "createdAt") {
+        return mult * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      }
+      if (appSortBy === "childFullName") {
+        return mult * a.childFullName.localeCompare(b.childFullName, "ru", { sensitivity: "base" });
+      }
+      return mult * a.employeeFullName.localeCompare(b.employeeFullName, "ru", { sensitivity: "base" });
+    });
+  }, [sortedApplications, appFilterStatuses, appFilterInterestIds, appSortBy, appSortOrder]);
+
+  const applicationsActiveFilterCount = appFilterStatuses.length + appFilterInterestIds.length;
+
+  const resetApplicationsFilters = () => {
+    setAppFilterStatuses([]);
+    setAppFilterInterestIds([]);
+    setAppSortBy("createdAt");
+    setAppSortOrder("desc");
+  };
+
   const [newApplicationOpen, setNewApplicationOpen] = useState(false);
   const [form, setForm] = useState<ApplicationFormState>(() => buildApplicationFormFromCurrentUser());
 
@@ -139,17 +191,25 @@ export function ProforientationView() {
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-4">
-      <Tabs defaultValue="applications" className="flex w-full min-w-0 flex-col gap-3">
-        <TabsList variant="grid2">
-          <TabsTrigger value="applications" className="gap-2">
-            <ClipboardList className="size-4" />
-            Заявки
-          </TabsTrigger>
-          <TabsTrigger value="drp">Администрирование профориентации</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="applications" className="flex w-full min-w-0 flex-col">
+        <div className="space-y-4 mb-4">
+          <TabsList variant="grid2" className="min-h-9 h-9 min-w-[min(100%,24rem)] w-full">
+            <TabsTrigger value="applications" className="flex items-center justify-center gap-2">
+              Заявки
+              <Badge variant="secondary" className="text-sm font-medium shrink-0">
+                {applications.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="drp" className="flex min-w-0 items-center justify-center gap-2 px-2">
+              <span className="min-w-0 truncate" title="Администрирование профориентации">
+                Администрирование профориентации
+              </span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="applications" className="mt-3 w-full min-w-0 space-y-4 data-[state=inactive]:hidden">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <TabsContent value="applications" className="mt-4 w-full min-w-0 space-y-3 data-[state=inactive]:hidden">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <div>
               <div className="flex items-center gap-1.5">
                 <h2 className="text-lg font-semibold">Заявки на профориентацию</h2>
@@ -170,13 +230,66 @@ export function ProforientationView() {
                 </Tooltip>
               </div>
             </div>
-            <Button type="button" className="gap-2 shrink-0" onClick={openNewDialog}>
-              <Plus className="size-4" />
-              Создать заявку
-            </Button>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setApplicationsFiltersOpen(true)}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Фильтры
+                {applicationsActiveFilterCount > 0 ? (
+                  <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
+                    {applicationsActiveFilterCount}
+                  </Badge>
+                ) : null}
+              </Button>
+              <Button type="button" size="default" className="shrink-0" onClick={openNewDialog}>
+                <Plus className="mr-2 h-4 w-4" />
+                Создать заявку
+              </Button>
+            </div>
           </div>
 
-          {sortedApplications.length === 0 ? (
+          {(() => {
+            const activeFilters: Array<{ label: string; onRemove: () => void }> = [];
+            appFilterStatuses.forEach((s) => {
+              activeFilters.push({
+                label: `Статус: ${STATUS_LABEL[s]}`,
+                onRemove: () => setAppFilterStatuses((prev) => prev.filter((x) => x !== s)),
+              });
+            });
+            appFilterInterestIds.forEach((id) => {
+              const dir = INTEREST_DIRECTIONS.find((d) => d.id === id);
+              if (dir) {
+                activeFilters.push({
+                  label: `Направление: ${dir.label}`,
+                  onRemove: () => setAppFilterInterestIds((prev) => prev.filter((x) => x !== id)),
+                });
+              }
+            });
+            if (activeFilters.length === 0) return null;
+            return (
+              <div className="flex flex-shrink-0 flex-wrap items-center gap-2">
+                {activeFilters.map((filter, index) => (
+                  <Badge key={index} variant="secondary" className="flex items-center gap-1 px-2 py-1">
+                    <span className="text-sm">{filter.label}</span>
+                    <button
+                      type="button"
+                      onClick={filter.onRemove}
+                      className="ml-1 rounded-full hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      aria-label="Удалить фильтр"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            );
+          })()}
+
+          {applications.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
                 <div className="rounded-full bg-muted p-3">
@@ -190,9 +303,19 @@ export function ProforientationView() {
                 </div>
               </CardContent>
             </Card>
+          ) : filteredApplications.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+                <p className="font-medium">По выбранным фильтрам заявок нет</p>
+                <p className="text-sm text-muted-foreground">Измените условия в диалоге «Фильтры» или сбросьте их.</p>
+                <Button type="button" variant="outline" size="sm" onClick={resetApplicationsFilters}>
+                  Сбросить фильтры
+                </Button>
+              </CardContent>
+            </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
-              {sortedApplications.map((a) => (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {filteredApplications.map((a) => (
                 <Card
                   key={a.id}
                   className={cn(
@@ -205,8 +328,14 @@ export function ProforientationView() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-base text-muted-foreground">
-                          <span>
-                            номер{" "}
+                          <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <span className="sr-only">Номер заявки</span>
+                            <span
+                              className="inline-flex h-4 shrink-0 items-center font-semibold tabular-nums leading-none text-muted-foreground"
+                              aria-hidden
+                            >
+                              №
+                            </span>
                             <span
                               className="font-semibold tabular-nums text-foreground"
                               title={`Внутренний идентификатор: ${a.id}`}
@@ -217,8 +346,9 @@ export function ProforientationView() {
                           <span className="text-muted-foreground/40" aria-hidden>
                             ·
                           </span>
-                          <span>
-                            дата{" "}
+                          <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <span className="sr-only">Дата создания заявки</span>
+                            <CalendarDays className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                             <span className="font-medium text-foreground">
                               {formatDateDDMMYYYYRu(a.createdAt)}
                             </span>
@@ -229,71 +359,70 @@ export function ProforientationView() {
                     </div>
                   </CardHeader>
                   <Separator />
-                  <CardContent className="flex flex-1 flex-col gap-1.5 !px-3.5 !pb-3 !pt-4">
-                    <div className="rounded-md border border-border/80 bg-muted/30 p-2">
-                      <div className="min-w-0 space-y-1.5">
-                        <span className="block text-sm font-semibold">Создатель заявки:</span>
-                        <div className="flex min-w-0 items-start gap-2">
-                          <Avatar className="h-10 w-10 shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                              {employeeInitials(a.employeeFullName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0 flex flex-col gap-0">
-                            <span className="text-sm font-medium leading-snug text-foreground">{a.employeeFullName}</span>
-                            {a.employeePosition.trim() ? (
-                              <span className="text-sm text-muted-foreground">{a.employeePosition}</span>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-2 border-t border-border/60 pt-2">
-                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                          Участник тестирования
-                        </p>
-                        <p className="mt-1.5 min-w-0 text-sm font-semibold leading-snug text-foreground">
-                          {a.childFullName}
-                        </p>
-                        <div className="mt-1.5 space-y-1 text-sm">
-                          <p className="min-w-0 leading-snug">
-                            <span className="text-muted-foreground">Дата рождения: </span>
-                            <span className="font-medium text-foreground">
-                              {formatDateOrDefault(a.childBirthDate)}
-                            </span>
-                          </p>
-                          <p className="min-w-0 leading-snug">
-                            <span className="text-muted-foreground">Класс / курс: </span>
-                            <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
-                          </p>
-                        </div>
+                  <CardContent className="flex flex-1 flex-col gap-4 !px-3.5 !pb-3 !pt-4">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="shrink-0 text-sm font-semibold">Создатель заявки:</span>
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                          {employeeInitials(a.employeeFullName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 text-sm leading-snug">
+                        <span className="font-medium text-foreground">{a.employeeFullName}</span>
+                        {a.employeePosition.trim() ? (
+                          <span className="mt-0.5 block text-muted-foreground">{a.employeePosition}</span>
+                        ) : null}
                       </div>
                     </div>
-                    <div>
+                    <div className="rounded-md border border-border/80 bg-muted/30 p-3">
                       <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                        Направления интереса
+                        Участник тестирования
                       </p>
-                      {a.interestDirections.length > 0 ? (
-                        <div className="mt-1.5 flex flex-wrap gap-1">
-                          {a.interestDirections.map((id) => {
-                            const label =
-                              INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
-                            return (
-                              <Badge key={id} variant="secondary" className="text-sm font-normal">
-                                {label}
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <p className="mt-1.5 text-sm text-muted-foreground">Не указаны</p>
-                      )}
-                    </div>
-                    {a.comment ? (
-                      <div className="rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
-                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Комментарий</p>
-                        <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{a.comment}</p>
+                      <p className="mt-2 min-w-0 text-sm font-semibold leading-snug text-foreground">
+                        {a.childFullName}
+                      </p>
+                      <p className="mt-2 min-w-0 flex flex-wrap items-baseline gap-x-1 text-sm leading-snug">
+                        <span className="text-muted-foreground">Дата рождения: </span>
+                        <span className="font-medium text-foreground">
+                          {formatDateOrDefault(a.childBirthDate)}
+                        </span>
+                        <span className="text-muted-foreground/40" aria-hidden>
+                          ·
+                        </span>
+                        <span className="text-muted-foreground">Класс / курс: </span>
+                        <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
+                      </p>
+                      <div className="mt-3 border-t border-border/60 pt-3">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                          Направления интереса
+                        </p>
+                        {a.interestDirections.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {a.interestDirections.map((id) => {
+                              const label =
+                                INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
+                              return (
+                                <Badge key={id} variant="secondary" className="text-sm font-normal">
+                                  {label}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-sm text-muted-foreground">Не указаны</p>
+                        )}
                       </div>
-                    ) : null}
+                      <div className="mt-3 border-t border-border/60 pt-3">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Комментарий</p>
+                        {a.comment ? (
+                          <p className="mt-2 line-clamp-4 text-sm text-muted-foreground whitespace-pre-wrap">
+                            {a.comment}
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-sm text-muted-foreground">Не указан</p>
+                        )}
+                      </div>
+                    </div>
                     {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
                       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                         <span className="shrink-0 text-sm font-semibold">Ответственный сотрудник ДРП:</span>
@@ -302,13 +431,16 @@ export function ProforientationView() {
                             {employeeInitials(a.drpResponsibleFullName)}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="min-w-0 text-sm leading-snug">
+                        <div className="min-w-0 text-sm leading-snug">
                           <span className="font-medium text-foreground">{a.drpResponsibleFullName}</span>
-                        </span>
+                          {a.drpResponsiblePosition?.trim() ? (
+                            <span className="mt-0.5 block text-muted-foreground">{a.drpResponsiblePosition}</span>
+                          ) : null}
+                        </div>
                       </div>
                     ) : null}
                   </CardContent>
-                  <CardFooter className="mt-auto shrink-0 border-t !px-3.5 !pb-2 !pt-2 flex flex-wrap items-center justify-end gap-1.5">
+                  <CardFooter className="mt-auto shrink-0 border-t !px-3.5 !pb-2 !pt-2 flex flex-wrap items-center justify-end gap-2">
                     <Button
                       type="button"
                       variant="ghost"
@@ -348,8 +480,14 @@ export function ProforientationView() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-base text-muted-foreground">
-                          <span>
-                            номер{" "}
+                          <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <span className="sr-only">Номер заявки</span>
+                            <span
+                              className="inline-flex h-4 shrink-0 items-center font-semibold tabular-nums leading-none text-muted-foreground"
+                              aria-hidden
+                            >
+                              №
+                            </span>
                             <span
                               className="font-semibold tabular-nums text-foreground"
                               title={`Внутренний идентификатор: ${a.id}`}
@@ -360,8 +498,9 @@ export function ProforientationView() {
                           <span className="text-muted-foreground/40" aria-hidden>
                             ·
                           </span>
-                          <span>
-                            дата{" "}
+                          <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <span className="sr-only">Дата создания заявки</span>
+                            <CalendarDays className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                             <span className="font-medium text-foreground">
                               {formatDateDDMMYYYYRu(a.createdAt)}
                             </span>
@@ -372,43 +511,68 @@ export function ProforientationView() {
                     </div>
                   </CardHeader>
                   <Separator />
-                  <CardContent className="flex flex-1 flex-col gap-3 p-4 pt-4 text-sm">
-                    <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
-                      <div className="min-w-0 space-y-1.5">
-                        <span className="block text-sm font-semibold">Создатель заявки:</span>
-                        <div className="flex min-w-0 items-start gap-2">
-                          <Avatar className="h-10 w-10 shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                              {employeeInitials(a.employeeFullName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0 flex flex-col gap-0">
-                            <span className="text-sm font-medium leading-snug text-foreground">{a.employeeFullName}</span>
-                            {a.employeePosition.trim() ? (
-                              <span className="text-sm text-muted-foreground">{a.employeePosition}</span>
-                            ) : null}
-                          </div>
-                        </div>
+                  <CardContent className="flex flex-1 flex-col gap-4 p-4 pt-4 text-sm">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="shrink-0 text-sm font-semibold">Создатель заявки:</span>
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                          {employeeInitials(a.employeeFullName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 text-sm leading-snug">
+                        <span className="font-medium text-foreground">{a.employeeFullName}</span>
+                        {a.employeePosition.trim() ? (
+                          <span className="mt-0.5 block text-muted-foreground">{a.employeePosition}</span>
+                        ) : null}
                       </div>
+                    </div>
+                    <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
+                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                        Участник тестирования
+                      </p>
+                      <p className="mt-2 min-w-0 text-base font-semibold leading-snug text-foreground">
+                        {a.childFullName}
+                      </p>
+                      <p className="mt-2 min-w-0 flex flex-wrap items-baseline gap-x-1 leading-snug">
+                        <span className="text-muted-foreground">Дата рождения: </span>
+                        <span className="font-medium text-foreground">
+                          {formatDateOrDefault(a.childBirthDate)}
+                        </span>
+                        <span className="text-muted-foreground/40" aria-hidden>
+                          ·
+                        </span>
+                        <span className="text-muted-foreground">Класс / курс: </span>
+                        <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
+                      </p>
                       <div className="mt-3 border-t border-border/60 pt-3">
                         <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                          Участник тестирования
+                          Направления интереса
                         </p>
-                        <p className="mt-2 min-w-0 text-base font-semibold leading-snug text-foreground">
-                          {a.childFullName}
-                        </p>
-                        <dl className="mt-2 space-y-1.5">
-                          <div className="min-w-0 leading-snug">
-                            <span className="text-muted-foreground">Дата рождения: </span>
-                            <span className="font-medium text-foreground">
-                              {formatDateOrDefault(a.childBirthDate)}
-                            </span>
+                        {a.interestDirections.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {a.interestDirections.map((id) => {
+                              const label =
+                                INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
+                              return (
+                                <Badge key={id} variant="secondary" className="text-sm font-normal">
+                                  {label}
+                                </Badge>
+                              );
+                            })}
                           </div>
-                          <div className="min-w-0 leading-snug">
-                            <span className="text-muted-foreground">Класс / курс: </span>
-                            <span className="font-medium text-foreground">{a.childSchoolGrade || "—"}</span>
-                          </div>
-                        </dl>
+                        ) : (
+                          <p className="mt-2 text-sm text-muted-foreground">Не указаны</p>
+                        )}
+                      </div>
+                      <div className="mt-3 border-t border-border/60 pt-3">
+                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Комментарий</p>
+                        {a.comment ? (
+                          <p className="mt-2 line-clamp-6 text-sm text-muted-foreground whitespace-pre-wrap">
+                            {a.comment}
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-sm text-muted-foreground">Не указан</p>
+                        )}
                       </div>
                     </div>
                     <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
@@ -420,30 +584,6 @@ export function ProforientationView() {
                         </div>
                       </dl>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                        Направления интереса
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {a.interestDirections.map((id) => {
-                          const label =
-                            INTEREST_DIRECTIONS.find((d) => d.id === id)?.label ?? id;
-                          return (
-                            <Badge key={id} variant="secondary" className="text-sm font-normal">
-                              {label}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {a.comment ? (
-                      <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 p-3">
-                        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Комментарий</p>
-                        <p className="mt-2 line-clamp-6 text-sm text-muted-foreground whitespace-pre-wrap">
-                          {a.comment}
-                        </p>
-                      </div>
-                    ) : null}
                     {(a.status === "in_progress" || a.status === "completed") && a.drpResponsibleFullName ? (
                       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                         <span className="shrink-0 text-sm font-semibold">Ответственный сотрудник ДРП:</span>
@@ -452,9 +592,12 @@ export function ProforientationView() {
                             {employeeInitials(a.drpResponsibleFullName)}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="min-w-0 text-sm leading-snug">
+                        <div className="min-w-0 text-sm leading-snug">
                           <span className="font-medium text-foreground">{a.drpResponsibleFullName}</span>
-                        </span>
+                          {a.drpResponsiblePosition?.trim() ? (
+                            <span className="mt-0.5 block text-muted-foreground">{a.drpResponsiblePosition}</span>
+                          ) : null}
+                        </div>
                       </div>
                     ) : null}
                   </CardContent>
@@ -467,8 +610,8 @@ export function ProforientationView() {
                           type="button"
                           onClick={() =>
                             updateStatus(a.id, "in_progress", {
-                              drpScheduledDate: new Date().toISOString().slice(0, 10),
                               drpResponsibleFullName: getCurrentBankEmployee().fullName,
+                              drpResponsiblePosition: getCurrentBankEmployee().position,
                             })
                           }
                         >
@@ -501,6 +644,79 @@ export function ProforientationView() {
         </TabsContent>
       </Tabs>
 
+      <Dialog open={applicationsFiltersOpen} onOpenChange={setApplicationsFiltersOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Фильтры и сортировка</DialogTitle>
+            <DialogDescription>Настройте фильтры для списка заявок на профориентацию</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label>Статус заявки</Label>
+              <MultiSelect
+                options={PROFORIENTATION_STATUS_OPTIONS.map(({ value, label }) => ({ value, label }))}
+                selected={appFilterStatuses}
+                onChange={(selected) => setAppFilterStatuses(selected as ProforientationStatus[])}
+                placeholder="Все статусы"
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label>Направления интереса</Label>
+              <MultiSelect
+                options={INTEREST_DIRECTIONS.map((d) => ({ value: d.id, label: d.label }))}
+                selected={appFilterInterestIds}
+                onChange={setAppFilterInterestIds}
+                placeholder="Все направления"
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label>Сортировка</Label>
+              <div className="flex items-center gap-2">
+                <Select value={appSortBy} onValueChange={(v) => setAppSortBy(v as ApplicationsSortBy)}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Сортировать по" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="createdAt">По дате создания</SelectItem>
+                    <SelectItem value="childFullName">По ФИО участника</SelectItem>
+                    <SelectItem value="employeeFullName">По ФИО создателя</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setAppSortOrder((o) => (o === "asc" ? "desc" : "asc"))}
+                  title={appSortOrder === "asc" ? "По возрастанию" : "По убыванию"}
+                >
+                  {appSortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                resetApplicationsFilters();
+              }}
+            >
+              Сбросить фильтры
+            </Button>
+            <Button type="button" onClick={() => setApplicationsFiltersOpen(false)}>
+              Применить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog
         open={newApplicationOpen}
         onOpenChange={(open) => {
@@ -516,91 +732,86 @@ export function ProforientationView() {
               тестирования и отправьте заявку — она поступит в ДРП для записи на процедуру.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmitNew} className="flex flex-col gap-4">
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="po-emp-name">ФИО сотрудника</Label>
+          <form onSubmit={handleSubmitNew} className="contents">
+            <div className="space-y-4 py-4">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="shrink-0 text-sm font-semibold">Создатель заявки:</span>
+                <Avatar className="h-10 w-10 shrink-0">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                    {employeeInitials(form.employeeFullName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex min-w-0 flex-1 flex-col gap-0">
+                  <Label htmlFor="po-emp-name" className="sr-only">
+                    ФИО сотрудника
+                  </Label>
                   <Input
                     id="po-emp-name"
                     readOnly
                     required
                     value={form.employeeFullName}
-                    className="bg-muted/50"
+                    className="h-auto min-h-0 border-0 bg-transparent px-0 py-0 text-sm font-medium leading-snug text-foreground shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="po-tab">Табельный номер</Label>
-                  <Input id="po-tab" readOnly value={form.employeeTabNumber} className="bg-muted/50" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="po-dept">Подразделение / блок</Label>
-                  <Input id="po-dept" readOnly value={form.employeeDepartment} className="bg-muted/50" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="po-position">Должность</Label>
-                <Input id="po-position" readOnly value={form.employeePosition} className="bg-muted/50" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="po-email">Корпоративная почта</Label>
+                  <Label htmlFor="po-position" className="sr-only">
+                    Должность
+                  </Label>
                   <Input
-                    id="po-email"
-                    type="email"
+                    id="po-position"
                     readOnly
-                    required
-                    value={form.employeeEmail}
-                    className="bg-muted/50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="po-phone">Телефон</Label>
-                  <Input id="po-phone" type="tel" readOnly value={form.employeePhone} className="bg-muted/50" />
-                </div>
-              </div>
-              <div className="space-y-2 border-t pt-4">
-                <span className="text-sm font-medium">Участник тестирования</span>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="po-child">ФИО участника</Label>
-                  <Input
-                    id="po-child"
-                    required
-                    value={form.childFullName}
-                    onChange={(e) => setForm((f) => ({ ...f, childFullName: e.target.value }))}
+                    value={form.employeePosition}
+                    className="h-auto min-h-0 border-0 bg-transparent px-0 py-0 text-sm leading-snug text-muted-foreground shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="po-birth">Дата рождения</Label>
+
+              <div className="space-y-2 w-full">
+                <Label htmlFor="po-child">
+                  ФИО участника тестирования <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="po-child"
+                  required
+                  value={form.childFullName}
+                  onChange={(e) => setForm((f) => ({ ...f, childFullName: e.target.value }))}
+                  placeholder="Фамилия Имя Отчество"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="min-w-[180px] flex-1 space-y-2">
+                  <Label htmlFor="po-birth">
+                    Дата рождения <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="po-birth"
                     type="date"
                     required
                     value={form.childBirthDate}
                     onChange={(e) => setForm((f) => ({ ...f, childBirthDate: e.target.value }))}
+                    className="w-full"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="min-w-[180px] flex-1 space-y-2">
                   <Label htmlFor="po-grade">Класс / курс</Label>
                   <Input
                     id="po-grade"
                     value={form.childSchoolGrade}
                     onChange={(e) => setForm((f) => ({ ...f, childSchoolGrade: e.target.value }))}
                     placeholder="например, 9 класс"
+                    className="w-full"
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Интересы / предполагаемые направления</Label>
-                <div className="grid grid-cols-2 gap-4">
+
+              <div className="space-y-2 w-full">
+                <Label>Направления интереса</Label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {INTEREST_DIRECTIONS.map((d) => (
-                    <label key={d.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                    <label
+                      key={d.id}
+                      className="flex cursor-pointer items-center gap-2 rounded-md border border-transparent px-1 py-0.5 text-sm transition-colors hover:bg-muted/50"
+                    >
                       <Checkbox
                         checked={form.interestDirections.includes(d.id)}
                         onCheckedChange={() => toggleInterest(d.id)}
@@ -610,7 +821,8 @@ export function ProforientationView() {
                   ))}
                 </div>
               </div>
-              <div className="space-y-2">
+
+              <div className="space-y-2 w-full">
                 <Label htmlFor="po-comment">Комментарий</Label>
                 <Textarea
                   id="po-comment"
@@ -618,6 +830,7 @@ export function ProforientationView() {
                   onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
                   placeholder="Пожелания по срокам, особенности …"
                   rows={4}
+                  className="w-full"
                 />
               </div>
             </div>
@@ -625,8 +838,8 @@ export function ProforientationView() {
               <Button type="button" variant="outline" onClick={() => setNewApplicationOpen(false)}>
                 Отмена
               </Button>
-              <Button type="submit" className="gap-2">
-                <Plus className="size-4" />
+              <Button type="submit">
+                <Plus className="h-4 w-4 mr-1" />
                 Создать заявку
               </Button>
             </DialogFooter>

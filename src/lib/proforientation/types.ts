@@ -19,11 +19,11 @@ export interface UniversityRecommendation {
   universityName: string;
   fitScore: number;
   reason: string;
-  /** Доля стажёров по направлению «кибер/ИБ» из этого ВУЗа среди всех учтённых */
+  /** Доля стажёров, в справочнике отмеченных как профильные по должности/подразделению, среди учтённых по вузу */
   cyberSharePercent?: number;
   /** Стажёров из ВУЗа с отметкой стажировки в банке (данные справочника) */
   totalInternsWithBank?: number;
-  /** Из них по эвристике ИБ / кибер / смежные ИТ-направления */
+  /** Число стажёров с отметкой «профильный» по разметке справочника (не исчерпывает все виды практики) */
   cyberRelatedInterns?: number;
 }
 
@@ -62,6 +62,24 @@ export interface OrientationTestState {
   /** PDF с результатами теста (путь из /public или абсолютный URL) */
   resultsPdfUrl?: string;
 }
+
+/** Этап сопровождения в ДРП (отображается в блоке «Статус проведения профориентации») */
+export type DrpWorkflowStep = "application_submitted" | "third_party_testing" | "drp_consultation";
+
+export const DRP_WORKFLOW_STEP_ORDER: readonly DrpWorkflowStep[] = [
+  "application_submitted",
+  "third_party_testing",
+  "drp_consultation",
+] as const;
+
+export const DRP_WORKFLOW_STEP_LABEL: Record<DrpWorkflowStep, string> = {
+  application_submitted: "Заявка оформлена",
+  third_party_testing: "Тестирование у стороннего провайдера",
+  drp_consultation: "Консультация ДРП",
+};
+
+/** Даты этапов ДРП (ключ — этап, значение — YYYY-MM-DD) */
+export type DrpWorkflowStepDates = Partial<Record<DrpWorkflowStep, string>>;
 
 /** Короткая подпись для тега (компактно) */
 export const ORIENTATION_TEST_BADGE_LABEL: Record<OrientationTestWorkflowStatus, string> = {
@@ -122,14 +140,24 @@ export interface ProforientationApplication {
   /** Интересы / пожелания */
   interestDirections: string[];
   comment: string;
-  /** Заполняет ДРП */
-  drpScheduledDate?: string;
-  drpComment?: string;
+  /** Текущий этап процесса ДРП (если не задан — выводится из статуса заявки) */
+  drpWorkflowStep?: DrpWorkflowStep;
+  /** Даты прохождения этапов ДРП (отображаются как дд.мм.гггг) */
+  drpWorkflowStepDates?: DrpWorkflowStepDates;
   /** Ответственный сотрудник ДРП (после перевода заявки в работу) */
   drpResponsibleFullName?: string;
+  /** Должность ответственного ДРП (под ФИО, как у создателя заявки) */
+  drpResponsiblePosition?: string;
   /** Прохождение теста на профориентацию: ссылка, PDF, этап */
   orientationTest?: OrientationTestState;
   result?: ProforientationResult;
+}
+
+export function resolveDrpWorkflowStep(a: ProforientationApplication): DrpWorkflowStep {
+  if (a.drpWorkflowStep) return a.drpWorkflowStep;
+  if (a.status === "completed") return "drp_consultation";
+  if (a.status === "in_progress") return "third_party_testing";
+  return "application_submitted";
 }
 
 export const INTEREST_DIRECTIONS = [
